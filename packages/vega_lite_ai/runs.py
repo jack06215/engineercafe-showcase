@@ -42,12 +42,14 @@ def output_root() -> Path:
 
 
 def new_run_dir(root: Path) -> Path:
+    """Create and return a new timestamped run folder under *root*."""
     run_dir = root / datetime.datetime.now().strftime(_RUN_NAME)
     run_dir.mkdir(parents=True)
     return run_dir
 
 
 def append_event(run_dir: Path, kind: str, **fields: Any) -> None:
+    """Append one timestamped event to the run's event log."""
     event = {
         "at": datetime.datetime.now().isoformat(timespec="seconds"),
         "kind": kind,
@@ -58,6 +60,7 @@ def append_event(run_dir: Path, kind: str, **fields: Any) -> None:
 
 
 def read_events(run_dir: Path) -> list[dict[str, Any]]:
+    """Return the run's events, or an empty list if it has no event log."""
     path = run_dir / EVENTS
     if not path.exists():
         return []
@@ -71,6 +74,7 @@ def read_events(run_dir: Path) -> list[dict[str, Any]]:
 
 
 def run_topic(run_dir: Path) -> str:
+    """Return the topic recorded by the run's `started` event."""
     return next(
         (
             str(event.get("topic", ""))
@@ -91,6 +95,7 @@ def write_report(run_dir: Path, report: dict[str, Any]) -> None:
 
 
 def read_report(run_dir: Path) -> dict[str, Any] | None:
+    """Return the run's report, or None if the run has not written one."""
     path = run_dir / REPORT
     if not path.exists():
         return None
@@ -99,6 +104,7 @@ def read_report(run_dir: Path) -> dict[str, Any] | None:
 
 
 def write_pid(run_dir: Path, pid: int) -> None:
+    """Record the ID of the process that runs the agent for this run."""
     (run_dir / PID).write_text(str(pid), encoding="utf-8")
 
 
@@ -125,6 +131,7 @@ def list_runs(root: Path) -> list[Path]:
 
 
 def active_run(root: Path) -> Path | None:
+    """Return the first run under *root* whose process is still running."""
     return next((path for path in list_runs(root) if is_running(path)), None)
 
 

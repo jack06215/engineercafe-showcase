@@ -18,6 +18,7 @@ class InputError(ValueError):
 
 
 def load_csv(data: bytes) -> pandas.DataFrame:
+    """Parse uploaded CSV bytes into a DataFrame, or raise InputError."""
     try:
         # utf-8-sig drops the BOM Excel's "CSV UTF-8" writes, so it can't stick to the first header.
         text = data.decode("utf-8-sig")

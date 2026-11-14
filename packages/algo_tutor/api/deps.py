@@ -1,5 +1,8 @@
-"""Shared route plumbing: the per-request transaction, the hidden
-assessment, versions and idempotency (SPEC §9, §18)."""
+"""Shared route plumbing for every router.
+
+It covers the per-request transaction, the hidden assessment, versions and
+idempotency (SPEC §9, §18).
+"""
 
 import hashlib
 import json
@@ -23,6 +26,7 @@ from packages.algo_tutor.store.timeutil import iso_utc
 
 
 def app_state(request: Request) -> AppState:
+    """Return the app state stored on the FastAPI app."""
     state: AppState = request.app.state.algo
     return state
 
@@ -31,9 +35,12 @@ State = Annotated[AppState, Depends(app_state)]
 
 
 def db_session(request: Request) -> Iterator[Session]:
-    """One transaction per request: committed when the route returns,
-    rolled back if it raises. `scope="function"` (below) commits before the
-    response is sent, so a failed commit is an error response, not a lie."""
+    """One transaction per request, committed or rolled back with the route.
+
+    The transaction commits when the route returns and rolls back if it raises.
+    `scope="function"` (below) commits before the response is sent, so a failed
+    commit is an error response, not a lie.
+    """
     with transaction(app_state(request).runtime.sessions) as session:
         yield session
 
@@ -42,6 +49,7 @@ Db = Annotated[Session, Depends(db_session, scope="function")]
 
 
 def settings_row(session: Session) -> Settings:
+    """Return the single settings row."""
     return session.get_one(Settings, 1)
 
 
@@ -49,6 +57,7 @@ def settings_row(session: Session) -> Settings:
 
 
 def unfinished_attempt(session: Session) -> Attempt | None:
+    """Return the active or paused attempt, if there is one."""
     return session.scalars(
         select(Attempt).where(
             Attempt.status.in_([AttemptStatus.ACTIVE.value, AttemptStatus.PAUSED.value])
@@ -74,6 +83,7 @@ def forbid_during_assessment(session: Session) -> None:
 
 
 def check_version(current: int, sent: int, what: str) -> None:
+    """Raise a STALE error for *what* if *sent* is not the *current* version."""
     if current != sent:
         raise stale(what)
 
@@ -100,6 +110,7 @@ IdempotencyKey = Annotated[str, Depends(idempotency_key)]
 
 
 def fingerprint(request: Request, body: BaseModel | dict[str, Any] | None) -> str:
+    """Hash a request's method, path, query and body for idempotency checks."""
     payload = body.model_dump(mode="json") if isinstance(body, BaseModel) else body
     canonical = json.dumps(
         {
@@ -124,10 +135,12 @@ def idempotent(
     run: Callable[[], BaseModel],
     status: int = 200,
 ) -> JSONResponse:
-    """Run `run` once per key: the same key and body replay the first
-    response; the same key with another body is 409 IDEMPOTENCY_MISMATCH.
-    The record is written in the request's transaction, so it commits (or
-    rolls back) with the work."""
+    """Run `run` once per idempotency key.
+
+    The same key and body replay the first response; the same key with another
+    body is 409 IDEMPOTENCY_MISMATCH. The record is written in the request's
+    transaction, so it commits (or rolls back) with the work.
+    """
     digest = fingerprint(request, body)
     seen = session.get(Idempotency, key)
     if seen is not None:

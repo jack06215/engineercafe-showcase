@@ -36,29 +36,36 @@ PATTERNS = [
 
 @functools.cache
 def manifests() -> Manifests:
+    """Load the bundled manifests."""
     return load_manifests()
 
 
 def bank_pages() -> list[Any]:
+    """Return the pages of the recorded LeetCode bank download."""
     return list(json.loads((TESTDATA / "leetcode-bank.json").read_text())["pages"])
 
 
 @dataclass
 class TempDb:
+    """A migrated SQLite database in a temporary folder."""
+
     folder: tempfile.TemporaryDirectory[str]
     engine: Engine
     sessions: sessionmaker[Session]
 
     @property
     def path(self) -> Path:
+        """The temporary folder."""
         return Path(self.folder.name)
 
     def close(self) -> None:
+        """Dispose of the engine and delete the folder."""
         self.engine.dispose()
         self.folder.cleanup()
 
 
 def temp_db() -> TempDb:
+    """Create a migrated, seeded database in a new temporary folder."""
     folder = tempfile.TemporaryDirectory()
     engine = create_sqlite_engine(Path(folder.name) / "algo_tutor.sqlite")
     migrate(engine)

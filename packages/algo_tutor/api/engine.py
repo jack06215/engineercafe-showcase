@@ -33,6 +33,7 @@ _UNFINISHED = (AttemptStatus.ACTIVE.value, AttemptStatus.PAUSED.value)
 
 
 def settings_row(session: Session) -> models.Settings:
+    """Return the single settings row."""
     return session.get_one(models.Settings, 1)
 
 
@@ -53,6 +54,7 @@ def _text(day: date | None) -> str | None:
 
 
 def target_from_row(row: models.ReviewTarget) -> review.ReviewTarget:
+    """Convert a stored review target to the domain type."""
     return review.ReviewTarget(
         problem_id=row.problem_id,
         recommended_date=_day(row.recommended_date),
@@ -65,19 +67,23 @@ def target_from_row(row: models.ReviewTarget) -> review.ReviewTarget:
 
 
 def target_row(session: Session, problem_id: str) -> models.ReviewTarget | None:
+    """Return the stored review target of *problem_id*, if any."""
     return session.scalars(
         select(models.ReviewTarget).where(models.ReviewTarget.problem_id == problem_id)
     ).first()
 
 
 def target_of(session: Session, problem_id: str) -> review.ReviewTarget | None:
+    """Return the review target of *problem_id* as the domain type, if any."""
     row = target_row(session, problem_id)
     return None if row is None else target_from_row(row)
 
 
 def write_target(session: Session, target: review.ReviewTarget) -> models.ReviewTarget:
-    """Insert or update the problem's one target with the domain's values
-    (the domain has already bumped the version)."""
+    """Insert or update the problem's review target with the domain's values.
+
+    The domain has already bumped the version.
+    """
     row = target_row(session, target.problem_id)
     if row is None:
         row = models.ReviewTarget(id=new_id(), problem_id=target.problem_id)
@@ -162,7 +168,10 @@ def ladder_attempts(
     ).tuples()
     fitted = facts.estimates(session)
     out: list[ladder.LadderAttempt] = []
-    for attempt, problem, signals in rows:
+    for attempt, problem, joined in rows:
+        # The outer join gives None for an attempt without a signals row, but the
+        # tuple type that select() infers does not include None.
+        signals: models.AttemptSignals | None = joined
         if attempt.finished_at is None or attempt.outcome is None:
             continue
         out.append(
@@ -241,6 +250,7 @@ def study_list(session: Session, list_id: str | None) -> plan.StudyList | None:
 
 
 def unfinished_attempt(session: Session) -> models.Attempt | None:
+    """Return the active or paused attempt, if there is one."""
     return session.scalars(
         select(models.Attempt).where(models.Attempt.status.in_(_UNFINISHED))
     ).first()
@@ -258,6 +268,7 @@ def current_attempt(session: Session) -> plan.CurrentAttempt | None:
 def plan_context(
     session: Session, state: AppState, settings: models.Settings, day: date
 ) -> plan.PlanContext:
+    """Build the planner context for *day* from the database."""
     manifests = state.runtime.manifests
     return plan.PlanContext(
         today=day,

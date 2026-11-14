@@ -1,10 +1,12 @@
 load("@buildifier_prebuilt//:rules.bzl", "buildifier")
 load("//rules/markdown:defs.bzl", "markdown_docs")
 
-# Markdown: .markdownlint.jsonc is data for the //rules/markdown lint targets.
+# .markdownlint.jsonc is data for the //rules/markdown lint targets, and
+# pyproject.toml (ruff and mypy settings) for the //rules/python/lint ones.
 exports_files(
     srcs = [
         ".markdownlint.jsonc",
+        "pyproject.toml",
     ],
 )
 

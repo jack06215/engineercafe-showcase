@@ -71,10 +71,12 @@ RETRY_KEY = "retry"
 
 
 def sample_key(file_name: str) -> str:
+    """Return the widget key of the sample button for *file_name*."""
     return f"sample:{file_name}"
 
 
 def continue_key(index: int) -> str:
+    """Return the widget key of the continue button for turn *index*."""
     return f"continue:{index}"
 
 
@@ -110,6 +112,7 @@ def _load_resources(warm: bool) -> _Resources:
 
 
 def render_app() -> None:
+    """Render the Streamlit chat app."""
     resources = _load_resources(warm=MODEL_FACTORY_KEY not in streamlit.session_state)
     streamlit.session_state.setdefault(
         THINKING_KEY, resources.config.ollama.thinking_default
@@ -360,8 +363,10 @@ def _run_draw(resources: _Resources, session: ChatSession, request: str) -> None
 
 
 def _run_chat(resources: _Resources, session: ChatSession, request: str) -> None:
-    """Run the chat graph on a typed request: stream the prose answer as it comes, or show
-    vega_lite_tool's progress when the chat model calls it.
+    """Run the chat graph on a typed request.
+
+    Stream the prose answer as it comes, or show vega_lite_tool's progress when the chat model calls
+    it.
 
     Ollama being unreachable is not a turn: the request is kept for 再試行 instead.
     """

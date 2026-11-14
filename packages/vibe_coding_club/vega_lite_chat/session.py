@@ -21,6 +21,8 @@ from packages.vibe_coding_club.vega_lite_chat.translator import Attempt
 
 @dataclass(frozen=True)
 class Turn:
+    """One chart request and how the translator handled it."""
+
     request: str  # what the user typed; the first chart's is first_chart_request
     auto: bool  # the automatic first chart: shown as such, never a "recent request"
     reply: AssistantTurn | None  # None when every attempt in the repair loop failed
@@ -38,6 +40,7 @@ class Turn:
 
     @property
     def chart(self) -> ChartSpec | None:
+        """The chart of the reply, if there is one."""
         return self.reply.chart if self.reply is not None else None
 
     @property
@@ -58,6 +61,8 @@ class Answer:
 
 @dataclass
 class ChatSession:
+    """The loaded data and the conversation about it."""
+
     source_name: str
     df: pandas.DataFrame
     profile: DataProfile
@@ -66,6 +71,7 @@ class ChatSession:
     current: int | None = None  # index of the turn holding the current chart
 
     def current_chart(self) -> ChartSpec | None:
+        """The chart the user sees now, if any."""
         if self.current is None:
             return None
         turn = self.turns[self.current]

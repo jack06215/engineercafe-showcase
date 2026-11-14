@@ -74,27 +74,37 @@ class ChatContext:
 
 
 class ChatState(TypedDict):
+    """The LangGraph state: the conversation so far."""
+
     messages: Annotated[list[AnyMessage], add_messages]
 
 
 @dataclass(frozen=True)
 class Token:
+    """Stream event: the next piece of the chat model's answer."""
+
     text: str  # the next piece of the chat model's prose answer
 
 
 @dataclass(frozen=True)
 class ToolCalled:
+    """Stream event: the chat model asked for a chart."""
+
     request: str  # what the chat model passed to vega_lite_tool
 
 
 @dataclass(frozen=True)
 class Repairing:
+    """Stream event: the translator retries after a failed attempt."""
+
     number: int  # the attempt about to start, 2 or more
     errors: tuple[str, ...]  # what was wrong with the previous one
 
 
 @dataclass(frozen=True)
 class Finished:
+    """Stream event: the turn is complete."""
+
     turn: Turn | Answer  # ready for session.add_turn
 
 
@@ -186,6 +196,7 @@ def vega_lite_tool(
 
     Args:
         request: The user's request, copied word for word in the user's language.
+        runtime: Injected by LangGraph. The model never sees or sets it.
     """
 
     def on_attempt(number: int, errors: Sequence[str]) -> None:
@@ -218,8 +229,11 @@ def _chat_node(state: ChatState, runtime: Runtime[ChatContext]) -> ChatState:
 
 
 def chat_history(session: ChatSession, n: int) -> list[AnyMessage]:
-    """The last `n` turns as messages. A drawing appears as its vega_lite_tool call and result, the
-    way the chat model made it, so the history keeps showing the model when to call the tool."""
+    """The last `n` turns as messages.
+
+    A drawing appears as its vega_lite_tool call and result, the way the chat model made it, so the
+    history keeps showing the model when to call the tool.
+    """
     start = max(len(session.turns) - n, 0)
     messages: list[AnyMessage] = []
     for index, turn in enumerate(session.turns[start:], start=start):
@@ -237,6 +251,7 @@ def chat_history(session: ChatSession, n: int) -> list[AnyMessage]:
 
 
 def build_graph() -> CompiledStateGraph[ChatState, ChatContext, ChatState, ChatState]:
+    """Build the graph: the chat model, then the chart tool if it calls it."""
     graph = StateGraph(ChatState, context_schema=ChatContext)
     graph.add_node(CHAT_NODE, _chat_node)
     graph.add_node(TOOLS_NODE, ToolNode([vega_lite_tool]))

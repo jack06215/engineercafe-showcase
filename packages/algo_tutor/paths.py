@@ -17,24 +17,30 @@ class PathsError(ValueError):
 
 @dataclass(frozen=True)
 class AppPaths:
+    """Where the app reads its config and keeps its data."""
+
     repo_root: Path
     config_files: tuple[Path, ...]  # read in order, later merged on top
     data_dir: Path
 
     @property
     def package_dir(self) -> Path:
+        """The algo_tutor package folder in the repo."""
         return self.repo_root / PACKAGE
 
     @property
     def database(self) -> Path:
+        """The SQLite database file."""
         return self.data_dir / "algo_tutor.sqlite"
 
     @property
     def backups_dir(self) -> Path:
+        """The folder for database backups."""
         return self.data_dir / "backups"
 
     @property
     def bank_dir(self) -> Path:
+        """The folder for imported problem banks."""
         return self.data_dir / "bank"
 
     @property
@@ -44,6 +50,7 @@ class AppPaths:
 
     @property
     def patterns_dir(self) -> Path:
+        """The folder of pattern READMEs in the repo."""
         return self.repo_root / PATTERNS
 
 

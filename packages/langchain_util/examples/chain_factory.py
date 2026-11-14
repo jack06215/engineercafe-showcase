@@ -1,4 +1,4 @@
-"""A custom `chain_factory` that strips a reasoning model's `<think>` block.
+r"""A custom `chain_factory` that strips a reasoning model's `<think>` block.
 
 Reasoning models such as deepseek-r1 and qwen3 can put their chain of thought
 in the reply itself, wrapped in `<think>...</think>`. `ChatOllama` leaves it
@@ -10,14 +10,14 @@ fenced, and repair cannot help, because the model thinks again on every attempt.
 The default factory builds `template | chat | parser`. This one adds a step
 between the model and the parser:
 
-    bazel run //packages/langchain_util/examples:chain_factory -- \\
+    bazel run //packages/langchain_util/examples:chain_factory -- \
         --provider ollama "the Bazel build system"
 
 `--dry-run` replays a reply that opens with a `<think>` block. Add
 `--keep-reasoning` to use the default factory and see what it lets through:
 
     bazel run //packages/langchain_util/examples:chain_factory -- --dry-run bazel
-    bazel run //packages/langchain_util/examples:chain_factory -- \\
+    bazel run //packages/langchain_util/examples:chain_factory -- \
         --dry-run --keep-reasoning bazel
 
 Two consequences of putting the step *after* the model:
@@ -98,6 +98,7 @@ def reasoning_stripping_chain_factory(
 
 
 def build_prompt() -> ChatPromptTemplate:
+    """Load the explain prompt from the example templates."""
     return load_chat_prompt(
         [
             ("system", "explain.system.jinja"),
@@ -126,6 +127,7 @@ def explain(
     dry_run: bool,
     keep_reasoning: bool,
 ) -> str:
+    """Explain *topic* with a chain that keeps or strips the model's reasoning."""
     # Annotated as the Protocol so a factory with the wrong signature fails
     # type checking here, not when the chain is built.
     factory: ChainFactory = (
@@ -146,6 +148,7 @@ def explain(
 
 
 def main() -> int:
+    """Parse the command line, run the example and return an exit code."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("topic", help="What to explain")
     parser.add_argument(

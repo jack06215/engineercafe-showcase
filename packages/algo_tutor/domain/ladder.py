@@ -70,10 +70,12 @@ def classify(
 
 
 def result_score(result: Result) -> float:
+    """Return the score that *result* counts as in a level update."""
     return _SCORE[result]
 
 
 def expected_score(level: float, rating: float) -> float:
+    """Return the Elo expected score at *level* on a problem rated *rating*."""
     return 1 / (1 + 10 ** ((rating - level) / 400))
 
 
@@ -101,6 +103,7 @@ class LadderAttempt:
 
     @property
     def result(self) -> Result:
+        """How this attempt counts on the ladder."""
         return classify(
             self.outcome,
             self.help,
@@ -127,6 +130,8 @@ class LevelChange:
 
 @dataclass(frozen=True)
 class TopicLevel:
+    """The learner's ladder level in one topic."""
+
     topic_id: str
     level: int  # rounded
     at_target: bool  # rounded level >= target: only review checks, no new practice

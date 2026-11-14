@@ -21,7 +21,7 @@ and Turborepo workspace that Bazel ignores; see its
 ## System requirements
 
 macOS or Linux, on x86_64 or arm64. `MODULE.bazel` pins a Python build for
-those four platforms only.
+those four platforms only. Windows is not supported.
 
 | Tool | Needed for | Install |
 | --- | --- | --- |

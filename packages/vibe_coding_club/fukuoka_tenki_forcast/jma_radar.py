@@ -210,7 +210,7 @@ class _Entry:
     member: str
 
     @classmethod
-    def of(cls, entry: dict[str, Any]) -> "_Entry":
+    def of(cls, entry: dict[str, Any]) -> _Entry:
         return cls(
             str(entry["basetime"]),
             str(entry["validtime"]),

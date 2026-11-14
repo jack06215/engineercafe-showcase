@@ -2,6 +2,7 @@
   "components": {
     "schemas": {
       "ActiveAttemptBrief": {
+        "description": "The running attempt; its title is hidden during the assessment.",
         "properties": {
           "context": {
             "$ref": "#/components/schemas/Context"
@@ -35,7 +36,7 @@
         "type": "object"
       },
       "AttemptOut": {
-        "description": "One attempt. While a hidden assessment runs, the reflection fields,\nsignals and report of completed attempts are null (SPEC \u00a79).",
+        "description": "One attempt.\n\nWhile a hidden assessment runs, the reflection fields, signals and report of\ncompleted attempts are null (SPEC \u00a79).",
         "properties": {
           "active_seconds": {
             "title": "Active Seconds",
@@ -309,6 +310,7 @@
       },
       "AttemptStart": {
         "additionalProperties": false,
+        "description": "POST body to start an attempt.",
         "properties": {
           "language": {
             "$ref": "#/components/schemas/Language",
@@ -338,6 +340,7 @@
         "type": "object"
       },
       "AttemptStatus": {
+        "description": "Whether an attempt is running, paused or finished.",
         "enum": [
           "active",
           "paused",
@@ -347,6 +350,7 @@
         "type": "string"
       },
       "AttemptSummary": {
+        "description": "A short view of one attempt.",
         "properties": {
           "active_seconds": {
             "title": "Active Seconds",
@@ -434,6 +438,7 @@
         "type": "object"
       },
       "BackupStatus": {
+        "description": "The last backup and how many backups are kept.",
         "properties": {
           "kept": {
             "title": "Kept",
@@ -472,6 +477,7 @@
         "type": "object"
       },
       "BankStatus": {
+        "description": "The LeetCode bank download status and catalogue counts.",
         "properties": {
           "error": {
             "anyOf": [
@@ -582,7 +588,7 @@
         "type": "string"
       },
       "Desk": {
-        "description": "GET /desk. During a hidden assessment only `hidden_assessment` and\n`active_attempt` are filled (\"Assessment in progress\" + Resume).",
+        "description": "GET /desk.\n\nDuring a hidden assessment only `hidden_assessment` and `active_attempt` are\nfilled (\"Assessment in progress\" + Resume).",
         "properties": {
           "active_attempt": {
             "anyOf": [
@@ -663,6 +669,7 @@
         "type": "string"
       },
       "Disposition": {
+        "description": "What to do with a plan item that the learner does not want now.",
         "enum": [
           "swap",
           "snooze",
@@ -673,6 +680,7 @@
       },
       "DispositionIn": {
         "additionalProperties": false,
+        "description": "Swap, snooze or skip a plan item.",
         "properties": {
           "action": {
             "$ref": "#/components/schemas/Disposition"
@@ -705,7 +713,7 @@
       },
       "DraftPatch": {
         "additionalProperties": false,
-        "description": "Send `solution_path` with a path to link (and copy) a file, or with null\nto switch to the in-app editor.",
+        "description": "PATCH body for an attempt's draft.\n\nSend `solution_path` with a path to link (and copy) a file, or with null to\nswitch to the in-app editor.",
         "properties": {
           "code": {
             "anyOf": [
@@ -769,6 +777,7 @@
         "type": "object"
       },
       "ErrorBody": {
+        "description": "The body of every error response.",
         "properties": {
           "error": {
             "$ref": "#/components/schemas/ErrorDetail"
@@ -781,6 +790,7 @@
         "type": "object"
       },
       "ErrorDetail": {
+        "description": "The code, message and optional tutor error kind of an API error.",
         "properties": {
           "code": {
             "title": "Code",
@@ -810,6 +820,7 @@
         "type": "object"
       },
       "Evidence": {
+        "description": "What kind of evidence an attempt gives about the learner's skill.",
         "enum": [
           "retention",
           "near_transfer",
@@ -820,6 +831,7 @@
       },
       "FinishIn": {
         "additionalProperties": false,
+        "description": "POST body to finish an attempt.",
         "properties": {
           "code": {
             "anyOf": [
@@ -902,6 +914,7 @@
         "type": "object"
       },
       "FinishOut": {
+        "description": "The finished attempt and its next review.",
         "properties": {
           "attempt": {
             "$ref": "#/components/schemas/AttemptOut"
@@ -931,6 +944,7 @@
         "type": "object"
       },
       "Health": {
+        "description": "GET /health.",
         "properties": {
           "status": {
             "const": "ok",
@@ -943,6 +957,7 @@
         "type": "object"
       },
       "Help": {
+        "description": "How much help the learner used during an attempt.",
         "enum": [
           "unknown",
           "none",
@@ -954,6 +969,7 @@
         "type": "string"
       },
       "HintConversation": {
+        "description": "An attempt's hint conversation and the strongest hint given.",
         "properties": {
           "messages": {
             "items": {
@@ -982,6 +998,7 @@
       },
       "HintIn": {
         "additionalProperties": false,
+        "description": "POST body with the learner's message to the tutor.",
         "properties": {
           "text": {
             "maxLength": 4000,
@@ -997,6 +1014,7 @@
         "type": "object"
       },
       "HintLevel": {
+        "description": "How much a hint gives away.",
         "enum": [
           "small",
           "major"
@@ -1005,6 +1023,7 @@
         "type": "string"
       },
       "HintMessage": {
+        "description": "One message of an attempt's hint conversation.",
         "properties": {
           "analysis": {
             "anyOf": [
@@ -1085,7 +1104,7 @@
         "type": "object"
       },
       "HintReply": {
-        "description": "The tutor's reply. Hints append to the attempt's notes, which bumps its\nversion; the client must adopt `attempt_version` and `notes`.",
+        "description": "The tutor's reply.\n\nHints append to the attempt's notes, which bumps its version; the client\nmust adopt `attempt_version` and `notes`.",
         "properties": {
           "attempt_version": {
             "title": "Attempt Version",
@@ -1119,6 +1138,7 @@
         "type": "object"
       },
       "HintRole": {
+        "description": "Who wrote a hint message.",
         "enum": [
           "learner",
           "tutor"
@@ -1146,6 +1166,7 @@
         "type": "string"
       },
       "LevelChange": {
+        "description": "The last change to a topic level and the attempt that caused it.",
         "properties": {
           "attempt_id": {
             "title": "Attempt Id",
@@ -1189,6 +1210,7 @@
         "type": "object"
       },
       "ListCreated": {
+        "description": "The lists created from pasted text, and the lines left out.",
         "properties": {
           "lists": {
             "items": {
@@ -1220,6 +1242,7 @@
         "type": "object"
       },
       "ListDetail": {
+        "description": "A study list with its entries.",
         "properties": {
           "entries": {
             "items": {
@@ -1248,6 +1271,7 @@
       },
       "ListEntriesIn": {
         "additionalProperties": false,
+        "description": "Body to create lists from pasted text, one entry per line.",
         "properties": {
           "name": {
             "maxLength": 300,
@@ -1269,6 +1293,7 @@
         "type": "object"
       },
       "ListEntryOut": {
+        "description": "One problem on a study list.",
         "properties": {
           "added_at": {
             "format": "date-time",
@@ -1309,6 +1334,7 @@
         "type": "object"
       },
       "ListKind": {
+        "description": "Where a study list came from: a bundled course, the learner or a pack.",
         "enum": [
           "bundled",
           "own",
@@ -1319,7 +1345,7 @@
       },
       "ListPatch": {
         "additionalProperties": false,
-        "description": "Own lists only. `problem_ids` is the full new order (drop an id to\nremove it); `add_text` resolves and appends more entries.",
+        "description": "Own lists only.\n\n`problem_ids` is the full new order (drop an id to remove it); `add_text`\nresolves and appends more entries.",
         "properties": {
           "add_text": {
             "anyOf": [
@@ -1367,6 +1393,7 @@
         "type": "object"
       },
       "ListPreview": {
+        "description": "Preview of the lists that pasted text would create.",
         "properties": {
           "groups": {
             "items": {
@@ -1398,6 +1425,7 @@
         "type": "object"
       },
       "ListRef": {
+        "description": "The ID and name of a study list.",
         "properties": {
           "id": {
             "title": "Id",
@@ -1416,6 +1444,7 @@
         "type": "object"
       },
       "ListSummary": {
+        "description": "A study list with its progress.",
         "properties": {
           "active": {
             "title": "Active",
@@ -1487,6 +1516,7 @@
         "type": "object"
       },
       "MistakeEntry": {
+        "description": "A finished attempt with its mistake labels and takeaway.",
         "properties": {
           "attempt_id": {
             "title": "Attempt Id",
@@ -1523,6 +1553,7 @@
         "type": "object"
       },
       "MistakeLabel": {
+        "description": "The kind of mistake behind a failed attempt.",
         "enum": [
           "missed_edge_case",
           "wrong_approach",
@@ -1532,6 +1563,7 @@
         "type": "string"
       },
       "MistakeList": {
+        "description": "Attempts with mistakes, newest first.",
         "properties": {
           "items": {
             "items": {
@@ -1548,6 +1580,7 @@
         "type": "object"
       },
       "Notebook": {
+        "description": "A notebook of cues, pitfalls and notes, versioned for edits.",
         "properties": {
           "cues": {
             "title": "Cues",
@@ -1590,6 +1623,7 @@
       },
       "NotebookPatch": {
         "additionalProperties": false,
+        "description": "PATCH body for a notebook; omitted fields stay unchanged.",
         "properties": {
           "cues": {
             "anyOf": [
@@ -1643,6 +1677,7 @@
         "type": "object"
       },
       "NotebookProblem": {
+        "description": "An attempted problem shown on a notebook page.",
         "properties": {
           "attempts": {
             "title": "Attempts",
@@ -1671,6 +1706,7 @@
         "type": "object"
       },
       "Outcome": {
+        "description": "How an attempt ended.",
         "enum": [
           "solved",
           "not_solved",
@@ -1680,6 +1716,7 @@
         "type": "string"
       },
       "PackReport": {
+        "description": "The result of importing or dry-running a question pack.",
         "properties": {
           "already_applied": {
             "title": "Already Applied",
@@ -1748,6 +1785,7 @@
         "type": "object"
       },
       "PatternDetail": {
+        "description": "A pattern page: README, notebook and attempted problems.",
         "properties": {
           "notebook": {
             "$ref": "#/components/schemas/Notebook"
@@ -1789,6 +1827,7 @@
         "type": "object"
       },
       "PatternSummary": {
+        "description": "A pattern with its attempted-problem count.",
         "properties": {
           "id": {
             "title": "Id",
@@ -1822,7 +1861,7 @@
         "type": "object"
       },
       "PlanItemKind": {
-        "description": "A plan item's kind. A transfer check has no kind (None), which is\nwhat makes its attempt `mixed` (SPEC \u00a76.2).",
+        "description": "A plan item's kind.\n\nA transfer check has no kind (None), which is what makes its attempt `mixed`\n(SPEC \u00a76.2).",
         "enum": [
           "topic",
           "list"
@@ -1917,6 +1956,7 @@
         "type": "object"
       },
       "PlanItemStatus": {
+        "description": "Where a daily-plan item is in its life cycle.",
         "enum": [
           "active",
           "queued",
@@ -1927,6 +1967,7 @@
         "type": "string"
       },
       "PlanOut": {
+        "description": "A daily plan with the items of both lanes.",
         "properties": {
           "id": {
             "title": "Id",
@@ -1965,6 +2006,7 @@
       },
       "PlanVersionIn": {
         "additionalProperties": false,
+        "description": "A body that carries only the plan version.",
         "properties": {
           "version": {
             "minimum": 1,
@@ -1979,6 +2021,7 @@
         "type": "object"
       },
       "PreviewGroup": {
+        "description": "The entries that will form the list for one source.",
         "properties": {
           "entries": {
             "items": {
@@ -2004,7 +2047,7 @@
         "type": "object"
       },
       "ProblemBrief": {
-        "description": "Enough to show a row and link out. Never carries topic, tags or patterns,\nso it is safe inside a hidden assessment.",
+        "description": "Enough to show a row and link out.\n\nNever carries topic, tags or patterns, so it is safe inside a hidden\nassessment.",
         "properties": {
           "contest": {
             "anyOf": [
@@ -2079,6 +2122,7 @@
       },
       "ProblemCreate": {
         "additionalProperties": false,
+        "description": "POST body to add a problem by URL.",
         "properties": {
           "difficulty": {
             "anyOf": [
@@ -2117,6 +2161,7 @@
         "type": "object"
       },
       "ProblemDetail": {
+        "description": "The full view of one problem.",
         "properties": {
           "attempts": {
             "items": {
@@ -2221,6 +2266,7 @@
         "type": "object"
       },
       "ProblemPage": {
+        "description": "One page of the problem library.",
         "properties": {
           "items": {
             "items": {
@@ -2253,7 +2299,7 @@
       },
       "ProblemPatch": {
         "additionalProperties": false,
-        "description": "Send `topic_id` to override the primary topic (null = \"None\"); send\n`reset_topic: true` to go back to the automatic topic.",
+        "description": "PATCH body for a problem's notes, topic and pattern labels.\n\nSend `topic_id` to override the primary topic (null = \"None\"); send\n`reset_topic: true` to go back to the automatic topic.",
         "properties": {
           "notes": {
             "anyOf": [
@@ -2600,6 +2646,7 @@
         "type": "object"
       },
       "RatingOut": {
+        "description": "A problem rating, exact or estimated.",
         "properties": {
           "estimated": {
             "title": "Estimated",
@@ -2619,6 +2666,7 @@
       },
       "ReflectionPatch": {
         "additionalProperties": false,
+        "description": "PATCH body for an attempt's mistake labels and takeaway.",
         "properties": {
           "mistake_labels": {
             "items": {
@@ -2649,6 +2697,7 @@
       },
       "ReorderIn": {
         "additionalProperties": false,
+        "description": "The new order of every item in one plan lane.",
         "properties": {
           "item_ids": {
             "items": {
@@ -2675,6 +2724,7 @@
         "type": "object"
       },
       "Report": {
+        "description": "The tutor's report on an attempt, by section.",
         "properties": {
           "complexity": {
             "anyOf": [
@@ -2807,6 +2857,7 @@
         "type": "string"
       },
       "ResolvedEntry": {
+        "description": "A pasted line matched to a problem.",
         "properties": {
           "line": {
             "title": "Line",
@@ -2851,6 +2902,7 @@
         "type": "string"
       },
       "ReviewAction": {
+        "description": "How the next review of a problem was scheduled.",
         "enum": [
           "recommended",
           "manual",
@@ -2872,6 +2924,7 @@
       },
       "ReviewPatch": {
         "additionalProperties": false,
+        "description": "PATCH body to reschedule a problem's next review.",
         "properties": {
           "action": {
             "$ref": "#/components/schemas/ReviewAction"
@@ -2903,6 +2956,7 @@
         "type": "object"
       },
       "ReviewStage": {
+        "description": "Where a problem is in the spaced-review cycle.",
         "enum": [
           "repair",
           "reconstruction",
@@ -2916,6 +2970,7 @@
         "type": "string"
       },
       "ReviewTargetOut": {
+        "description": "When and how a problem is next due for review.",
         "properties": {
           "action": {
             "$ref": "#/components/schemas/ReviewAction"
@@ -2968,6 +3023,7 @@
         "type": "object"
       },
       "SettingsOut": {
+        "description": "The learner's settings.",
         "properties": {
           "active_list_atcoder": {
             "anyOf": [
@@ -3048,6 +3104,7 @@
       },
       "SettingsPatch": {
         "additionalProperties": false,
+        "description": "PATCH body for settings; omitted fields stay unchanged.",
         "properties": {
           "atcoder_per_day": {
             "anyOf": [
@@ -3110,6 +3167,7 @@
       },
       "SetupIn": {
         "additionalProperties": false,
+        "description": "POST /setup: the first-run choices.",
         "properties": {
           "download_bank": {
             "default": true,
@@ -3139,6 +3197,7 @@
         "type": "object"
       },
       "SetupState": {
+        "description": "GET /setup: the onboarding state.",
         "properties": {
           "onboarding_complete": {
             "title": "Onboarding Complete",
@@ -3162,6 +3221,7 @@
         "type": "object"
       },
       "Signals": {
+        "description": "The learner's own signals about an attempt.",
         "properties": {
           "accepted_first_try": {
             "anyOf": [
@@ -3194,6 +3254,7 @@
       },
       "SignalsPatch": {
         "additionalProperties": false,
+        "description": "PATCH body for an attempt's signals; omitted fields stay unchanged.",
         "properties": {
           "accepted_first_try": {
             "anyOf": [
@@ -3232,6 +3293,7 @@
         "type": "string"
       },
       "SuggestedPath": {
+        "description": "A suggested solution file path, and whether the file exists.",
         "properties": {
           "exists": {
             "title": "Exists",
@@ -3250,6 +3312,7 @@
         "type": "object"
       },
       "TimerAction": {
+        "description": "An event that the attempt timer receives from the client.",
         "enum": [
           "heartbeat",
           "pause",
@@ -3260,6 +3323,7 @@
       },
       "TimerIn": {
         "additionalProperties": false,
+        "description": "A timer event for an attempt.",
         "properties": {
           "action": {
             "$ref": "#/components/schemas/TimerAction"
@@ -3290,6 +3354,7 @@
         "type": "object"
       },
       "TopicDetail": {
+        "description": "A topic page: level, notebook and attempted problems.",
         "properties": {
           "level": {
             "$ref": "#/components/schemas/TopicLevel"
@@ -3324,6 +3389,7 @@
         "type": "object"
       },
       "TopicLevel": {
+        "description": "The learner's level in one topic.",
         "properties": {
           "at_target": {
             "title": "At Target",
@@ -3373,6 +3439,7 @@
         "type": "object"
       },
       "TopicLevels": {
+        "description": "The learner's level in every topic.",
         "properties": {
           "target_rating": {
             "title": "Target Rating",
@@ -3407,6 +3474,7 @@
         "type": "string"
       },
       "TutorStatus": {
+        "description": "The tutor's settings and pending report count.",
         "properties": {
           "enabled": {
             "title": "Enabled",
@@ -3445,6 +3513,7 @@
         "type": "object"
       },
       "TutorTest": {
+        "description": "Result of a test call to the tutor model.",
         "properties": {
           "error_kind": {
             "anyOf": [
@@ -3503,6 +3572,7 @@
         "type": "object"
       },
       "UnresolvedLine": {
+        "description": "A pasted line that matched no problem, and why.",
         "properties": {
           "line": {
             "title": "Line",

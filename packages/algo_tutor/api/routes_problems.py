@@ -65,6 +65,7 @@ def _date(text: str | None) -> date | None:
 
 
 def get_problem(session: Session, problem_id: str) -> Problem:
+    """Return the problem with *problem_id*; raise 404 if there is none."""
     problem = session.get(Problem, problem_id)
     if problem is None:
         raise not_found("Problem")
@@ -75,6 +76,7 @@ def get_problem(session: Session, problem_id: str) -> Problem:
 
 
 def review_out(target: ReviewTarget | None) -> schemas.ReviewTargetOut | None:
+    """Convert a review target to its API shape."""
     if target is None:
         return None
     return schemas.ReviewTargetOut(
@@ -88,6 +90,7 @@ def review_out(target: ReviewTarget | None) -> schemas.ReviewTargetOut | None:
 
 
 def attempt_summary(attempt: Attempt) -> schemas.AttemptSummary:
+    """Return the short API view of *attempt*."""
     return schemas.AttemptSummary(
         id=attempt.id,
         problem_id=attempt.problem_id,
@@ -105,6 +108,7 @@ def attempt_summary(attempt: Attempt) -> schemas.AttemptSummary:
 
 
 def pattern_ids(session: Session, problem_id: str) -> list[str]:
+    """Return the pattern IDs of *problem_id*, in pattern order."""
     return list(
         session.scalars(
             select(ProblemPattern.pattern_id)
@@ -118,6 +122,7 @@ def pattern_ids(session: Session, problem_id: str) -> list[str]:
 def detail(
     session: Session, state: AppState, problem: Problem
 ) -> schemas.ProblemDetail:
+    """Return the full API view of *problem*."""
     lists = session.execute(
         select(StudyList.id, StudyList.name)
         .join(ListEntry, ListEntry.list_id == StudyList.id)
@@ -243,6 +248,7 @@ def list_problems(
     state: deps.State,
     session: deps.Db,
 ) -> schemas.ProblemPage:
+    """Return one page of the problem library, filtered and sorted."""
     deps.forbid_during_assessment(session)
     statement = select(Problem)
     if query.q:
@@ -351,8 +357,11 @@ def list_problems(
 def add_problem(
     body: schemas.ProblemCreate, state: deps.State, session: deps.Db
 ) -> JSONResponse:
-    """Add by URL; a problem already in the library comes back as is (200
-    instead of 201). AtCoder needs a typed title (never fetched)."""
+    """Add a problem by URL.
+
+    A problem already in the library comes back as is (200 instead of 201).
+    AtCoder needs a typed title (never fetched).
+    """
     deps.forbid_during_assessment(session)
     added = add_problem_by_url(
         session,
@@ -391,8 +400,12 @@ def get_problem_detail(
 def patch_problem(
     problem_id: str, body: schemas.ProblemPatch, state: deps.State, session: deps.Db
 ) -> schemas.ProblemDetail:
-    """Notes, the primary-topic override (`topic_id`, null for "None"),
-    `reset_topic`, and the pattern labels (by pattern id)."""
+    """Edit a problem's notes, primary topic and pattern labels.
+
+    Send `topic_id` to override the primary topic (null for "None"),
+    `reset_topic` to go back to the automatic topic, and the pattern labels by
+    pattern id.
+    """
     deps.forbid_during_assessment(session)
     problem = get_problem(session, problem_id)
     sent = body.model_fields_set
@@ -439,8 +452,10 @@ def patch_problem(
 def solution_files(
     repo_root: Path, roots: Iterable[str] = (LEETCODE_SRC, ATCODER_SRC)
 ) -> list[str]:
-    """Repo-relative solution files (.py/.go/.ts) under the LeetCode and
-    AtCoder source folders; dot folders are skipped."""
+    """Repo-relative solution files under the LeetCode and AtCoder source folders.
+
+    Only .py, .go and .ts files count; dot folders are skipped.
+    """
     extensions = tuple(EXTENSIONS.values())
     found: list[str] = []
     for root in roots:
@@ -460,8 +475,11 @@ def suggested_path(
     session: deps.Db,
     language: Language = Language.PYTHON,
 ) -> schemas.SuggestedPath:
-    """Appendix D. During a hidden assessment, only the assessment's own
-    problem gets a suggestion: a folder name gives a topic away."""
+    """Appendix D.
+
+    During a hidden assessment, only the assessment's own problem gets a
+    suggestion: a folder name gives a topic away.
+    """
     assessment = deps.assessment_attempt(session)
     if assessment is not None and assessment.problem_id != problem_id:
         raise hidden_assessment()

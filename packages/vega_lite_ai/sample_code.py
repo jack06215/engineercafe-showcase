@@ -1,3 +1,5 @@
+"""Smallest Claude Agent SDK example: a chart agent with a data-finder subagent."""
+
 import asyncio
 
 from claude_agent_sdk import AgentDefinition, ClaudeAgentOptions, query
@@ -20,6 +22,7 @@ options = ClaudeAgentOptions(
 
 # 指示を送り、進み具合を順に受け取る
 async def main() -> None:
+    """Send the prompt and print each message the agent streams back."""
     async for message in query(prompt="人口の推移をグラフにして", options=options):
         print(message)
 

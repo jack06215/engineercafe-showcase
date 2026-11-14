@@ -50,6 +50,7 @@ def _require_env_vars(
 
 
 def check_environ_openai() -> None:
+    """Check that the env vars the OpenAI chat client reads are set."""
     _require_env_vars(
         [
             "OPENAI_API_KEY",
@@ -59,10 +60,12 @@ def check_environ_openai() -> None:
 
 
 def check_environ_ollama() -> None:
+    """Check that the env var the Ollama chat client reads is set."""
     _require_env_vars(["OLLAMA_MODEL"])
 
 
 def check_environ_azure_openai() -> None:
+    """Check that the env vars the Azure OpenAI chat client reads are set."""
     _require_env_vars(
         [
             "AZURE_OPENAI_API_KEY",
@@ -77,14 +80,17 @@ def check_environ_azure_openai() -> None:
 
 
 def check_environ_openai_embeddings() -> None:
+    """Check that the env vars the OpenAI embeddings client reads are set."""
     _require_env_vars(["OPENAI_API_KEY", "OPENAI_EMBEDDING_MODEL"])
 
 
 def check_environ_ollama_embeddings() -> None:
+    """Check that the env var the Ollama embeddings client reads is set."""
     _require_env_vars(["OLLAMA_EMBEDDING_MODEL"])
 
 
 def check_environ_azure_openai_embeddings() -> None:
+    """Check that the env vars the Azure OpenAI embeddings client reads are set."""
     _require_env_vars(
         [
             "AZURE_OPENAI_API_KEY",

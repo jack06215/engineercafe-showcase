@@ -1,3 +1,5 @@
+"""Run subprocesses with streamed logging, secret redaction and captured output."""
+
 import json
 import logging
 import os

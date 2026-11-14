@@ -92,6 +92,8 @@ class Hourly:
 
 
 class RadarProduct(enum.Enum):
+    """The JMA rain radar products: nowcast and short-range forecast."""
+
     NOWCAST = "nowc"  # 高解像度降水ナウキャスト: every 5 minutes, up to an hour ahead
     SHORT_RANGE = "rasrf"  # 降水短時間予報: hourly, up to 15 hours ahead
 
@@ -149,14 +151,19 @@ def from_now(frames: Sequence[RadarFrame]) -> tuple[RadarFrame, ...]:
 class WeatherSource(Protocol):
     """Everything the views ask for. Every method may raise ForecastError."""
 
-    def forecast(self) -> Forecast: ...
+    def forecast(self) -> Forecast:
+        """Return the area's forecast."""
 
-    def hourly(self) -> tuple[Hourly, ...]: ...
+    def hourly(self) -> tuple[Hourly, ...]:
+        """Return the area's 3-hourly forecast."""
 
-    def radar_frames(self, product: RadarProduct) -> tuple[RadarFrame, ...]: ...
+    def radar_frames(self, product: RadarProduct) -> tuple[RadarFrame, ...]:
+        """Return the available radar frames for *product*."""
 
     def radar_map(
         self, frame: RadarFrame, zoom: int, width: int, height: int
-    ) -> RadarMap: ...
+    ) -> RadarMap:
+        """Return the radar map of *frame* at *zoom*, sized *width* by *height*."""
 
-    def rain_at_city(self, frames: Sequence[RadarFrame]) -> tuple[RainPoint, ...]: ...
+    def rain_at_city(self, frames: Sequence[RadarFrame]) -> tuple[RainPoint, ...]:
+        """Return the rain at the city for each of *frames*."""

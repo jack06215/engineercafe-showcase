@@ -9,6 +9,7 @@ from packages.algo_tutor.cli import add_location_flags, add_serve_flags, run_cli
 
 
 def main() -> None:
+    """Parse the flags and start the API server."""
     parser = argparse.ArgumentParser(
         prog="serve", description=__doc__.splitlines()[0] if __doc__ else None
     )

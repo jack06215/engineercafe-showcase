@@ -27,10 +27,12 @@ _WRITES = frozenset({"POST", "PUT", "PATCH", "DELETE"})
 
 
 def allowed_hosts(port: int) -> frozenset[str]:
+    """Return the Host header values that the server accepts on *port*."""
     return frozenset({f"127.0.0.1:{port}", f"localhost:{port}"})
 
 
 def allowed_origins(port: int) -> frozenset[str]:
+    """Return the Origin values the server accepts, including the Vite dev server."""
     return frozenset(
         f"http://{host}:{p}"
         for host in ("127.0.0.1", "localhost")
@@ -57,7 +59,10 @@ def refusal(method: str, headers: dict[str, str], port: int) -> str | None:
 
 
 class LocalOnlyMiddleware(BaseHTTPMiddleware):
+    """Refuse requests that do not come from this machine."""
+
     def __init__(self, app: ASGIApp, port: int) -> None:
+        """Guard *app*, which listens on *port*."""
         super().__init__(app)
         self.port = port
 
@@ -66,6 +71,7 @@ class LocalOnlyMiddleware(BaseHTTPMiddleware):
         request: Request,
         call_next: Callable[[Request], Awaitable[Response]],
     ) -> Response:
+        """Answer 403 NOT_LOCAL if the request is refused, else pass it on."""
         headers = {k.lower(): v for k, v in request.headers.items()}
         reason = refusal(request.method, headers, self.port)
         if reason is not None:

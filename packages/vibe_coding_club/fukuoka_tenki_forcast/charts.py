@@ -75,10 +75,12 @@ class TempScale:
     width: int
 
     def cell(self, temp: float) -> int:
+        """Return the column of *temp* on the scale, clamped to the chart width."""
         position = (temp - self.low) / max(self.high - self.low, 1) * (self.width - 1)
         return min(max(round(position), 0), self.width - 1)
 
     def temp(self, cell: int) -> float:
+        """Return the temperature at column *cell*."""
         return self.low + cell / max(self.width - 1, 1) * (self.high - self.low)
 
 
@@ -180,8 +182,11 @@ def rain_strip(
 
 
 def _ruler(frames: Sequence[RadarFrame], cell: int) -> Text:
-    """Times under the frames that fall on the half hour (nowcast) or on every
-    third hour (15-hour forecast), where they fit without overlapping."""
+    """Time labels for the frames, placed where they fit without overlapping.
+
+    Labels fall on the half hour for the nowcast and on every third hour for the
+    15-hour forecast.
+    """
     ruler = ""
     today = frames[0].at.date() if frames else None
     for i, frame in enumerate(frames):

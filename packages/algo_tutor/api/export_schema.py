@@ -1,8 +1,8 @@
-"""Write the HTTP contract as an OpenAPI document of component schemas.
+r"""Write the HTTP contract as an OpenAPI document of component schemas.
 
 The web client generates its TypeScript types from this file:
 
-    bazel run //packages/algo_tutor/api:export_schema -- \\
+    bazel run //packages/algo_tutor/api:export_schema -- \
         src/main/typescript/packages/algo-tutor-web/src/api/schema.json
 
 Only the bodies, not the paths: the routes live in the API app, and the
@@ -51,6 +51,7 @@ def build_document() -> dict[str, Any]:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Write the schema document to the given path and return an exit code."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument(
         "output", type=Path, help="where to write the JSON, relative to the repo root"

@@ -138,7 +138,7 @@ def _render_sidebar(root: Path) -> Path | None:
     name = streamlit.sidebar.radio(
         "これまでの実行", names, format_func=lambda item: _run_label(root / item)
     )
-    return None if name is None else root / name
+    return root / name
 
 
 def _render_chart(run_dir: Path) -> None:
@@ -226,6 +226,7 @@ def _render_run(run_dir: Path) -> None:
 
 
 def render_app() -> None:
+    """Render the Streamlit app page."""
     streamlit.title(TITLE)
     try:
         root: Path = streamlit.session_state.get(OUTPUT_KEY) or output_root()

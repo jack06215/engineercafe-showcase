@@ -1,6 +1,9 @@
 load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
 load("@rules_python//python/entry_points:py_console_script_binary.bzl", "py_console_script_binary")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
 load("//rules/markdown:defs.bzl", "markdown_docs")
+load(":defs.bzl", "py_library")
+load(":lint_runfiles_test.bzl", "lint_runfiles_test")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -34,4 +37,33 @@ exports_files([
 markdown_docs(
     name = "docs",
     srcs = glob(["*.md"]),
+)
+
+sh_test(
+    name = "lint_config_test",
+    srcs = ["lint_config_test.sh"],
+    args = [
+        "$(rootpath lint.sh)",
+        "$(rootpath :ruff)",
+        "$(rootpath :mypy)",
+        "$(rootpath //:pyproject.toml)",
+        "$(rootpath testdata/undocumented.py)",
+    ],
+    data = [
+        "lint.sh",
+        "testdata/undocumented.py",
+        ":mypy",
+        ":ruff",
+        "//:pyproject.toml",
+    ],
+)
+
+py_library(
+    name = "documented",
+    srcs = ["testdata/documented.py"],
+)
+
+lint_runfiles_test(
+    name = "lint_runfiles_test",
+    target_under_test = ":documented.lint",
 )

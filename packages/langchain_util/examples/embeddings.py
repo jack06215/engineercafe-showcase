@@ -1,4 +1,4 @@
-"""Embeddings: `get_embeddings_client` plus a nearest-neighbour search.
+r"""Embeddings: `get_embeddings_client` plus a nearest-neighbour search.
 
 The embeddings client reads its model from its own variable --
 OPENAI_EMBEDDING_MODEL, AZURE_OPENAI_EMBEDDING_DEPLOYMENT, or
@@ -7,13 +7,13 @@ cannot embed.
 
 Rank the built-in runbook snippets against a query:
 
-    bazel run //packages/langchain_util/examples:embeddings -- \\
+    bazel run //packages/langchain_util/examples:embeddings -- \
         --provider openai "the release broke checkout, how do I undo it?"
 
 `--dry-run` embeds with a bag-of-words stand-in, so snippets rank by shared
 words rather than by meaning. That is enough to check the wiring:
 
-    bazel run //packages/langchain_util/examples:embeddings -- \\
+    bazel run //packages/langchain_util/examples:embeddings -- \
         --dry-run "roll back a failed deploy"
 """
 
@@ -47,12 +47,15 @@ class BagOfWordsEmbeddings(Embeddings):
     """
 
     def __init__(self, size: int = 256) -> None:
+        """Use *size* hash buckets per vector."""
         self.size = size
 
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        """Embed each text with `embed_query`."""
         return [self.embed_query(text) for text in texts]
 
     def embed_query(self, text: str) -> list[float]:
+        """Count the words of *text* into hash buckets."""
         vector = [0.0] * self.size
         for word in re.findall(r"[a-z0-9]+", text.lower()):
             # hashlib rather than hash(): str hashes are salted per process, so
@@ -64,6 +67,7 @@ class BagOfWordsEmbeddings(Embeddings):
 
 
 def build_embeddings(*, provider: Provider, dry_run: bool) -> Embeddings:
+    """Return the offline bag-of-words model on a dry run, else the real client."""
     if dry_run:
         return BagOfWordsEmbeddings()
 
@@ -117,6 +121,7 @@ def search(
 
 
 def main() -> int:
+    """Parse the command line, run the example and return an exit code."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("query", help="What to search the runbook for")
     parser.add_argument(

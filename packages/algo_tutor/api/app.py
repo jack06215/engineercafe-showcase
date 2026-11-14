@@ -45,9 +45,11 @@ class AppState:
 
     @property
     def tutor_enabled(self) -> bool:
+        """Whether the config turns the LLM tutor on."""
         return self.runtime.config.tutor.enabled
 
     def wake_worker(self) -> None:
+        """Wake the report worker, if one is running."""
         if self.worker is not None:
             self.worker.wake()
 
@@ -69,8 +71,11 @@ def create_app(
     clock: Callable[[], datetime] = now_utc,
     start_worker: bool = True,
 ) -> FastAPI:
-    """The app over an opened runtime. Tests pass a scripted `chat_factory`,
-    a fixed `clock`, and `start_worker=False` to drive the queue by hand."""
+    """The app over an opened runtime.
+
+    Tests pass a scripted `chat_factory`, a fixed `clock`, and
+    `start_worker=False` to drive the queue by hand.
+    """
     state = AppState(runtime=runtime, chat_factory=chat_factory, clock=clock)
 
     @asynccontextmanager

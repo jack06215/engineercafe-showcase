@@ -188,6 +188,7 @@ def record_message(run_dir: Path, message: Message) -> None:
 
 
 def run_status(state: RunState, *, stopped: bool) -> str:
+    """Classify a finished run as chart, no_chart, stopped or failed."""
     if state.gave_up is not None:
         return "no_chart"
     if state.passed is not None and stop_problem(state) is None:
@@ -257,6 +258,7 @@ async def run_agent(topic: str, run_dir: Path) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build the command-line parser for the agent."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("topic", help="what to chart, e.g. 人口の推移")
     parser.add_argument(
@@ -268,6 +270,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def run_cli(namespace: argparse.Namespace) -> None:
+    """Run the agent for the parsed command line and exit with its status."""
     run_dir: Path = namespace.run_dir or new_run_dir(output_root())
     write_pid(run_dir, os.getpid())
     if namespace.run_dir is None:  # the app logs this itself before starting us

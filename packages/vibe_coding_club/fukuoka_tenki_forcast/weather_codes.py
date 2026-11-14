@@ -36,10 +36,12 @@ def weather_category(code: str) -> str:
 
 
 def weather_emoji(code: str) -> str:
+    """Return the emoji for the category of JMA weather *code*."""
     return EMOJI.get(weather_category(code), "❓")
 
 
 def weather_text(code: str) -> str:
+    """Return the Japanese text for JMA weather *code*."""
     return TELOPS[code][0] if code in TELOPS else f"天気コード {code}"
 
 

@@ -32,6 +32,7 @@ SCHEMA_VERSION = len(STEPS)
 
 
 def user_version(connection: Connection) -> int:
+    """Return the schema version stored in SQLite's `user_version` pragma."""
     return int(connection.exec_driver_sql("PRAGMA user_version").scalar_one())
 
 

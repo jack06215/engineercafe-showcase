@@ -1,4 +1,4 @@
-"""Response caching: identical prompts answered from disk, not the provider.
+r"""Response caching: identical prompts answered from disk, not the provider.
 
 `enable_llm_cache` installs a process-wide cache that every LangChain chat model
 checks before it sends a request, so `invoke_llm` takes no extra argument.
@@ -6,7 +6,7 @@ checks before it sends a request, so `invoke_llm` takes no extra argument.
 Ask the same question twice. The second call returns in milliseconds and sends
 nothing:
 
-    bazel run //packages/langchain_util/examples:llm_cache -- \\
+    bazel run //packages/langchain_util/examples:llm_cache -- \
         --provider openai --repeat 2 "What is a content-addressed cache?"
 
 Run it again and even the first call is a hit, because the SQLite file outlives
@@ -15,7 +15,7 @@ the process. `--in-memory` gives a cache that lasts for one run only.
 `--dry-run` uses a fake model that takes a second per reply, so a hit shows up
 as the missing second:
 
-    bazel run //packages/langchain_util/examples:llm_cache -- \\
+    bazel run //packages/langchain_util/examples:llm_cache -- \
         --dry-run --in-memory --repeat 3 "anything"
 
 What the cache key is, and what that implies:
@@ -61,6 +61,7 @@ FAKE_REPLY_DELAY_S = 1.0
 
 
 def build_prompt() -> ChatPromptTemplate:
+    """Load the explain prompt from the example templates."""
     return load_chat_prompt(
         [
             ("system", "explain.system.jinja"),
@@ -114,6 +115,7 @@ def ask_repeatedly(
 
 
 def main() -> int:
+    """Parse the command line, run the example and return an exit code."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("question", help="What to ask; repeated verbatim")
     parser.add_argument(

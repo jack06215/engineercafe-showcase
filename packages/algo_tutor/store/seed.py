@@ -49,6 +49,8 @@ def sync_topics(session: Session, catalog: TopicCatalog) -> None:
 
 @dataclass(frozen=True)
 class FoundPattern:
+    """A pattern folder found in the repo."""
+
     id: str  # folder name
     name: str  # the README's first `# ` heading
     position: int  # the NN prefix

@@ -69,6 +69,21 @@ in the workspace runs them. If you add an `sh_binary` for a script, start it
 with `bazel run`. Do not make it a test, because a `bazel` command in a test
 action can deadlock against the Bazel server.
 
+## Where the settings come from
+
+ruff and mypy read their settings from `pyproject.toml` at the repo root. A
+`.lint` test runs in the runfiles tree, where neither tool can find that file
+by searching parent directories. Thus the macro adds `//:pyproject.toml` to
+the test data, and `lint.sh` passes it to ruff with `--config` and to mypy
+with `--config-file`. A `.fix` target runs in the workspace, so ruff finds the
+file itself.
+
+Two tests guard this. `lint_runfiles_test` checks that a `.lint` target from
+the macro has `pyproject.toml` in its runfiles. `lint_config_test` runs
+`lint.sh` on `testdata/undocumented.py` and requires ruff to report the
+missing docstring (D103). ruff's defaults do not include the docstring rules,
+so the report shows that `lint.sh` applied the settings.
+
 ## How mypy finds types
 
 `lint.sh` runs mypy with `--ignore-missing-imports` and
@@ -106,6 +121,7 @@ mypy may not resolve the import.
 | `defs.bzl` | The `py_library` and `py_binary` macros. |
 | `lint.sh` | The script that a `.lint` target runs. |
 | `fix.sh` | The script that a `.fix` target runs. |
+| `lint_config_test.sh`, `lint_runfiles_test.bzl`, `testdata/` | The tests that `.lint` targets apply `pyproject.toml`, and their inputs. |
 | `check_all.sh`, `fix_all.sh` | Scripts that run the targets with a name that ends in `.lint` or `.fix` under `//packages/...`. No target runs them. |
 | `BUILD.bazel` | `:ruff` and `:mypy`. The ruff wheel has no console script, so `:ruff` extracts the ruff binary from the wheel. |
 

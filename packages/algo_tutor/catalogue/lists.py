@@ -44,6 +44,8 @@ SOURCE_LABELS = {Source.LEETCODE: "LeetCode", Source.ATCODER: "AtCoder"}
 
 @dataclass(frozen=True)
 class ResolvedEntry:
+    """A list line matched to a problem."""
+
     source: Source
     external_id: str
     title: str
@@ -53,6 +55,8 @@ class ResolvedEntry:
 
 @dataclass(frozen=True)
 class Unresolved:
+    """A list line that could not be matched, and why."""
+
     line: str
     reason: str
 
@@ -128,6 +132,7 @@ def _resolve_line(
 
 
 def split_lines(text: str) -> list[str]:
+    """Return the non-blank lines of *text*, up to the list entry limit."""
     lines = [line for line in text.splitlines() if line.strip()]
     if len(lines) > constants.MAX_LIST_ENTRIES:
         raise InvalidInput(
@@ -218,6 +223,7 @@ def create_list(
     origin: str | None = None,
     source_url: str | None = None,
 ) -> StudyList:
+    """Create and return a new study list with a unique *name*."""
     row = StudyList(
         id=new_id(),
         name=_check_name(session, name),
@@ -299,6 +305,7 @@ def create_own_lists(
 
 
 def get_list(session: Session, list_id: str) -> StudyList:
+    """Return the list with *list_id*; raise NotFound if there is none."""
     study_list = session.get(StudyList, list_id)
     if study_list is None:
         raise NotFound("No such list.")
@@ -313,6 +320,7 @@ def _editable(session: Session, list_id: str) -> StudyList:
 
 
 def rename_list(session: Session, list_id: str, name: str) -> StudyList:
+    """Rename an editable list to a unique *name*."""
     study_list = _editable(session, list_id)
     study_list.name = _check_name(session, name, exclude_id=list_id)
     session.flush()
@@ -422,6 +430,7 @@ def activate_list(session: Session, list_id: str) -> StudyList:
 
 
 def deactivate_list(session: Session, list_id: str) -> StudyList:
+    """Stop using *list_id* as the active list for any source."""
     study_list = get_list(session, list_id)
     settings = _settings(session)
     if settings.active_list_leetcode == list_id:
@@ -445,6 +454,8 @@ def done_clause() -> Exists:
 
 @dataclass(frozen=True)
 class EntryView:
+    """One list entry as the API shows it."""
+
     problem_id: str
     title: str
     position: int

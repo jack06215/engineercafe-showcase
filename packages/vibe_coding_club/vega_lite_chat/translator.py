@@ -25,12 +25,16 @@ from packages.vibe_coding_club.vega_lite_chat.prompts import (
 
 @dataclass(frozen=True)
 class Attempt:
+    """One reply from the chart model and what was wrong with it."""
+
     raw: str
     errors: tuple[str, ...]  # empty when the reply passed
 
 
 @dataclass(frozen=True)
 class Translation:
+    """The final turn and every attempt that led to it."""
+
     turn: AssistantTurn | None  # None when every attempt failed
     attempts: tuple[Attempt, ...]
 

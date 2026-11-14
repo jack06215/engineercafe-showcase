@@ -14,10 +14,12 @@ _KANA = ((0x3041, 0x309F), (0x30A0, 0x30FF), (0x31F0, 0x31FF), (0xFF66, 0xFF9F))
 
 
 def has_kana(text: str) -> bool:
+    """Return whether *text* contains hiragana or katakana."""
     return any(lo <= ord(ch) <= hi for ch in text for lo, hi in _KANA)
 
 
 def detect(text: str) -> OutputLanguage:
+    """Return Japanese if *text* contains kana, else English."""
     return "Japanese" if has_kana(text) else "English"
 
 
@@ -27,12 +29,16 @@ def for_report(notes: str, takeaway: str | None) -> OutputLanguage:
 
 
 def for_hint(latest_message: str, notes: str) -> OutputLanguage:
-    """A hint follows the learner's latest message; a blank message falls
-    back to the attempt's notes."""
+    """The language of a hint: that of the learner's latest message.
+
+    A blank message falls back to the attempt's notes.
+    """
     return detect(latest_message if latest_message.strip() else notes)
 
 
 def pin(language: OutputLanguage) -> str:
-    """The line every prompt carries: qwen3.6 switched language unprompted
-    in an earlier test."""
+    """The language line that every prompt carries.
+
+    qwen3.6 switched language unprompted in an earlier test.
+    """
     return f"Write every field in {language}."

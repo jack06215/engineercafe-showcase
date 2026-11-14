@@ -62,6 +62,7 @@ def run_cli(namespace: argparse.Namespace) -> None:
 
 
 def main(args: Args) -> None:
+    """Show the Fukuoka forecast: the TUI on a terminal, plain text otherwise."""
     source: WeatherSource = JmaSource(FUKUOKA)
     # Fall back to plain text when piped or redirected.
     if args.plain or not sys.stdout.isatty():

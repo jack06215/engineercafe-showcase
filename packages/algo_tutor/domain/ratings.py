@@ -13,6 +13,8 @@ from packages.algo_tutor.domain.enums import Difficulty, Source
 
 @dataclass(frozen=True)
 class Rating:
+    """A problem rating, exact or estimated."""
+
     value: int
     estimated: bool  # shown with "≈" in the UI
 

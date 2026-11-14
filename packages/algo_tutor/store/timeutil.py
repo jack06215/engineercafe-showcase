@@ -11,6 +11,7 @@ from zoneinfo import ZoneInfo
 
 
 def new_id() -> str:
+    """Return a new random UUID as a string."""
     return str(uuid.uuid4())
 
 
@@ -27,6 +28,7 @@ def parse_iso(text: str) -> datetime:
 
 
 def now_utc() -> datetime:
+    """Return the current time in UTC."""
     return datetime.now(UTC)
 
 

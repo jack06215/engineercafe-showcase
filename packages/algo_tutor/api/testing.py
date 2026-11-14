@@ -1,6 +1,8 @@
-"""API test harness: a real runtime on a temporary repo root and data
-folder, the app with a scripted tutor, and a client that passes the
-local-only guard."""
+"""API test harness for the algo_tutor routes.
+
+It runs a real runtime on a temporary repo root and data folder, the app with a
+scripted tutor, and a client that passes the local-only guard.
+"""
 
 import tempfile
 from collections.abc import Callable
@@ -38,14 +40,18 @@ class Clock:
     """A settable clock for the app and the stopwatch."""
 
     def __init__(self, now: datetime = NOW) -> None:
+        """Start the clock at *now*."""
         self.now = now
 
     def __call__(self) -> datetime:
+        """Return the current fake time."""
         return self.now
 
 
 @dataclass
 class Harness:
+    """A test app with a temporary database, fake clock and scripted tutor."""
+
     folder: tempfile.TemporaryDirectory[str]
     runtime: Runtime
     client: TestClient
@@ -55,32 +61,40 @@ class Harness:
 
     @property
     def repo_root(self) -> Path:
+        """The repo root that the app reads patterns from."""
         return self.runtime.paths.repo_root
 
     @property
     def state(self) -> AppState:
+        """The app state of the test client's app."""
         state: AppState = self.client.app.state.algo  # type: ignore[attr-defined]
         return state
 
     def session(self) -> Session:
+        """Open a new database session."""
         return self.runtime.sessions()
 
     def get(self, path: str, **kwargs: Any) -> httpx2.Response:
+        """GET an API path, given without the /api prefix."""
         return self.client.get(f"/api{path}", **kwargs)
 
     def post(self, path: str, body: Any = None, **kwargs: Any) -> httpx2.Response:
+        """POST a JSON body to an API path, given without the /api prefix."""
         return self.client.post(
             f"/api{path}", json=body if body is not None else {}, **kwargs
         )
 
     def patch(self, path: str, body: Any, **kwargs: Any) -> httpx2.Response:
+        """PATCH a JSON body to an API path, given without the /api prefix."""
         return self.client.patch(f"/api{path}", json=body, **kwargs)
 
     def delete(self, path: str, **kwargs: Any) -> httpx2.Response:
+        """DELETE an API path, given without the /api prefix."""
         headers = {"content-type": "application/json"} | kwargs.pop("headers", {})
         return self.client.delete(f"/api{path}", headers=headers, **kwargs)
 
     def close(self) -> None:
+        """Close the client, the runtime and the temporary folder."""
         self.client.close()
         self.runtime.close()
         self.folder.cleanup()
@@ -92,8 +106,11 @@ def make_harness(
     repo_files: dict[str, str] | None = None,
     start_worker: bool = False,
 ) -> Harness:
-    """A fresh app. `repo_files` are written under the temporary repo root
-    (relative paths), e.g. solution files for path suggestions."""
+    """A fresh app.
+
+    `repo_files` are written under the temporary repo root (relative paths),
+    e.g. solution files for path suggestions.
+    """
     folder = tempfile.TemporaryDirectory()
     root = Path(folder.name) / "repo"
     pattern = (
@@ -187,8 +204,10 @@ def insert_attempt(
     labels: tuple[str, ...] = (),
     finished: datetime = NOW,
 ) -> str:
-    """An attempt straight into the database (an unfinished `mixed` one is a
-    hidden assessment); its id."""
+    """Insert an attempt straight into the database and return its id.
+
+    An unfinished `mixed` attempt is a hidden assessment.
+    """
     done = status == "completed"
     with h.runtime.sessions() as session, session.begin():
         attempt = Attempt(
@@ -226,8 +245,10 @@ def seed_problem(
     paid_only: bool = False,
     number: int | None = None,
 ) -> str:
-    """A library problem with a made-up slug (so no zerotrac rating applies);
-    `rating` is stored as a fitted estimate."""
+    """Add a library problem with a made-up slug, so no zerotrac rating applies.
+
+    `rating` is stored as a fitted estimate.
+    """
     slug = "t-" + "-".join(title.lower().split())
     with h.session() as session, session.begin():
         problem = Problem(
@@ -283,16 +304,22 @@ def finish_body(version: int, **overrides: Any) -> dict[str, Any]:
 
 @dataclass
 class FakeResponse:
+    """A canned HTTP response for the bank download."""
+
     status_code: int
     body: Any
 
     def json(self) -> Any:
+        """Return the canned body."""
         return self.body
 
 
 def install_fake_bank(h: Harness) -> BankService:
-    """The app's bank service, fetching agent B's recorded pages instead of
-    LeetCode. Call `.join()` on it after POST /bank/refresh."""
+    """The app's bank service, fetching recorded pages instead of LeetCode.
+
+    The pages are agent B's recordings. Call `.join()` on it after POST
+    /bank/refresh.
+    """
     pages = bank_pages()
 
     def post(url: str, *, json: Any, headers: Any, timeout: float) -> FakeResponse:

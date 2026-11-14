@@ -75,6 +75,7 @@ def _ts(text: str | None) -> datetime | None:
 
 
 def get_attempt(session: Session, attempt_id: str) -> models.Attempt:
+    """Return the attempt with *attempt_id*; raise 404 if there is none."""
     attempt = session.get(models.Attempt, attempt_id)
     if attempt is None:
         raise not_found("Attempt")
@@ -93,6 +94,7 @@ def _hint_levels(session: Session, attempt_id: str) -> list[HintLevel | None]:
 
 
 def report_out(attempt: models.Attempt) -> Report:
+    """Return the API view of the attempt's report."""
     sections = from_column(attempt.report)
     return Report(
         status=ReportStatus(attempt.report_status),
@@ -111,6 +113,7 @@ def report_out(attempt: models.Attempt) -> Report:
 
 
 def signals_out(session: Session, attempt_id: str) -> Signals:
+    """Return the API view of the attempt's self-reported signals."""
     row = session.get(models.AttemptSignals, attempt_id)
     return Signals(
         accepted_first_try=row.accepted_first_try if row else None,
@@ -119,6 +122,7 @@ def signals_out(session: Session, attempt_id: str) -> Signals:
 
 
 def problem_patterns(session: Session, problem_id: str) -> list[str]:
+    """Return the pattern IDs of *problem_id*, sorted."""
     return list(
         session.scalars(
             select(models.ProblemPattern.pattern_id)
@@ -131,9 +135,11 @@ def problem_patterns(session: Session, problem_id: str) -> list[str]:
 def attempt_out(
     session: Session, state: AppState, attempt: models.Attempt
 ) -> AttemptOut:
-    """The full attempt. While a hidden assessment runs, completed attempts
-    lose their reflection, signals and report, and no attempt shows the
-    problem's patterns (SPEC §9)."""
+    """The full attempt.
+
+    While a hidden assessment runs, completed attempts lose their reflection,
+    signals and report, and no attempt shows the problem's patterns (SPEC §9).
+    """
     hidden = deps.assessment_attempt(session) is not None
     problem = session.get_one(models.Problem, attempt.problem_id)
     completed = attempt.status == AttemptStatus.COMPLETED.value
@@ -178,6 +184,7 @@ def attempt_out(
 
 
 def summary_out(attempt: models.Attempt) -> AttemptSummary:
+    """Return the short API view of *attempt*."""
     return AttemptSummary(
         id=attempt.id,
         problem_id=attempt.problem_id,
@@ -210,6 +217,7 @@ def list_attempts(
 
 @router.get("/attempts/{attempt_id}")
 def read_attempt(attempt_id: str, session: deps.Db, state: deps.State) -> AttemptOut:
+    """Return the attempt with *attempt_id*."""
     return attempt_out(session, state, get_attempt(session, attempt_id))
 
 
@@ -235,8 +243,11 @@ def normalise_path(text: str) -> str:
 
 
 def read_solution(repo_root: Path, relative: str) -> str:
-    """The linked file's text: inside the repo once symlinks are resolved,
-    a regular file, at most 1,000,000 bytes, UTF-8 (SPEC §6.4)."""
+    """The linked file's text, after the checks of SPEC §6.4.
+
+    The file must be inside the repo once symlinks are resolved, a regular file,
+    at most 1,000,000 bytes, and UTF-8.
+    """
     root = repo_root.resolve()
     candidate = root / relative
     if not candidate.exists():
@@ -388,6 +399,7 @@ def save_draft(
 
 
 def timer_state(attempt: models.Attempt) -> timer.TimerState:
+    """Return the timer state stored on *attempt*."""
     return timer.TimerState(
         status=AttemptStatus(attempt.status),
         active_seconds=attempt.active_seconds,
@@ -591,8 +603,10 @@ def save_reflection(
 def save_signals(
     attempt_id: str, body: SignalsPatch, session: deps.Db, state: deps.State
 ) -> AttemptOut:
-    """First-try acceptance and how it felt (SPEC §6.7). Not versioned; only
-    the fields sent change, and null clears one."""
+    """First-try acceptance and how it felt (SPEC §6.7).
+
+    Not versioned; only the fields sent change, and null clears one.
+    """
     attempt = get_attempt(session, attempt_id)
     _completed(attempt)
     row = session.get(models.AttemptSignals, attempt.id)
@@ -627,7 +641,7 @@ def _tutor_off() -> ApiError:
 def request_report(
     attempt_id: str, background: BackgroundTasks, session: deps.Db, state: deps.State
 ) -> Report:
-    """ "Ask for a report" / "Try again". Not repeated once a report exists."""
+    """The "Ask for a report" / "Try again" button. Not repeated once a report exists."""
     attempt = get_attempt(session, attempt_id)
     if not state.tutor_enabled:
         raise _tutor_off()
@@ -666,6 +680,7 @@ def _messages(session: Session, attempt_id: str) -> list[models.HintMessage]:
 
 @router.get("/attempts/{attempt_id}/hints")
 def read_hints(attempt_id: str, session: deps.Db) -> HintConversation:
+    """Return the attempt's hint conversation."""
     get_attempt(session, attempt_id)
     rows = _messages(session, attempt_id)
     return HintConversation(
@@ -711,9 +726,11 @@ def _hint_input(
 
 @router.post("/attempts/{attempt_id}/hints")
 def ask_for_hint(attempt_id: str, body: HintIn, state: deps.State) -> HintReply:
-    """Send a message to Algo-chan during an attempt. The model call runs
-    between two short transactions, so a slow reply never holds the
-    database: heartbeats and drafts carry on meanwhile."""
+    """Send a message to Algo-chan during an attempt.
+
+    The model call runs between two short transactions, so a slow reply never
+    holds the database: heartbeats and drafts carry on meanwhile.
+    """
     if not state.tutor_enabled:
         raise _tutor_off()
     sessions = state.runtime.sessions

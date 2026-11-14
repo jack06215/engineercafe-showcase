@@ -21,6 +21,8 @@ _BASE = len(LABELS) * 2
 
 @dataclass(frozen=True)
 class ProblemFeatures:
+    """The problem traits that the rating model reads."""
+
     difficulty: Difficulty
     ac_rate: float  # percent, 0–100
     tags: tuple[str, ...]
@@ -28,15 +30,19 @@ class ProblemFeatures:
 
 @dataclass(frozen=True)
 class RatedFeatures(ProblemFeatures):
+    """Problem traits with a known rating, used for training."""
+
     rating: float
 
 
 class TooFewRatedProblemsError(ValueError):
-    pass
+    """There are too few rated problems to fit the model."""
 
 
 @dataclass(frozen=True)
 class RatingModel:
+    """A fitted rating predictor with its held-out error."""
+
     predict: Callable[[ProblemFeatures], float]
     held_out_error: int  # mean absolute error on held-out folds, never on training rows
     method: str  # e.g. "ridge-v1 mae=148"

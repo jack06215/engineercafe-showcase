@@ -77,28 +77,34 @@ def week_forecast() -> Forecast:
 
 
 def raw_hourly() -> dict[str, Any]:
+    """Return the recorded JSON of the 3-hourly forecast."""
     data: dict[str, Any] = _load(HOURLY_JSON)
     return data
 
 
 def sample_hourly() -> tuple[Hourly, ...]:
+    """Return the recorded 3-hourly forecast, parsed."""
     return parse_hourly(raw_hourly())
 
 
 def raw_nowcast_times() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Return the recorded observed and forecast nowcast time lists."""
     return _load(NOWCAST_OBSERVED_JSON), _load(NOWCAST_FORECAST_JSON)
 
 
 def raw_short_range_times() -> list[dict[str, Any]]:
+    """Return the recorded short-range forecast time list."""
     data: list[dict[str, Any]] = _load(SHORT_RANGE_JSON)
     return data
 
 
 def nowcast_frames() -> tuple[RadarFrame, ...]:
+    """Return the radar frames parsed from the recorded nowcast times."""
     return parse_nowcast_frames(*raw_nowcast_times())
 
 
 def short_range_frames() -> tuple[RadarFrame, ...]:
+    """Return the radar frames parsed from the recorded short-range times."""
     return parse_short_range_frames(raw_short_range_times())
 
 
@@ -160,19 +166,23 @@ class FakeSource:
         forecast: Forecast | None = None,
         fail: Mapping[str, ForecastError] | None = None,
     ) -> None:
+        """Serve *forecast* or the sample; raise the errors in *fail* by call name."""
         self._forecast = forecast or sample_forecast()
         self.fail = dict(fail or {})
         self.calls: list[str] = []
 
     def forecast(self) -> Forecast:
+        """Return the canned forecast."""
         self._call("forecast")
         return self._forecast
 
     def hourly(self) -> tuple[Hourly, ...]:
+        """Return the recorded 3-hourly forecast."""
         self._call("hourly")
         return sample_hourly()
 
     def radar_frames(self, product: RadarProduct) -> tuple[RadarFrame, ...]:
+        """Return the recorded frames for *product*."""
         self._call("radar_frames")
         if product is RadarProduct.NOWCAST:
             return nowcast_frames()
@@ -181,6 +191,7 @@ class FakeSource:
     def radar_map(
         self, frame: RadarFrame, zoom: int, width: int, height: int
     ) -> RadarMap:
+        """Return a fake radar map of the requested size."""
         self._call("radar_map")
         return radar_map(frame, zoom, width, height)
 

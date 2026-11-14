@@ -1,0 +1,6 @@
+load("//rules/markdown:defs.bzl", "markdown_docs")
+
+markdown_docs(
+    name = "docs",
+    srcs = glob(["**/*.md"]),
+)

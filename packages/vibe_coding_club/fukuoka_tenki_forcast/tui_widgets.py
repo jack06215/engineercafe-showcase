@@ -57,12 +57,14 @@ def date_text(date: datetime.date) -> Text:
 
 
 def temp_text(temp: int | None, style: str) -> Text:
+    """Format *temp* in degrees Celsius, or a dim dash if it is unknown."""
     if temp is None:
         return Text("-", style="dim")
     return Text(f"{temp}℃", style=style)
 
 
 def day_card_content(day: DayForecast) -> Text:
+    """Build the text of one day card."""
     text = Text()
     text.append(f"{weather_emoji(day.weather_code)} ")
     text.append(day.weather, style="bold")
@@ -151,6 +153,7 @@ class DayCard(Static):
     """
 
     def __init__(self, day: DayForecast, today: datetime.date) -> None:
+        """Show *day*, titled relative to *today*."""
         category = CATEGORY_CLASSES.get(weather_category(day.weather_code), "")
         super().__init__(day_card_content(day), classes=category)
         self.border_title = day_title(day.date, today)
@@ -173,10 +176,12 @@ class WeeklyTable(DataTable[Text]):
     """
 
     def __init__(self) -> None:
+        """Set up an empty, striped table."""
         super().__init__(cursor_type="none", zebra_stripes=True)
         self.border_title = "7日間の予報"
 
     def show_days(self, days: Sequence[WeeklyDay], normals: Normals | None) -> None:
+        """Fill the table with one row per day in *days*."""
         # Columns need a running app, so they are added on first use rather
         # than in __init__.
         if not self.columns:
@@ -199,6 +204,7 @@ class WeeklyKey(Static):
     """
 
     def show_normals(self, normals: Normals | None) -> None:
+        """Show the key for *normals* and make it visible."""
         self.update(weekly_key(normals))
         self.display = True
 
@@ -218,10 +224,12 @@ class HourlyStrip(Static):
     """
 
     def __init__(self) -> None:
+        """Set up the strip with its border title."""
         super().__init__()
         self.border_title = "3時間ごとの予報"
 
     def show_hours(self, hours: Sequence[Hourly]) -> None:
+        """Show the chart of *hours*, cropped to the screen width."""
         chart = hourly_chart(hours)
         # Too narrow a screen crops the right-hand hours rather than wrapping.
         chart.no_wrap = True
@@ -229,6 +237,7 @@ class HourlyStrip(Static):
         self.update(chart)
 
     def show_error(self, message: str) -> None:
+        """Show *message* in red in place of the chart."""
         self.update(Text(message, style="red"))
 
 

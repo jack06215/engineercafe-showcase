@@ -1,11 +1,11 @@
-"""Free-text output: `StrOutputParser`, so `invoke_llm` returns a `str`.
+r"""Free-text output: `StrOutputParser`, so `invoke_llm` returns a `str`.
 
 The prompt lives in `prompts/explain.*.jinja`, one file per chat message, loaded
 by `langchain_util.prompts.load_chat_prompt`.
 
 Run it against a provider:
 
-    bazel run //packages/langchain_util/examples:string_output -- \\
+    bazel run //packages/langchain_util/examples:string_output -- \
         --provider openai "the Bazel build system"
 
 Or without spending anything -- `--dry-run` replays the canned reply below,
@@ -133,6 +133,7 @@ def explain_streaming(
 
 
 def main() -> int:
+    """Parse the command line, run the example and return an exit code."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("topic", help="What to explain")
     parser.add_argument(

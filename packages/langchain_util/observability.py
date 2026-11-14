@@ -139,6 +139,7 @@ class UsageCollector(BaseCallbackHandler):
     """Collects rendered prompts, raw outputs, and token counts from a chain."""
 
     def __init__(self) -> None:
+        """Start with empty usage."""
         self.usage = Usage()
 
     def on_llm_start(
@@ -150,6 +151,7 @@ class UsageCollector(BaseCallbackHandler):
         parent_run_id: UUID | None = None,
         **kwargs: Any,
     ) -> None:
+        """Record the prompts of a completion-model call."""
         self.usage.prompts.extend(prompts)
 
     def on_chat_model_start(
@@ -161,6 +163,7 @@ class UsageCollector(BaseCallbackHandler):
         parent_run_id: UUID | None = None,
         **kwargs: Any,
     ) -> None:
+        """Record each chat conversation as one rendered prompt."""
         for conversation in messages:
             rendered = "\n".join(
                 f"{message.type}: {message.text}" for message in conversation
@@ -175,6 +178,7 @@ class UsageCollector(BaseCallbackHandler):
         parent_run_id: UUID | None = None,
         **kwargs: Any,
     ) -> None:
+        """Count the call and add its token usage."""
         self.usage.llm_calls += 1
 
         counted_from_message = False

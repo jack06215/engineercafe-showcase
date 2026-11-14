@@ -35,6 +35,8 @@ from packages.algo_tutor.store.timeutil import now_utc
 
 @dataclass(frozen=True)
 class Runtime:
+    """What a running server needs: paths, config, manifests and the database."""
+
     paths: AppPaths
     config: AppConfig
     manifests: Manifests
@@ -46,6 +48,7 @@ class Runtime:
         return load_saved(self.paths.bank_file)
 
     def close(self) -> None:
+        """Release the database engine's connections."""
         self.engine.dispose()
 
 

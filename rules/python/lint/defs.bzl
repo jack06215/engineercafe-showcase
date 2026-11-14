@@ -49,8 +49,10 @@ def _lint_and_fix_targets(name, srcs, deps = []):
         args = [
             "$(rootpath //rules/python/lint:ruff)",
             "$(rootpath :%s)" % mypy_bin,
+            "$(rootpath //:pyproject.toml)",
         ] + ["$(rootpath %s)" % src for src in srcs],
         data = srcs + _same_package_dep_srcs(deps, srcs_canon) + [
+            "//:pyproject.toml",
             "//rules/python/lint:ruff",
             ":" + mypy_bin,
         ],

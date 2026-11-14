@@ -9,4 +9,5 @@ router = APIRouter(tags=["health"])
 
 @router.get("/health")
 def health() -> Health:
+    """Report that the server is up."""
     return Health()

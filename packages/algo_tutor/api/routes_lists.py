@@ -36,6 +36,7 @@ _KIND_ORDER = {ListKind.BUNDLED.value: 0, ListKind.OWN.value: 1, ListKind.PACK.v
 
 
 def summary(session: Session, study_list: StudyList) -> schemas.ListSummary:
+    """Return the API summary of *study_list* with its progress."""
     done, total = list_progress(session).get(study_list.id, (0, 0))
     settings = deps.settings_row(session)
     return schemas.ListSummary(
@@ -59,8 +60,11 @@ def list_detail(
     study_list: StudyList,
     unresolved: list[Unresolved] | None = None,
 ) -> schemas.ListDetail:
-    """The list in order. During a hidden assessment the assessment's own
-    problem is left out: its course section would name its topic."""
+    """The list in order.
+
+    During a hidden assessment the assessment's own problem is left out: its
+    course section would name its topic.
+    """
     assessment = deps.assessment_attempt(session)
     hidden = assessment.problem_id if assessment is not None else None
     entries = [
@@ -107,8 +111,10 @@ def get_lists(session: deps.Db) -> list[schemas.ListSummary]:
 def preview(
     body: schemas.ListEntriesIn, state: deps.State, session: deps.Db
 ) -> schemas.ListPreview:
-    """What a paste would create, without writing anything: one group per
-    source (a mixed paste becomes one list per source)."""
+    """What a paste would create, without writing anything.
+
+    One group per source: a mixed paste becomes one list per source.
+    """
     result = preview_entries(
         session,
         state.runtime.manifests,
@@ -142,6 +148,7 @@ def preview(
 def create_lists(
     body: schemas.ListEntriesIn, state: deps.State, session: deps.Db
 ) -> schemas.ListCreated:
+    """Create the learner's own lists from pasted text, one list per source."""
     created, unresolved = create_own_lists(
         session,
         state.runtime.manifests,
@@ -161,6 +168,7 @@ def create_lists(
 def get_list_detail(
     list_id: str, state: deps.State, session: deps.Db
 ) -> schemas.ListDetail:
+    """Return a list with its entries."""
     return list_detail(session, state, get_list(session, list_id))
 
 
@@ -190,15 +198,19 @@ def patch_list(
 @router.delete("/lists/{list_id}", status_code=204)
 def remove_list(list_id: str, session: deps.Db) -> Response:
     """Any list, bundled included (following the course again recreates it).
-    Progress lives on attempts, so nothing else is lost."""
+
+    Progress lives on attempts, so nothing else is lost.
+    """
     delete_list(session, list_id)
     return Response(status_code=204)
 
 
 @router.post("/lists/bundled/{course}")
 def follow(course: BundledSet, state: deps.State, session: deps.Db) -> JSONResponse:
-    """Follow NeetCode 150, Blind 75 or Hello Interview: 201 the first time,
-    200 with the existing list after that."""
+    """Follow NeetCode 150, Blind 75 or Hello Interview.
+
+    Answers 201 the first time, and 200 with the existing list after that.
+    """
     followed = follow_course(
         session,
         state.runtime.manifests,
@@ -221,6 +233,7 @@ def activate(list_id: str, session: deps.Db) -> schemas.ListSummary:
 
 @router.post("/lists/{list_id}/deactivate")
 def deactivate(list_id: str, session: deps.Db) -> schemas.ListSummary:
+    """Stop using a list as the active list."""
     return summary(session, deactivate_list(session, list_id))
 
 
@@ -236,9 +249,11 @@ def post_pack(
     key: deps.IdempotencyKey,
     dry_run: Annotated[bool, Query()] = False,
 ) -> JSONResponse:
-    """Import a version-2 question pack (SPEC §5.9). `dry_run=true` reports
-    what would change without writing. Importing the same pack twice is a
-    no-op (`already_applied`)."""
+    """Import a version-2 question pack (SPEC §5.9).
+
+    `dry_run=true` reports what would change without writing. Importing the same
+    pack twice is a no-op (`already_applied`).
+    """
     parsed = parse_pack(json.dumps(body))
 
     def run() -> schemas.PackReport:

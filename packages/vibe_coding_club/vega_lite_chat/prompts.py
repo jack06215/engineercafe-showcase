@@ -1,5 +1,7 @@
-"""The prompts from prompts.yaml: the chat model's instructions, and the translator's instructions,
-few-shot examples and the messages for one call.
+"""The prompts from prompts.yaml, for the chat model and the translator.
+
+They are the chat model's instructions, and the translator's instructions, few-shot examples and the
+messages for one call.
 
 The JSON schema goes into the translator's system prompt as text as well: `with_structured_output` hands it to
 Ollama only as `format`, which constrains the output but never shows the field descriptions to the
@@ -43,6 +45,8 @@ class PromptError(Exception):
 
 
 class Example(BaseModel):
+    """A worked example for the translator prompt."""
+
     model_config = ConfigDict(extra="forbid", frozen=True)
 
     sample: str  # a sample CSV's file name, e.g. "sales_by_region.csv"
@@ -63,6 +67,8 @@ class _PromptFile(BaseModel):
 
 @dataclass(frozen=True)
 class PromptBook:
+    """The prompt texts and examples loaded from the prompt files."""
+
     chat_system: (
         str  # the chat model's instructions; chat_system_prompt appends the table
     )
@@ -154,6 +160,7 @@ def repair_message(errors: Sequence[str]) -> HumanMessage:
 
 
 def system_prompt(book: PromptBook) -> str:
+    """Return the translator's instructions followed by the reply schema."""
     return (
         f"{book.system.rstrip()}\n\n"
         "The reply must match this JSON schema (shown as YAML):\n\n"
@@ -167,6 +174,7 @@ def user_message(
     recent: Sequence[str],
     request: str,
 ) -> str:
+    """Build the translator's user message for one request."""
     recent_text = "\n".join(f"- {line}" for line in recent) if recent else "none"
     return (
         f"## Data profile\n{profile_yaml(profile).rstrip()}\n\n"
@@ -177,8 +185,11 @@ def user_message(
 
 
 def reply_json(turn: AssistantTurn) -> str:
-    """An example reply as the model should write it. The keys the schema requires stay even when
-    empty: `chart: null`, and `filters: []` right after `mark`."""
+    """An example reply as the model should write it.
+
+    The keys the schema requires stay even when empty: `chart: null`, and `filters: []` right after
+    `mark`.
+    """
     chart = None
     if turn.chart is not None:
         rest = _compact(turn.chart)
@@ -220,8 +231,18 @@ def _sample_profile(name: str, data: DataConfig, label: str) -> DataProfile:
 
 @functools.cache
 def _schema_yaml() -> str:
-    schema = _without_titles(AssistantTurn.model_json_schema(by_alias=True))
+    schema = _without_model_docstrings(
+        _without_titles(AssistantTurn.model_json_schema(by_alias=True))
+    )
     return yaml.safe_dump(schema, allow_unicode=True, sort_keys=False)
+
+
+def _without_model_docstrings(schema: dict[str, Any]) -> dict[str, Any]:
+    # pydantic copies each model's docstring into the schema as "description". The docstrings are
+    # written for programmers; the Field descriptions are the instructions written for the model.
+    for model in [schema, *schema.get("$defs", {}).values()]:
+        model.pop("description", None)
+    return schema
 
 
 def _without_titles(node: Any) -> Any:

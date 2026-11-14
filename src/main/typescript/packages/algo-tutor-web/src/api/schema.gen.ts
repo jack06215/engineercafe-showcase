@@ -7,7 +7,10 @@ export type paths = Record<string, never>;
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** ActiveAttemptBrief */
+        /**
+         * ActiveAttemptBrief
+         * @description The running attempt; its title is hidden during the assessment.
+         */
         ActiveAttemptBrief: {
             context: components["schemas"]["Context"];
             /** Id */
@@ -18,8 +21,10 @@ export interface components {
         };
         /**
          * AttemptOut
-         * @description One attempt. While a hidden assessment runs, the reflection fields,
-         *     signals and report of completed attempts are null (SPEC §9).
+         * @description One attempt.
+         *
+         *     While a hidden assessment runs, the reflection fields, signals and report of
+         *     completed attempts are null (SPEC §9).
          */
         AttemptOut: {
             /** Active Seconds */
@@ -84,7 +89,10 @@ export interface components {
             /** Version */
             version: number;
         };
-        /** AttemptStart */
+        /**
+         * AttemptStart
+         * @description POST body to start an attempt.
+         */
         AttemptStart: {
             /** @default python */
             language?: components["schemas"]["Language"];
@@ -98,10 +106,14 @@ export interface components {
         };
         /**
          * AttemptStatus
+         * @description Whether an attempt is running, paused or finished.
          * @enum {string}
          */
         AttemptStatus: "active" | "paused" | "completed";
-        /** AttemptSummary */
+        /**
+         * AttemptSummary
+         * @description A short view of one attempt.
+         */
         AttemptSummary: {
             /** Active Seconds */
             active_seconds: number;
@@ -129,7 +141,10 @@ export interface components {
              */
             study_date: string;
         };
-        /** BackupStatus */
+        /**
+         * BackupStatus
+         * @description The last backup and how many backups are kept.
+         */
         BackupStatus: {
             /** Kept */
             kept: number;
@@ -138,7 +153,10 @@ export interface components {
             /** Path */
             path: string | null;
         };
-        /** BankStatus */
+        /**
+         * BankStatus
+         * @description The LeetCode bank download status and catalogue counts.
+         */
         BankStatus: {
             /** Error */
             error: string | null;
@@ -176,8 +194,10 @@ export interface components {
         Context: "mixed" | "targeted";
         /**
          * Desk
-         * @description GET /desk. During a hidden assessment only `hidden_assessment` and
-         *     `active_attempt` are filled ("Assessment in progress" + Resume).
+         * @description GET /desk.
+         *
+         *     During a hidden assessment only `hidden_assessment` and `active_attempt` are
+         *     filled ("Assessment in progress" + Resume).
          */
         Desk: {
             active_attempt: components["schemas"]["ActiveAttemptBrief"] | null;
@@ -212,10 +232,14 @@ export interface components {
         DifficultyFeel: "too_easy" | "too_hard";
         /**
          * Disposition
+         * @description What to do with a plan item that the learner does not want now.
          * @enum {string}
          */
         Disposition: "swap" | "snooze" | "skip";
-        /** DispositionIn */
+        /**
+         * DispositionIn
+         * @description Swap, snooze or skip a plan item.
+         */
         DispositionIn: {
             action: components["schemas"]["Disposition"];
             /**
@@ -228,8 +252,10 @@ export interface components {
         };
         /**
          * DraftPatch
-         * @description Send `solution_path` with a path to link (and copy) a file, or with null
-         *     to switch to the in-app editor.
+         * @description PATCH body for an attempt's draft.
+         *
+         *     Send `solution_path` with a path to link (and copy) a file, or with null to
+         *     switch to the in-app editor.
          */
         DraftPatch: {
             /**
@@ -252,11 +278,17 @@ export interface components {
             /** Version */
             version: number;
         };
-        /** ErrorBody */
+        /**
+         * ErrorBody
+         * @description The body of every error response.
+         */
         ErrorBody: {
             error: components["schemas"]["ErrorDetail"];
         };
-        /** ErrorDetail */
+        /**
+         * ErrorDetail
+         * @description The code, message and optional tutor error kind of an API error.
+         */
         ErrorDetail: {
             /** Code */
             code: string;
@@ -267,10 +299,14 @@ export interface components {
         };
         /**
          * Evidence
+         * @description What kind of evidence an attempt gives about the learner's skill.
          * @enum {string}
          */
         Evidence: "retention" | "near_transfer" | "unseen";
-        /** FinishIn */
+        /**
+         * FinishIn
+         * @description POST body to finish an attempt.
+         */
         FinishIn: {
             /**
              * Code
@@ -302,14 +338,20 @@ export interface components {
             /** Version */
             version: number;
         };
-        /** FinishOut */
+        /**
+         * FinishOut
+         * @description The finished attempt and its next review.
+         */
         FinishOut: {
             attempt: components["schemas"]["AttemptOut"];
             /** Next Review Date */
             next_review_date: string | null;
             review_stage: components["schemas"]["ReviewStage"];
         };
-        /** Health */
+        /**
+         * Health
+         * @description GET /health.
+         */
         Health: {
             /**
              * Status
@@ -320,26 +362,37 @@ export interface components {
         };
         /**
          * Help
+         * @description How much help the learner used during an attempt.
          * @enum {string}
          */
         Help: "unknown" | "none" | "small" | "major" | "solution";
-        /** HintConversation */
+        /**
+         * HintConversation
+         * @description An attempt's hint conversation and the strongest hint given.
+         */
         HintConversation: {
             /** Messages */
             messages: components["schemas"]["HintMessage"][];
             strongest_level: components["schemas"]["HintLevel"] | null;
         };
-        /** HintIn */
+        /**
+         * HintIn
+         * @description POST body with the learner's message to the tutor.
+         */
         HintIn: {
             /** Text */
             text: string;
         };
         /**
          * HintLevel
+         * @description How much a hint gives away.
          * @enum {string}
          */
         HintLevel: "small" | "major";
-        /** HintMessage */
+        /**
+         * HintMessage
+         * @description One message of an attempt's hint conversation.
+         */
         HintMessage: {
             /** Analysis */
             analysis: string | null;
@@ -363,8 +416,10 @@ export interface components {
         };
         /**
          * HintReply
-         * @description The tutor's reply. Hints append to the attempt's notes, which bumps its
-         *     version; the client must adopt `attempt_version` and `notes`.
+         * @description The tutor's reply.
+         *
+         *     Hints append to the attempt's notes, which bumps its version; the client
+         *     must adopt `attempt_version` and `notes`.
          */
         HintReply: {
             /** Attempt Version */
@@ -376,6 +431,7 @@ export interface components {
         };
         /**
          * HintRole
+         * @description Who wrote a hint message.
          * @enum {string}
          */
         HintRole: "learner" | "tutor";
@@ -391,7 +447,10 @@ export interface components {
          * @enum {string}
          */
         Language: "python" | "go" | "typescript";
-        /** LevelChange */
+        /**
+         * LevelChange
+         * @description The last change to a topic level and the attempt that caused it.
+         */
         LevelChange: {
             /** Attempt Id */
             attempt_id: string;
@@ -410,7 +469,10 @@ export interface components {
              */
             study_date: string;
         };
-        /** ListCreated */
+        /**
+         * ListCreated
+         * @description The lists created from pasted text, and the lines left out.
+         */
         ListCreated: {
             /** Lists */
             lists: components["schemas"]["ListSummary"][];
@@ -419,7 +481,10 @@ export interface components {
             /** Unresolved Reasons */
             unresolved_reasons?: components["schemas"]["UnresolvedLine"][];
         };
-        /** ListDetail */
+        /**
+         * ListDetail
+         * @description A study list with its entries.
+         */
         ListDetail: {
             /** Entries */
             entries: components["schemas"]["ListEntryOut"][];
@@ -427,14 +492,20 @@ export interface components {
             /** Unresolved */
             unresolved?: components["schemas"]["UnresolvedLine"][];
         };
-        /** ListEntriesIn */
+        /**
+         * ListEntriesIn
+         * @description Body to create lists from pasted text, one entry per line.
+         */
         ListEntriesIn: {
             /** Name */
             name: string;
             /** Text */
             text: string;
         };
-        /** ListEntryOut */
+        /**
+         * ListEntryOut
+         * @description One problem on a study list.
+         */
         ListEntryOut: {
             /**
              * Added At
@@ -451,13 +522,16 @@ export interface components {
         };
         /**
          * ListKind
+         * @description Where a study list came from: a bundled course, the learner or a pack.
          * @enum {string}
          */
         ListKind: "bundled" | "own" | "pack";
         /**
          * ListPatch
-         * @description Own lists only. `problem_ids` is the full new order (drop an id to
-         *     remove it); `add_text` resolves and appends more entries.
+         * @description Own lists only.
+         *
+         *     `problem_ids` is the full new order (drop an id to remove it); `add_text`
+         *     resolves and appends more entries.
          */
         ListPatch: {
             /**
@@ -476,7 +550,10 @@ export interface components {
              */
             problem_ids?: string[] | null;
         };
-        /** ListPreview */
+        /**
+         * ListPreview
+         * @description Preview of the lists that pasted text would create.
+         */
         ListPreview: {
             /** Groups */
             groups: components["schemas"]["PreviewGroup"][];
@@ -485,14 +562,20 @@ export interface components {
             /** Unresolved Reasons */
             unresolved_reasons?: components["schemas"]["UnresolvedLine"][];
         };
-        /** ListRef */
+        /**
+         * ListRef
+         * @description The ID and name of a study list.
+         */
         ListRef: {
             /** Id */
             id: string;
             /** Name */
             name: string;
         };
-        /** ListSummary */
+        /**
+         * ListSummary
+         * @description A study list with its progress.
+         */
         ListSummary: {
             /** Active */
             active: boolean;
@@ -516,7 +599,10 @@ export interface components {
             /** Total */
             total: number;
         };
-        /** MistakeEntry */
+        /**
+         * MistakeEntry
+         * @description A finished attempt with its mistake labels and takeaway.
+         */
         MistakeEntry: {
             /** Attempt Id */
             attempt_id: string;
@@ -533,15 +619,22 @@ export interface components {
         };
         /**
          * MistakeLabel
+         * @description The kind of mistake behind a failed attempt.
          * @enum {string}
          */
         MistakeLabel: "missed_edge_case" | "wrong_approach" | "implementation_bug";
-        /** MistakeList */
+        /**
+         * MistakeList
+         * @description Attempts with mistakes, newest first.
+         */
         MistakeList: {
             /** Items */
             items: components["schemas"]["MistakeEntry"][];
         };
-        /** Notebook */
+        /**
+         * Notebook
+         * @description A notebook of cues, pitfalls and notes, versioned for edits.
+         */
         Notebook: {
             /** Cues */
             cues: string;
@@ -554,7 +647,10 @@ export interface components {
             /** Version */
             version: number;
         };
-        /** NotebookPatch */
+        /**
+         * NotebookPatch
+         * @description PATCH body for a notebook; omitted fields stay unchanged.
+         */
         NotebookPatch: {
             /**
              * Cues
@@ -574,7 +670,10 @@ export interface components {
             /** Version */
             version: number;
         };
-        /** NotebookProblem */
+        /**
+         * NotebookProblem
+         * @description An attempted problem shown on a notebook page.
+         */
         NotebookProblem: {
             /** Attempts */
             attempts: number;
@@ -583,10 +682,14 @@ export interface components {
         };
         /**
          * Outcome
+         * @description How an attempt ended.
          * @enum {string}
          */
         Outcome: "solved" | "not_solved" | "stopped";
-        /** PackReport */
+        /**
+         * PackReport
+         * @description The result of importing or dry-running a question pack.
+         */
         PackReport: {
             /** Already Applied */
             already_applied: boolean;
@@ -611,7 +714,10 @@ export interface components {
             problems_existing: number;
             summary: components["schemas"]["ListSummary"] | null;
         };
-        /** PatternDetail */
+        /**
+         * PatternDetail
+         * @description A pattern page: README, notebook and attempted problems.
+         */
         PatternDetail: {
             notebook: components["schemas"]["Notebook"];
             pattern: components["schemas"]["PatternSummary"];
@@ -622,7 +728,10 @@ export interface components {
             /** Readme Path */
             readme_path: string;
         };
-        /** PatternSummary */
+        /**
+         * PatternSummary
+         * @description A pattern with its attempted-problem count.
+         */
         PatternSummary: {
             /** Id */
             id: string;
@@ -637,8 +746,10 @@ export interface components {
         };
         /**
          * PlanItemKind
-         * @description A plan item's kind. A transfer check has no kind (None), which is
-         *     what makes its attempt `mixed` (SPEC §6.2).
+         * @description A plan item's kind.
+         *
+         *     A transfer check has no kind (None), which is what makes its attempt `mixed`
+         *     (SPEC §6.2).
          * @enum {string}
          */
         PlanItemKind: "topic" | "list";
@@ -666,10 +777,14 @@ export interface components {
         };
         /**
          * PlanItemStatus
+         * @description Where a daily-plan item is in its life cycle.
          * @enum {string}
          */
         PlanItemStatus: "active" | "queued" | "completed" | "skipped";
-        /** PlanOut */
+        /**
+         * PlanOut
+         * @description A daily plan with the items of both lanes.
+         */
         PlanOut: {
             /** Id */
             id: string;
@@ -685,12 +800,18 @@ export interface components {
             /** Version */
             version: number;
         };
-        /** PlanVersionIn */
+        /**
+         * PlanVersionIn
+         * @description A body that carries only the plan version.
+         */
         PlanVersionIn: {
             /** Version */
             version: number;
         };
-        /** PreviewGroup */
+        /**
+         * PreviewGroup
+         * @description The entries that will form the list for one source.
+         */
         PreviewGroup: {
             /** Entries */
             entries: components["schemas"]["ResolvedEntry"][];
@@ -700,8 +821,10 @@ export interface components {
         };
         /**
          * ProblemBrief
-         * @description Enough to show a row and link out. Never carries topic, tags or patterns,
-         *     so it is safe inside a hidden assessment.
+         * @description Enough to show a row and link out.
+         *
+         *     Never carries topic, tags or patterns, so it is safe inside a hidden
+         *     assessment.
          */
         ProblemBrief: {
             /** Contest */
@@ -718,7 +841,10 @@ export interface components {
             /** Url */
             url: string;
         };
-        /** ProblemCreate */
+        /**
+         * ProblemCreate
+         * @description POST body to add a problem by URL.
+         */
         ProblemCreate: {
             /** @default null */
             difficulty?: components["schemas"]["Difficulty"] | null;
@@ -730,7 +856,10 @@ export interface components {
             /** Url */
             url: string;
         };
-        /** ProblemDetail */
+        /**
+         * ProblemDetail
+         * @description The full view of one problem.
+         */
         ProblemDetail: {
             /** Attempts */
             attempts: components["schemas"]["AttemptSummary"][];
@@ -757,7 +886,10 @@ export interface components {
             /** Topic Overridden */
             topic_overridden: boolean;
         };
-        /** ProblemPage */
+        /**
+         * ProblemPage
+         * @description One page of the problem library.
+         */
         ProblemPage: {
             /** Items */
             items: components["schemas"]["ProblemRow"][];
@@ -770,7 +902,9 @@ export interface components {
         };
         /**
          * ProblemPatch
-         * @description Send `topic_id` to override the primary topic (null = "None"); send
+         * @description PATCH body for a problem's notes, topic and pattern labels.
+         *
+         *     Send `topic_id` to override the primary topic (null = "None"); send
          *     `reset_topic: true` to go back to the automatic topic.
          */
         ProblemPatch: {
@@ -891,14 +1025,20 @@ export interface components {
             /** Topic Id */
             topic_id: string | null;
         };
-        /** RatingOut */
+        /**
+         * RatingOut
+         * @description A problem rating, exact or estimated.
+         */
         RatingOut: {
             /** Estimated */
             estimated: boolean;
             /** Value */
             value: number;
         };
-        /** ReflectionPatch */
+        /**
+         * ReflectionPatch
+         * @description PATCH body for an attempt's mistake labels and takeaway.
+         */
         ReflectionPatch: {
             /** Mistake Labels */
             mistake_labels: components["schemas"]["MistakeLabel"][];
@@ -907,7 +1047,10 @@ export interface components {
             /** Version */
             version: number;
         };
-        /** ReorderIn */
+        /**
+         * ReorderIn
+         * @description The new order of every item in one plan lane.
+         */
         ReorderIn: {
             /** Item Ids */
             item_ids: string[];
@@ -915,7 +1058,10 @@ export interface components {
             /** Version */
             version: number;
         };
-        /** Report */
+        /**
+         * Report
+         * @description The tutor's report on an attempt, by section.
+         */
         Report: {
             /** Complexity */
             complexity: string | null;
@@ -942,7 +1088,10 @@ export interface components {
          * @enum {string}
          */
         ReportStatus: "none" | "pending" | "generating" | "done" | "failed";
-        /** ResolvedEntry */
+        /**
+         * ResolvedEntry
+         * @description A pasted line matched to a problem.
+         */
         ResolvedEntry: {
             /** Line */
             line: string;
@@ -960,6 +1109,7 @@ export interface components {
         Result: "struggled" | "ok" | "strong";
         /**
          * ReviewAction
+         * @description How the next review of a problem was scheduled.
          * @enum {string}
          */
         ReviewAction: "recommended" | "manual" | "snooze" | "none";
@@ -969,7 +1119,10 @@ export interface components {
          * @enum {string}
          */
         ReviewChoice: "recommended" | "manual" | "none";
-        /** ReviewPatch */
+        /**
+         * ReviewPatch
+         * @description PATCH body to reschedule a problem's next review.
+         */
         ReviewPatch: {
             action: components["schemas"]["ReviewAction"];
             /**
@@ -982,10 +1135,14 @@ export interface components {
         };
         /**
          * ReviewStage
+         * @description Where a problem is in the spaced-review cycle.
          * @enum {string}
          */
         ReviewStage: "repair" | "reconstruction" | "transfer" | "mixed" | "retired" | "covered" | "snoozed";
-        /** ReviewTargetOut */
+        /**
+         * ReviewTargetOut
+         * @description When and how a problem is next due for review.
+         */
         ReviewTargetOut: {
             action: components["schemas"]["ReviewAction"];
             /** Effective Date */
@@ -998,7 +1155,10 @@ export interface components {
             /** Version */
             version: number;
         };
-        /** SettingsOut */
+        /**
+         * SettingsOut
+         * @description The learner's settings.
+         */
         SettingsOut: {
             /** Active List Atcoder */
             active_list_atcoder: string | null;
@@ -1020,7 +1180,10 @@ export interface components {
             /** Timezone */
             timezone: string;
         };
-        /** SettingsPatch */
+        /**
+         * SettingsPatch
+         * @description PATCH body for settings; omitted fields stay unchanged.
+         */
         SettingsPatch: {
             /**
              * Atcoder Per Day
@@ -1043,7 +1206,10 @@ export interface components {
              */
             target_rating?: number | null;
         };
-        /** SetupIn */
+        /**
+         * SetupIn
+         * @description POST /setup: the first-run choices.
+         */
         SetupIn: {
             /**
              * Download Bank
@@ -1058,7 +1224,10 @@ export interface components {
              */
             questions_per_day?: number;
         };
-        /** SetupState */
+        /**
+         * SetupState
+         * @description GET /setup: the onboarding state.
+         */
         SetupState: {
             /** Onboarding Complete */
             onboarding_complete: boolean;
@@ -1067,13 +1236,19 @@ export interface components {
             /** Timezone */
             timezone: string;
         };
-        /** Signals */
+        /**
+         * Signals
+         * @description The learner's own signals about an attempt.
+         */
         Signals: {
             /** Accepted First Try */
             accepted_first_try: boolean | null;
             difficulty: components["schemas"]["DifficultyFeel"] | null;
         };
-        /** SignalsPatch */
+        /**
+         * SignalsPatch
+         * @description PATCH body for an attempt's signals; omitted fields stay unchanged.
+         */
         SignalsPatch: {
             /**
              * Accepted First Try
@@ -1089,7 +1264,10 @@ export interface components {
          * @enum {string}
          */
         Source: "leetcode" | "atcoder";
-        /** SuggestedPath */
+        /**
+         * SuggestedPath
+         * @description A suggested solution file path, and whether the file exists.
+         */
         SuggestedPath: {
             /** Exists */
             exists: boolean;
@@ -1098,10 +1276,14 @@ export interface components {
         };
         /**
          * TimerAction
+         * @description An event that the attempt timer receives from the client.
          * @enum {string}
          */
         TimerAction: "heartbeat" | "pause" | "resume";
-        /** TimerIn */
+        /**
+         * TimerIn
+         * @description A timer event for an attempt.
+         */
         TimerIn: {
             action: components["schemas"]["TimerAction"];
             /**
@@ -1112,7 +1294,10 @@ export interface components {
             /** Version */
             version: number;
         };
-        /** TopicDetail */
+        /**
+         * TopicDetail
+         * @description A topic page: level, notebook and attempted problems.
+         */
         TopicDetail: {
             level: components["schemas"]["TopicLevel"];
             notebook: components["schemas"]["Notebook"];
@@ -1123,7 +1308,10 @@ export interface components {
             /** Unseen Count */
             unseen_count: number;
         };
-        /** TopicLevel */
+        /**
+         * TopicLevel
+         * @description The learner's level in one topic.
+         */
         TopicLevel: {
             /** At Target */
             at_target: boolean;
@@ -1139,7 +1327,10 @@ export interface components {
             /** Name */
             name: string;
         };
-        /** TopicLevels */
+        /**
+         * TopicLevels
+         * @description The learner's level in every topic.
+         */
         TopicLevels: {
             /** Target Rating */
             target_rating: number;
@@ -1152,7 +1343,10 @@ export interface components {
          * @enum {string}
          */
         TutorErrorKind: "disabled" | "unavailable" | "model_missing" | "timeout" | "invalid_output" | "error";
-        /** TutorStatus */
+        /**
+         * TutorStatus
+         * @description The tutor's settings and pending report count.
+         */
         TutorStatus: {
             /** Enabled */
             enabled: boolean;
@@ -1168,7 +1362,10 @@ export interface components {
              */
             provider: "ollama" | "openai" | "azure";
         };
-        /** TutorTest */
+        /**
+         * TutorTest
+         * @description Result of a test call to the tutor model.
+         */
         TutorTest: {
             error_kind: components["schemas"]["TutorErrorKind"] | null;
             /** Latency Ms */
@@ -1182,7 +1379,10 @@ export interface components {
             /** Provider */
             provider: string;
         };
-        /** UnresolvedLine */
+        /**
+         * UnresolvedLine
+         * @description A pasted line that matched no problem, and why.
+         */
         UnresolvedLine: {
             /** Line */
             line: string;

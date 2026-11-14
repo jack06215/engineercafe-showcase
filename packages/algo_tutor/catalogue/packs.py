@@ -44,6 +44,8 @@ _Title = Field(min_length=1, max_length=constants.MAX_TITLE_CHARS)
 
 
 class PackQuestion(BaseModel):
+    """One question of a pack file."""
+
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
     url: str
@@ -60,6 +62,8 @@ class PackQuestion(BaseModel):
 
 
 class Pack(BaseModel):
+    """A question pack file, version 2."""
+
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
     version: Literal[2]
@@ -70,6 +74,7 @@ class Pack(BaseModel):
     )
 
     def refs(self) -> list[ProblemRef]:
+        """Return the problem reference of each question URL."""
         refs = []
         for q in self.questions:
             ref = parse_problem_url(q.url)
@@ -83,6 +88,7 @@ class PackError(InvalidInput):
     """The pack failed validation. `problems` lists each failure with its path."""
 
     def __init__(self, problems: list[str]) -> None:
+        """Store every problem found in the pack."""
         super().__init__("The question pack is invalid: " + "; ".join(problems))
         self.problems = problems
 
@@ -94,11 +100,14 @@ def canonical_json(value: Any) -> str:
 
 @dataclass(frozen=True)
 class ParsedPack:
+    """A validated pack with the fingerprint of its content."""
+
     pack: Pack
     fingerprint: str  # SHA-256 of the canonical JSON
 
     @property
     def import_id(self) -> str:
+        """The import ID, derived from the fingerprint."""
         return f"pack-v2-{self.fingerprint}"
 
 
@@ -141,6 +150,8 @@ def parse_pack(raw: str | bytes) -> ParsedPack:
 
 @dataclass
 class PackReport:
+    """Counts from one pack import or dry run."""
+
     import_id: str
     dry_run: bool
     already_applied: bool = False
@@ -152,6 +163,7 @@ class PackReport:
     lists_extended: list[str] = field(default_factory=list)
 
     def as_json(self) -> dict[str, Any]:
+        """Return the report as a JSON-ready dict."""
         return {
             "import_id": self.import_id,
             "dry_run": self.dry_run,

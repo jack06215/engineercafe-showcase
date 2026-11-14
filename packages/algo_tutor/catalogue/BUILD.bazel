@@ -1,5 +1,6 @@
 load("@monorepo_pip//:requirements.bzl", "requirement")
 load("@rules_python//python:py_test.bzl", "py_test")
+load("//rules/markdown:defs.bzl", "markdown_docs")
 load("//rules/python/lint:defs.bzl", "py_library")
 
 # Where problems and lists come from (SPEC §5): the bundled manifests, the
@@ -63,3 +64,8 @@ py_library(
         "test_setup",
     ]
 ]
+
+markdown_docs(
+    name = "docs",
+    srcs = glob(["*.md"]),
+)

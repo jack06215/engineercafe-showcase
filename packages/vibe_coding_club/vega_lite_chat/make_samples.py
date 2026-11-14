@@ -58,6 +58,7 @@ STORE_YIELD = {"福岡": 1.9, "北九州": 1.5, "久留米": 1.4, "熊本": 1.6,
 
 
 def sales_by_region(rng: random.Random) -> pandas.DataFrame:
+    """Generate two years of monthly sales by region."""
     rows = []
     for year in (2024, 2025):
         for month in range(1, 13):
@@ -82,6 +83,7 @@ def sales_by_region(rng: random.Random) -> pandas.DataFrame:
 
 
 def stores(rng: random.Random) -> pandas.DataFrame:
+    """Generate one row per store with its floor area and sales."""
     rows = []
     for region, names in STORES.items():
         for name in names:
@@ -99,6 +101,7 @@ def stores(rng: random.Random) -> pandas.DataFrame:
 
 
 def default_out_dir() -> Path:
+    """Return sample_data/ in the source tree, also under `bazel run`."""
     # `bazel run` starts in the runfiles tree; write into the source tree instead.
     workspace = os.environ.get("BUILD_WORKSPACE_DIRECTORY")
     if workspace:
@@ -107,6 +110,7 @@ def default_out_dir() -> Path:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build the command-line parser."""
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
@@ -117,6 +121,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> None:
+    """Write the sample CSVs."""
     args = build_parser().parse_args(argv)
     out_dir: Path = args.out_dir or default_out_dir()
     out_dir.mkdir(parents=True, exist_ok=True)
