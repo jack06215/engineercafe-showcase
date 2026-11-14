@@ -78,8 +78,9 @@ exclude = [
 ]
 
 [tool.ruff]
-# ruff formats Python code blocks in Markdown too.
-extend-exclude = ["*.md"]
+# ruff formats Python code blocks in Markdown too. The lint testdata breaks the
+# rules on purpose; lint_config_test passes it by path, which skips this list.
+extend-exclude = ["*.md", "rules/python/lint/testdata"]
 
 [tool.ruff.lint]
 extend-select = ["D"]
