@@ -1,0 +1,3531 @@
+{
+  "components": {
+    "schemas": {
+      "ActiveAttemptBrief": {
+        "properties": {
+          "context": {
+            "$ref": "#/components/schemas/Context"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "problem_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Problem Title"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AttemptStatus"
+          }
+        },
+        "required": [
+          "id",
+          "problem_title",
+          "context",
+          "status"
+        ],
+        "title": "ActiveAttemptBrief",
+        "type": "object"
+      },
+      "AttemptOut": {
+        "description": "One attempt. While a hidden assessment runs, the reflection fields,\nsignals and report of completed attempts are null (SPEC \u00a79).",
+        "properties": {
+          "active_seconds": {
+            "title": "Active Seconds",
+            "type": "integer"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "code_copied_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Code Copied At"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "context": {
+            "$ref": "#/components/schemas/Context"
+          },
+          "evidence": {
+            "$ref": "#/components/schemas/Evidence"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "gap_seconds": {
+            "title": "Gap Seconds",
+            "type": "integer"
+          },
+          "help": {
+            "$ref": "#/components/schemas/Help"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "last_heartbeat_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Heartbeat At"
+          },
+          "mistake_labels": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MistakeLabel"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mistake Labels"
+          },
+          "needs_gap_decision": {
+            "title": "Needs Gap Decision",
+            "type": "boolean"
+          },
+          "next_review_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Review Date"
+          },
+          "notes": {
+            "title": "Notes",
+            "type": "string"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Outcome"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "patterns": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patterns"
+          },
+          "plan_item_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan Item Id"
+          },
+          "problem": {
+            "$ref": "#/components/schemas/ProblemBrief"
+          },
+          "report": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Report"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "running_since": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Running Since"
+          },
+          "server_now": {
+            "format": "date-time",
+            "title": "Server Now",
+            "type": "string"
+          },
+          "signals": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Signals"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "solution_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Solution Path"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AttemptStatus"
+          },
+          "strongest_hint": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HintLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "study_date": {
+            "format": "date",
+            "title": "Study Date",
+            "type": "string"
+          },
+          "takeaway": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Takeaway"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "problem",
+          "plan_item_id",
+          "context",
+          "evidence",
+          "status",
+          "version",
+          "language",
+          "code",
+          "solution_path",
+          "code_copied_at",
+          "notes",
+          "outcome",
+          "help",
+          "confidence",
+          "active_seconds",
+          "gap_seconds",
+          "running_since",
+          "last_heartbeat_at",
+          "needs_gap_decision",
+          "started_at",
+          "finished_at",
+          "study_date",
+          "next_review_date",
+          "strongest_hint",
+          "takeaway",
+          "mistake_labels",
+          "signals",
+          "patterns",
+          "report",
+          "server_now"
+        ],
+        "title": "AttemptOut",
+        "type": "object"
+      },
+      "AttemptStart": {
+        "additionalProperties": false,
+        "properties": {
+          "language": {
+            "$ref": "#/components/schemas/Language",
+            "default": "python"
+          },
+          "plan_item_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Plan Item Id"
+          },
+          "problem_id": {
+            "title": "Problem Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "problem_id"
+        ],
+        "title": "AttemptStart",
+        "type": "object"
+      },
+      "AttemptStatus": {
+        "enum": [
+          "active",
+          "paused",
+          "completed"
+        ],
+        "title": "AttemptStatus",
+        "type": "string"
+      },
+      "AttemptSummary": {
+        "properties": {
+          "active_seconds": {
+            "title": "Active Seconds",
+            "type": "integer"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "context": {
+            "$ref": "#/components/schemas/Context"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "help": {
+            "$ref": "#/components/schemas/Help"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Outcome"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "problem_id": {
+            "title": "Problem Id",
+            "type": "string"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AttemptStatus"
+          },
+          "study_date": {
+            "format": "date",
+            "title": "Study Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "problem_id",
+          "status",
+          "context",
+          "language",
+          "outcome",
+          "help",
+          "confidence",
+          "active_seconds",
+          "started_at",
+          "finished_at",
+          "study_date"
+        ],
+        "title": "AttemptSummary",
+        "type": "object"
+      },
+      "BackupStatus": {
+        "properties": {
+          "kept": {
+            "title": "Kept",
+            "type": "integer"
+          },
+          "last_backup_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Backup At"
+          },
+          "path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Path"
+          }
+        },
+        "required": [
+          "last_backup_at",
+          "path",
+          "kept"
+        ],
+        "title": "BackupStatus",
+        "type": "object"
+      },
+      "BankStatus": {
+        "properties": {
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "estimated": {
+            "title": "Estimated",
+            "type": "integer"
+          },
+          "fetched_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fetched At"
+          },
+          "method": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Method"
+          },
+          "pages_done": {
+            "title": "Pages Done",
+            "type": "integer"
+          },
+          "pages_total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pages Total"
+          },
+          "problems": {
+            "title": "Problems",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "never",
+              "running",
+              "done",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "unknown_tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Unknown Tags",
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "fetched_at",
+          "pages_done",
+          "pages_total",
+          "problems",
+          "estimated",
+          "method",
+          "unknown_tags",
+          "error"
+        ],
+        "title": "BankStatus",
+        "type": "object"
+      },
+      "BundledSet": {
+        "description": "The courses \"Follow\" can create (SPEC \u00a75.10).",
+        "enum": [
+          "neetcode-150",
+          "blind-75",
+          "hello-interview"
+        ],
+        "title": "BundledSet",
+        "type": "string"
+      },
+      "Context": {
+        "description": "`mixed` is the hidden assessment (SPEC \u00a79); everything else is `targeted`.",
+        "enum": [
+          "mixed",
+          "targeted"
+        ],
+        "title": "Context",
+        "type": "string"
+      },
+      "Desk": {
+        "description": "GET /desk. During a hidden assessment only `hidden_assessment` and\n`active_attempt` are filled (\"Assessment in progress\" + Resume).",
+        "properties": {
+          "active_attempt": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ActiveAttemptBrief"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "bank_empty": {
+            "title": "Bank Empty",
+            "type": "boolean"
+          },
+          "checks_due": {
+            "title": "Checks Due",
+            "type": "integer"
+          },
+          "hidden_assessment": {
+            "title": "Hidden Assessment",
+            "type": "boolean"
+          },
+          "left_today": {
+            "title": "Left Today",
+            "type": "integer"
+          },
+          "plan": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PlanOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "today": {
+            "format": "date",
+            "title": "Today",
+            "type": "string"
+          },
+          "total_today": {
+            "title": "Total Today",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "hidden_assessment",
+          "active_attempt",
+          "today",
+          "plan",
+          "left_today",
+          "total_today",
+          "checks_due",
+          "bank_empty"
+        ],
+        "title": "Desk",
+        "type": "object"
+      },
+      "Difficulty": {
+        "description": "LeetCode's difficulty label. AtCoder problems may have none.",
+        "enum": [
+          "Easy",
+          "Medium",
+          "Hard"
+        ],
+        "title": "Difficulty",
+        "type": "string"
+      },
+      "DifficultyFeel": {
+        "description": "The \"How did it feel?\" signal (SPEC \u00a76.7).",
+        "enum": [
+          "too_easy",
+          "too_hard"
+        ],
+        "title": "DifficultyFeel",
+        "type": "string"
+      },
+      "Disposition": {
+        "enum": [
+          "swap",
+          "snooze",
+          "skip"
+        ],
+        "title": "Disposition",
+        "type": "string"
+      },
+      "DispositionIn": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/Disposition"
+          },
+          "snooze_until": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Snooze Until"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version",
+          "action"
+        ],
+        "title": "DispositionIn",
+        "type": "object"
+      },
+      "DraftPatch": {
+        "additionalProperties": false,
+        "description": "Send `solution_path` with a path to link (and copy) a file, or with null\nto switch to the in-app editor.",
+        "properties": {
+          "code": {
+            "anyOf": [
+              {
+                "maxLength": 1000000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Code"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Language"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "maxLength": 100000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Notes"
+          },
+          "solution_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Solution Path"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version"
+        ],
+        "title": "DraftPatch",
+        "type": "object"
+      },
+      "ErrorBody": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorDetail"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "title": "ErrorBody",
+        "type": "object"
+      },
+      "ErrorDetail": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TutorErrorKind"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ErrorDetail",
+        "type": "object"
+      },
+      "Evidence": {
+        "enum": [
+          "retention",
+          "near_transfer",
+          "unseen"
+        ],
+        "title": "Evidence",
+        "type": "string"
+      },
+      "FinishIn": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "anyOf": [
+              {
+                "maxLength": 1000000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Code"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "maximum": 5,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Confidence"
+          },
+          "help": {
+            "$ref": "#/components/schemas/Help"
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "notes": {
+            "default": "",
+            "maxLength": 100000,
+            "title": "Notes",
+            "type": "string"
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/Outcome"
+          },
+          "review_choice": {
+            "$ref": "#/components/schemas/ReviewChoice",
+            "default": "recommended"
+          },
+          "review_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Review Date"
+          },
+          "time": {
+            "pattern": "^[0-9]{1,4}:[0-5][0-9]$",
+            "title": "Time",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version",
+          "outcome",
+          "help",
+          "time",
+          "language"
+        ],
+        "title": "FinishIn",
+        "type": "object"
+      },
+      "FinishOut": {
+        "properties": {
+          "attempt": {
+            "$ref": "#/components/schemas/AttemptOut"
+          },
+          "next_review_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Review Date"
+          },
+          "review_stage": {
+            "$ref": "#/components/schemas/ReviewStage"
+          }
+        },
+        "required": [
+          "attempt",
+          "next_review_date",
+          "review_stage"
+        ],
+        "title": "FinishOut",
+        "type": "object"
+      },
+      "Health": {
+        "properties": {
+          "status": {
+            "const": "ok",
+            "default": "ok",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "title": "Health",
+        "type": "object"
+      },
+      "Help": {
+        "enum": [
+          "unknown",
+          "none",
+          "small",
+          "major",
+          "solution"
+        ],
+        "title": "Help",
+        "type": "string"
+      },
+      "HintConversation": {
+        "properties": {
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/HintMessage"
+            },
+            "title": "Messages",
+            "type": "array"
+          },
+          "strongest_level": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HintLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "messages",
+          "strongest_level"
+        ],
+        "title": "HintConversation",
+        "type": "object"
+      },
+      "HintIn": {
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "HintIn",
+        "type": "object"
+      },
+      "HintLevel": {
+        "enum": [
+          "small",
+          "major"
+        ],
+        "title": "HintLevel",
+        "type": "string"
+      },
+      "HintMessage": {
+        "properties": {
+          "analysis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hint"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HintLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          },
+          "role": {
+            "$ref": "#/components/schemas/HintRole"
+          },
+          "stuck_at_seconds": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stuck At Seconds"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "position",
+          "role",
+          "text",
+          "stuck_at_seconds",
+          "level",
+          "hint",
+          "analysis",
+          "created_at"
+        ],
+        "title": "HintMessage",
+        "type": "object"
+      },
+      "HintReply": {
+        "description": "The tutor's reply. Hints append to the attempt's notes, which bumps its\nversion; the client must adopt `attempt_version` and `notes`.",
+        "properties": {
+          "attempt_version": {
+            "title": "Attempt Version",
+            "type": "integer"
+          },
+          "message": {
+            "$ref": "#/components/schemas/HintMessage"
+          },
+          "notes": {
+            "title": "Notes",
+            "type": "string"
+          },
+          "strongest_level": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HintLevel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "message",
+          "attempt_version",
+          "notes",
+          "strongest_level"
+        ],
+        "title": "HintReply",
+        "type": "object"
+      },
+      "HintRole": {
+        "enum": [
+          "learner",
+          "tutor"
+        ],
+        "title": "HintRole",
+        "type": "string"
+      },
+      "Lane": {
+        "description": "A section of the daily plan (SPEC \u00a710).",
+        "enum": [
+          "leetcode",
+          "atcoder"
+        ],
+        "title": "Lane",
+        "type": "string"
+      },
+      "Language": {
+        "description": "Solution languages (SPEC \u00a76.2). No C++ or Java (\u00a72.4).",
+        "enum": [
+          "python",
+          "go",
+          "typescript"
+        ],
+        "title": "Language",
+        "type": "string"
+      },
+      "LevelChange": {
+        "properties": {
+          "attempt_id": {
+            "title": "Attempt Id",
+            "type": "string"
+          },
+          "delta": {
+            "title": "Delta",
+            "type": "integer"
+          },
+          "estimated": {
+            "title": "Estimated",
+            "type": "boolean"
+          },
+          "problem_title": {
+            "title": "Problem Title",
+            "type": "string"
+          },
+          "rating": {
+            "title": "Rating",
+            "type": "integer"
+          },
+          "result": {
+            "$ref": "#/components/schemas/Result"
+          },
+          "study_date": {
+            "format": "date",
+            "title": "Study Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "delta",
+          "attempt_id",
+          "problem_title",
+          "rating",
+          "estimated",
+          "result",
+          "study_date"
+        ],
+        "title": "LevelChange",
+        "type": "object"
+      },
+      "ListCreated": {
+        "properties": {
+          "lists": {
+            "items": {
+              "$ref": "#/components/schemas/ListSummary"
+            },
+            "title": "Lists",
+            "type": "array"
+          },
+          "unresolved": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Unresolved",
+            "type": "array"
+          },
+          "unresolved_reasons": {
+            "items": {
+              "$ref": "#/components/schemas/UnresolvedLine"
+            },
+            "title": "Unresolved Reasons",
+            "type": "array"
+          }
+        },
+        "required": [
+          "lists",
+          "unresolved"
+        ],
+        "title": "ListCreated",
+        "type": "object"
+      },
+      "ListDetail": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/ListEntryOut"
+            },
+            "title": "Entries",
+            "type": "array"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ListSummary"
+          },
+          "unresolved": {
+            "items": {
+              "$ref": "#/components/schemas/UnresolvedLine"
+            },
+            "title": "Unresolved",
+            "type": "array"
+          }
+        },
+        "required": [
+          "summary",
+          "entries"
+        ],
+        "title": "ListDetail",
+        "type": "object"
+      },
+      "ListEntriesIn": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "text": {
+            "maxLength": 200000,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "text"
+        ],
+        "title": "ListEntriesIn",
+        "type": "object"
+      },
+      "ListEntryOut": {
+        "properties": {
+          "added_at": {
+            "format": "date-time",
+            "title": "Added At",
+            "type": "string"
+          },
+          "done": {
+            "title": "Done",
+            "type": "boolean"
+          },
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          },
+          "problem": {
+            "$ref": "#/components/schemas/ProblemBrief"
+          },
+          "section": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Section"
+          }
+        },
+        "required": [
+          "problem",
+          "position",
+          "section",
+          "added_at",
+          "done"
+        ],
+        "title": "ListEntryOut",
+        "type": "object"
+      },
+      "ListKind": {
+        "enum": [
+          "bundled",
+          "own",
+          "pack"
+        ],
+        "title": "ListKind",
+        "type": "string"
+      },
+      "ListPatch": {
+        "additionalProperties": false,
+        "description": "Own lists only. `problem_ids` is the full new order (drop an id to\nremove it); `add_text` resolves and appends more entries.",
+        "properties": {
+          "add_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Add Text"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Name"
+          },
+          "problem_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Problem Ids"
+          }
+        },
+        "title": "ListPatch",
+        "type": "object"
+      },
+      "ListPreview": {
+        "properties": {
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/PreviewGroup"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
+          "unresolved": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Unresolved",
+            "type": "array"
+          },
+          "unresolved_reasons": {
+            "items": {
+              "$ref": "#/components/schemas/UnresolvedLine"
+            },
+            "title": "Unresolved Reasons",
+            "type": "array"
+          }
+        },
+        "required": [
+          "groups",
+          "unresolved"
+        ],
+        "title": "ListPreview",
+        "type": "object"
+      },
+      "ListRef": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "ListRef",
+        "type": "object"
+      },
+      "ListSummary": {
+        "properties": {
+          "active": {
+            "title": "Active",
+            "type": "boolean"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "done": {
+            "title": "Done",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ListKind"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "origin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin"
+          },
+          "source": {
+            "$ref": "#/components/schemas/Source"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "source",
+          "kind",
+          "origin",
+          "source_url",
+          "created_at",
+          "active",
+          "done",
+          "total"
+        ],
+        "title": "ListSummary",
+        "type": "object"
+      },
+      "MistakeEntry": {
+        "properties": {
+          "attempt_id": {
+            "title": "Attempt Id",
+            "type": "string"
+          },
+          "finished_at": {
+            "format": "date-time",
+            "title": "Finished At",
+            "type": "string"
+          },
+          "mistake_labels": {
+            "items": {
+              "$ref": "#/components/schemas/MistakeLabel"
+            },
+            "title": "Mistake Labels",
+            "type": "array"
+          },
+          "problem": {
+            "$ref": "#/components/schemas/ProblemBrief"
+          },
+          "takeaway": {
+            "title": "Takeaway",
+            "type": "string"
+          }
+        },
+        "required": [
+          "attempt_id",
+          "problem",
+          "finished_at",
+          "mistake_labels",
+          "takeaway"
+        ],
+        "title": "MistakeEntry",
+        "type": "object"
+      },
+      "MistakeLabel": {
+        "enum": [
+          "missed_edge_case",
+          "wrong_approach",
+          "implementation_bug"
+        ],
+        "title": "MistakeLabel",
+        "type": "string"
+      },
+      "MistakeList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/MistakeEntry"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "MistakeList",
+        "type": "object"
+      },
+      "Notebook": {
+        "properties": {
+          "cues": {
+            "title": "Cues",
+            "type": "string"
+          },
+          "notes": {
+            "title": "Notes",
+            "type": "string"
+          },
+          "pitfalls": {
+            "title": "Pitfalls",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "cues",
+          "pitfalls",
+          "notes",
+          "version",
+          "updated_at"
+        ],
+        "title": "Notebook",
+        "type": "object"
+      },
+      "NotebookPatch": {
+        "additionalProperties": false,
+        "properties": {
+          "cues": {
+            "anyOf": [
+              {
+                "maxLength": 1000000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Cues"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "maxLength": 1000000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Notes"
+          },
+          "pitfalls": {
+            "anyOf": [
+              {
+                "maxLength": 1000000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Pitfalls"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version"
+        ],
+        "title": "NotebookPatch",
+        "type": "object"
+      },
+      "NotebookProblem": {
+        "properties": {
+          "attempts": {
+            "title": "Attempts",
+            "type": "integer"
+          },
+          "latest_outcome": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Outcome"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "problem": {
+            "$ref": "#/components/schemas/ProblemBrief"
+          }
+        },
+        "required": [
+          "problem",
+          "attempts",
+          "latest_outcome"
+        ],
+        "title": "NotebookProblem",
+        "type": "object"
+      },
+      "Outcome": {
+        "enum": [
+          "solved",
+          "not_solved",
+          "stopped"
+        ],
+        "title": "Outcome",
+        "type": "string"
+      },
+      "PackReport": {
+        "properties": {
+          "already_applied": {
+            "title": "Already Applied",
+            "type": "boolean"
+          },
+          "dry_run": {
+            "title": "Dry Run",
+            "type": "boolean"
+          },
+          "entries_added": {
+            "title": "Entries Added",
+            "type": "integer"
+          },
+          "import_id": {
+            "title": "Import Id",
+            "type": "string"
+          },
+          "lists_created": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Lists Created",
+            "type": "array"
+          },
+          "lists_extended": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Lists Extended",
+            "type": "array"
+          },
+          "patterns_added": {
+            "default": 0,
+            "title": "Patterns Added",
+            "type": "integer"
+          },
+          "problems_created": {
+            "title": "Problems Created",
+            "type": "integer"
+          },
+          "problems_existing": {
+            "title": "Problems Existing",
+            "type": "integer"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ListSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "import_id",
+          "dry_run",
+          "already_applied",
+          "summary",
+          "problems_created",
+          "problems_existing",
+          "entries_added"
+        ],
+        "title": "PackReport",
+        "type": "object"
+      },
+      "PatternDetail": {
+        "properties": {
+          "notebook": {
+            "$ref": "#/components/schemas/Notebook"
+          },
+          "pattern": {
+            "$ref": "#/components/schemas/PatternSummary"
+          },
+          "problems": {
+            "items": {
+              "$ref": "#/components/schemas/NotebookProblem"
+            },
+            "title": "Problems",
+            "type": "array"
+          },
+          "readme_markdown": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Readme Markdown"
+          },
+          "readme_path": {
+            "title": "Readme Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pattern",
+          "readme_path",
+          "readme_markdown",
+          "notebook",
+          "problems"
+        ],
+        "title": "PatternDetail",
+        "type": "object"
+      },
+      "PatternSummary": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "missing": {
+            "title": "Missing",
+            "type": "boolean"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          },
+          "problems": {
+            "title": "Problems",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "position",
+          "missing",
+          "problems"
+        ],
+        "title": "PatternSummary",
+        "type": "object"
+      },
+      "PlanItemKind": {
+        "description": "A plan item's kind. A transfer check has no kind (None), which is\nwhat makes its attempt `mixed` (SPEC \u00a76.2).",
+        "enum": [
+          "topic",
+          "list"
+        ],
+        "title": "PlanItemKind",
+        "type": "string"
+      },
+      "PlanItemOut": {
+        "description": "A plan row. `review_of` is never sent: it would give a transfer check away.",
+        "properties": {
+          "attempt_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attempt Id"
+          },
+          "disposition": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Disposition"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_check": {
+            "title": "Is Check",
+            "type": "boolean"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PlanItemKind"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "lane": {
+            "$ref": "#/components/schemas/Lane"
+          },
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          },
+          "problem": {
+            "$ref": "#/components/schemas/ProblemBrief"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "signals": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Signals"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/PlanItemStatus"
+          }
+        },
+        "required": [
+          "id",
+          "lane",
+          "position",
+          "problem",
+          "attempt_id",
+          "status",
+          "reason",
+          "kind",
+          "disposition",
+          "is_check",
+          "signals"
+        ],
+        "title": "PlanItemOut",
+        "type": "object"
+      },
+      "PlanItemStatus": {
+        "enum": [
+          "active",
+          "queued",
+          "completed",
+          "skipped"
+        ],
+        "title": "PlanItemStatus",
+        "type": "string"
+      },
+      "PlanOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PlanItemOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "plan_date": {
+            "format": "date",
+            "title": "Plan Date",
+            "type": "string"
+          },
+          "timezone": {
+            "title": "Timezone",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "plan_date",
+          "timezone",
+          "version",
+          "items"
+        ],
+        "title": "PlanOut",
+        "type": "object"
+      },
+      "PlanVersionIn": {
+        "additionalProperties": false,
+        "properties": {
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version"
+        ],
+        "title": "PlanVersionIn",
+        "type": "object"
+      },
+      "PreviewGroup": {
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/ResolvedEntry"
+            },
+            "title": "Entries",
+            "type": "array"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/Source"
+          }
+        },
+        "required": [
+          "source",
+          "name",
+          "entries"
+        ],
+        "title": "PreviewGroup",
+        "type": "object"
+      },
+      "ProblemBrief": {
+        "description": "Enough to show a row and link out. Never carries topic, tags or patterns,\nso it is safe inside a hidden assessment.",
+        "properties": {
+          "contest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contest"
+          },
+          "difficulty": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Difficulty"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RatingOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source": {
+            "$ref": "#/components/schemas/Source"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "source",
+          "title",
+          "url",
+          "number",
+          "contest",
+          "difficulty",
+          "rating"
+        ],
+        "title": "ProblemBrief",
+        "type": "object"
+      },
+      "ProblemCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "difficulty": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Difficulty"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Title"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "ProblemCreate",
+        "type": "object"
+      },
+      "ProblemDetail": {
+        "properties": {
+          "attempts": {
+            "items": {
+              "$ref": "#/components/schemas/AttemptSummary"
+            },
+            "title": "Attempts",
+            "type": "array"
+          },
+          "exposed": {
+            "title": "Exposed",
+            "type": "boolean"
+          },
+          "external_id": {
+            "title": "External Id",
+            "type": "string"
+          },
+          "lists": {
+            "items": {
+              "$ref": "#/components/schemas/ListRef"
+            },
+            "title": "Lists",
+            "type": "array"
+          },
+          "neetcode_category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Neetcode Category"
+          },
+          "notes": {
+            "title": "Notes",
+            "type": "string"
+          },
+          "paid_only": {
+            "title": "Paid Only",
+            "type": "boolean"
+          },
+          "patterns": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Patterns",
+            "type": "array"
+          },
+          "problem": {
+            "$ref": "#/components/schemas/ProblemBrief"
+          },
+          "review": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReviewTargetOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source_tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Source Tags",
+            "type": "array"
+          },
+          "topic_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topic Id"
+          },
+          "topic_overridden": {
+            "title": "Topic Overridden",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "problem",
+          "external_id",
+          "paid_only",
+          "source_tags",
+          "neetcode_category",
+          "topic_id",
+          "topic_overridden",
+          "patterns",
+          "notes",
+          "exposed",
+          "lists",
+          "review",
+          "attempts"
+        ],
+        "title": "ProblemDetail",
+        "type": "object"
+      },
+      "ProblemPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ProblemRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "page_size": {
+            "title": "Page Size",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "page_size"
+        ],
+        "title": "ProblemPage",
+        "type": "object"
+      },
+      "ProblemPatch": {
+        "additionalProperties": false,
+        "description": "Send `topic_id` to override the primary topic (null = \"None\"); send\n`reset_topic: true` to go back to the automatic topic.",
+        "properties": {
+          "notes": {
+            "anyOf": [
+              {
+                "maxLength": 100000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Notes"
+          },
+          "patterns": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Patterns"
+          },
+          "reset_topic": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Reset Topic"
+          },
+          "topic_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Topic Id"
+          }
+        },
+        "title": "ProblemPatch",
+        "type": "object"
+      },
+      "ProblemQuery": {
+        "additionalProperties": false,
+        "description": "Query string of GET /problems.",
+        "properties": {
+          "confidence": {
+            "anyOf": [
+              {
+                "enum": [
+                  "low",
+                  "medium",
+                  "high",
+                  "unknown"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Confidence"
+          },
+          "difficulty": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Difficulty"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "latest": {
+            "anyOf": [
+              {
+                "enum": [
+                  "solved",
+                  "not_solved",
+                  "stopped",
+                  "not_submitted"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Latest"
+          },
+          "list_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "List Id"
+          },
+          "order": {
+            "default": "asc",
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "title": "Order",
+            "type": "string"
+          },
+          "page": {
+            "default": 1,
+            "minimum": 1,
+            "title": "Page",
+            "type": "integer"
+          },
+          "page_size": {
+            "default": 25,
+            "maximum": 100,
+            "minimum": 1,
+            "title": "Page Size",
+            "type": "integer"
+          },
+          "pattern": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Pattern"
+          },
+          "q": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Q"
+          },
+          "sort": {
+            "default": "title",
+            "enum": [
+              "title",
+              "difficulty",
+              "rating",
+              "latest",
+              "time",
+              "confidence",
+              "next_review"
+            ],
+            "title": "Sort",
+            "type": "string"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Source"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "tag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Tag"
+          },
+          "time": {
+            "anyOf": [
+              {
+                "enum": [
+                  "0-10",
+                  "10-20",
+                  "20-30",
+                  "30-45",
+                  "45+",
+                  "unknown"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Time"
+          },
+          "topic": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Topic"
+          }
+        },
+        "title": "ProblemQuery",
+        "type": "object"
+      },
+      "ProblemRow": {
+        "description": "A library row (SPEC \u00a714 Library).",
+        "properties": {
+          "latest_active_seconds": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Active Seconds"
+          },
+          "latest_confidence": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Confidence"
+          },
+          "latest_outcome": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Outcome"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "next_review_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Review Date"
+          },
+          "paid_only": {
+            "title": "Paid Only",
+            "type": "boolean"
+          },
+          "patterns": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Patterns",
+            "type": "array"
+          },
+          "popularity": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Popularity"
+          },
+          "problem": {
+            "$ref": "#/components/schemas/ProblemBrief"
+          },
+          "source_tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Source Tags",
+            "type": "array"
+          },
+          "topic_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topic Id"
+          }
+        },
+        "required": [
+          "problem",
+          "topic_id",
+          "source_tags",
+          "patterns",
+          "paid_only",
+          "popularity",
+          "latest_outcome",
+          "latest_active_seconds",
+          "latest_confidence",
+          "next_review_date"
+        ],
+        "title": "ProblemRow",
+        "type": "object"
+      },
+      "RatingOut": {
+        "properties": {
+          "estimated": {
+            "title": "Estimated",
+            "type": "boolean"
+          },
+          "value": {
+            "title": "Value",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "value",
+          "estimated"
+        ],
+        "title": "RatingOut",
+        "type": "object"
+      },
+      "ReflectionPatch": {
+        "additionalProperties": false,
+        "properties": {
+          "mistake_labels": {
+            "items": {
+              "$ref": "#/components/schemas/MistakeLabel"
+            },
+            "maxItems": 3,
+            "title": "Mistake Labels",
+            "type": "array"
+          },
+          "takeaway": {
+            "maxLength": 2000,
+            "title": "Takeaway",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version",
+          "mistake_labels",
+          "takeaway"
+        ],
+        "title": "ReflectionPatch",
+        "type": "object"
+      },
+      "ReorderIn": {
+        "additionalProperties": false,
+        "properties": {
+          "item_ids": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Item Ids",
+            "type": "array"
+          },
+          "lane": {
+            "$ref": "#/components/schemas/Lane"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version",
+          "lane",
+          "item_ids"
+        ],
+        "title": "ReorderIn",
+        "type": "object"
+      },
+      "Report": {
+        "properties": {
+          "complexity": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Complexity"
+          },
+          "error_kind": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TutorErrorKind"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Message"
+          },
+          "improvements": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Improvements"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "practice": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Practice"
+          },
+          "reported_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reported At"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ReportStatus"
+          },
+          "strengths": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Strengths"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary"
+          }
+        },
+        "required": [
+          "status",
+          "summary",
+          "strengths",
+          "improvements",
+          "complexity",
+          "practice",
+          "error_kind",
+          "error_message",
+          "model",
+          "reported_at"
+        ],
+        "title": "Report",
+        "type": "object"
+      },
+      "ReportStatus": {
+        "description": "Attempt report queue state (SPEC \u00a712.4).",
+        "enum": [
+          "none",
+          "pending",
+          "generating",
+          "done",
+          "failed"
+        ],
+        "title": "ReportStatus",
+        "type": "string"
+      },
+      "ResolvedEntry": {
+        "properties": {
+          "line": {
+            "title": "Line",
+            "type": "string"
+          },
+          "problem_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Problem Id"
+          },
+          "source": {
+            "$ref": "#/components/schemas/Source"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "line",
+          "problem_id",
+          "title",
+          "source"
+        ],
+        "title": "ResolvedEntry",
+        "type": "object"
+      },
+      "Result": {
+        "description": "An attempt's level classification (SPEC \u00a77.2), weakest first.",
+        "enum": [
+          "struggled",
+          "ok",
+          "strong"
+        ],
+        "title": "Result",
+        "type": "string"
+      },
+      "ReviewAction": {
+        "enum": [
+          "recommended",
+          "manual",
+          "snooze",
+          "none"
+        ],
+        "title": "ReviewAction",
+        "type": "string"
+      },
+      "ReviewChoice": {
+        "description": "The finish form's \"Next review\" field (SPEC \u00a76.6).",
+        "enum": [
+          "recommended",
+          "manual",
+          "none"
+        ],
+        "title": "ReviewChoice",
+        "type": "string"
+      },
+      "ReviewPatch": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/ReviewAction"
+          },
+          "review_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Review Date"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version",
+          "action"
+        ],
+        "title": "ReviewPatch",
+        "type": "object"
+      },
+      "ReviewStage": {
+        "enum": [
+          "repair",
+          "reconstruction",
+          "transfer",
+          "mixed",
+          "retired",
+          "covered",
+          "snoozed"
+        ],
+        "title": "ReviewStage",
+        "type": "string"
+      },
+      "ReviewTargetOut": {
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/ReviewAction"
+          },
+          "effective_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective Date"
+          },
+          "problem_id": {
+            "title": "Problem Id",
+            "type": "string"
+          },
+          "recommended_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recommended Date"
+          },
+          "stage": {
+            "$ref": "#/components/schemas/ReviewStage"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "problem_id",
+          "recommended_date",
+          "effective_date",
+          "action",
+          "stage",
+          "version"
+        ],
+        "title": "ReviewTargetOut",
+        "type": "object"
+      },
+      "SettingsOut": {
+        "properties": {
+          "active_list_atcoder": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active List Atcoder"
+          },
+          "active_list_leetcode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active List Leetcode"
+          },
+          "atcoder_per_day": {
+            "title": "Atcoder Per Day",
+            "type": "integer"
+          },
+          "bank": {
+            "$ref": "#/components/schemas/BankStatus"
+          },
+          "include_paid_only": {
+            "title": "Include Paid Only",
+            "type": "boolean"
+          },
+          "last_backup_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Backup At"
+          },
+          "onboarding_complete": {
+            "title": "Onboarding Complete",
+            "type": "boolean"
+          },
+          "questions_per_day": {
+            "title": "Questions Per Day",
+            "type": "integer"
+          },
+          "target_rating": {
+            "title": "Target Rating",
+            "type": "integer"
+          },
+          "timezone": {
+            "title": "Timezone",
+            "type": "string"
+          }
+        },
+        "required": [
+          "timezone",
+          "questions_per_day",
+          "atcoder_per_day",
+          "target_rating",
+          "include_paid_only",
+          "onboarding_complete",
+          "active_list_leetcode",
+          "active_list_atcoder",
+          "last_backup_at",
+          "bank"
+        ],
+        "title": "SettingsOut",
+        "type": "object"
+      },
+      "SettingsPatch": {
+        "additionalProperties": false,
+        "properties": {
+          "atcoder_per_day": {
+            "anyOf": [
+              {
+                "maximum": 10,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Atcoder Per Day"
+          },
+          "include_paid_only": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Include Paid Only"
+          },
+          "questions_per_day": {
+            "anyOf": [
+              {
+                "maximum": 20,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Questions Per Day"
+          },
+          "target_rating": {
+            "anyOf": [
+              {
+                "maximum": 2600,
+                "minimum": 1200,
+                "multipleOf": 50,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Target Rating"
+          }
+        },
+        "title": "SettingsPatch",
+        "type": "object"
+      },
+      "SetupIn": {
+        "additionalProperties": false,
+        "properties": {
+          "download_bank": {
+            "default": true,
+            "title": "Download Bank",
+            "type": "boolean"
+          },
+          "follow": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BundledSet"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "questions_per_day": {
+            "default": 2,
+            "maximum": 20,
+            "minimum": 1,
+            "title": "Questions Per Day",
+            "type": "integer"
+          }
+        },
+        "title": "SetupIn",
+        "type": "object"
+      },
+      "SetupState": {
+        "properties": {
+          "onboarding_complete": {
+            "title": "Onboarding Complete",
+            "type": "boolean"
+          },
+          "questions_per_day": {
+            "title": "Questions Per Day",
+            "type": "integer"
+          },
+          "timezone": {
+            "title": "Timezone",
+            "type": "string"
+          }
+        },
+        "required": [
+          "onboarding_complete",
+          "timezone",
+          "questions_per_day"
+        ],
+        "title": "SetupState",
+        "type": "object"
+      },
+      "Signals": {
+        "properties": {
+          "accepted_first_try": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accepted First Try"
+          },
+          "difficulty": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DifficultyFeel"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "accepted_first_try",
+          "difficulty"
+        ],
+        "title": "Signals",
+        "type": "object"
+      },
+      "SignalsPatch": {
+        "additionalProperties": false,
+        "properties": {
+          "accepted_first_try": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Accepted First Try"
+          },
+          "difficulty": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DifficultyFeel"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          }
+        },
+        "title": "SignalsPatch",
+        "type": "object"
+      },
+      "Source": {
+        "description": "Where a problem lives (SPEC \u00a75.1).",
+        "enum": [
+          "leetcode",
+          "atcoder"
+        ],
+        "title": "Source",
+        "type": "string"
+      },
+      "SuggestedPath": {
+        "properties": {
+          "exists": {
+            "title": "Exists",
+            "type": "boolean"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "exists"
+        ],
+        "title": "SuggestedPath",
+        "type": "object"
+      },
+      "TimerAction": {
+        "enum": [
+          "heartbeat",
+          "pause",
+          "resume"
+        ],
+        "title": "TimerAction",
+        "type": "string"
+      },
+      "TimerIn": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/TimerAction"
+          },
+          "include_gap": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Include Gap"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version",
+          "action"
+        ],
+        "title": "TimerIn",
+        "type": "object"
+      },
+      "TopicDetail": {
+        "properties": {
+          "level": {
+            "$ref": "#/components/schemas/TopicLevel"
+          },
+          "notebook": {
+            "$ref": "#/components/schemas/Notebook"
+          },
+          "problems": {
+            "items": {
+              "$ref": "#/components/schemas/NotebookProblem"
+            },
+            "title": "Problems",
+            "type": "array"
+          },
+          "target_rating": {
+            "title": "Target Rating",
+            "type": "integer"
+          },
+          "unseen_count": {
+            "title": "Unseen Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "level",
+          "target_rating",
+          "notebook",
+          "problems",
+          "unseen_count"
+        ],
+        "title": "TopicDetail",
+        "type": "object"
+      },
+      "TopicLevel": {
+        "properties": {
+          "at_target": {
+            "title": "At Target",
+            "type": "boolean"
+          },
+          "attempts": {
+            "title": "Attempts",
+            "type": "integer"
+          },
+          "curriculum": {
+            "title": "Curriculum",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "last_change": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LevelChange"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "level": {
+            "title": "Level",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "curriculum",
+          "level",
+          "at_target",
+          "attempts",
+          "last_change"
+        ],
+        "title": "TopicLevel",
+        "type": "object"
+      },
+      "TopicLevels": {
+        "properties": {
+          "target_rating": {
+            "title": "Target Rating",
+            "type": "integer"
+          },
+          "topics": {
+            "items": {
+              "$ref": "#/components/schemas/TopicLevel"
+            },
+            "title": "Topics",
+            "type": "array"
+          }
+        },
+        "required": [
+          "target_rating",
+          "topics"
+        ],
+        "title": "TopicLevels",
+        "type": "object"
+      },
+      "TutorErrorKind": {
+        "description": "Why an AI panel can't show output (SPEC \u00a712.1).",
+        "enum": [
+          "disabled",
+          "unavailable",
+          "model_missing",
+          "timeout",
+          "invalid_output",
+          "error"
+        ],
+        "title": "TutorErrorKind",
+        "type": "string"
+      },
+      "TutorStatus": {
+        "properties": {
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "leaves_machine": {
+            "title": "Leaves Machine",
+            "type": "boolean"
+          },
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "pending_reports": {
+            "title": "Pending Reports",
+            "type": "integer"
+          },
+          "provider": {
+            "enum": [
+              "ollama",
+              "openai",
+              "azure"
+            ],
+            "title": "Provider",
+            "type": "string"
+          }
+        },
+        "required": [
+          "enabled",
+          "provider",
+          "model",
+          "leaves_machine",
+          "pending_reports"
+        ],
+        "title": "TutorStatus",
+        "type": "object"
+      },
+      "TutorTest": {
+        "properties": {
+          "error_kind": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TutorErrorKind"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "latency_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latency Ms"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "provider": {
+            "title": "Provider",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok",
+          "provider",
+          "model",
+          "latency_ms",
+          "error_kind",
+          "message"
+        ],
+        "title": "TutorTest",
+        "type": "object"
+      },
+      "UnresolvedLine": {
+        "properties": {
+          "line": {
+            "title": "Line",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "line",
+          "reason"
+        ],
+        "title": "UnresolvedLine",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "algo_tutor",
+    "version": "0"
+  },
+  "openapi": "3.1.0",
+  "paths": {}
+}

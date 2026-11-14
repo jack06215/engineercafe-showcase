@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hello World 3D</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: system-ui, sans-serif;
+      background: radial-gradient(circle at center, #2a2a40, #0d0d16);
+      overflow: hidden;
+    }
+
+    .scene {
+      perspective: 1000px;
+    }
+
+    .text {
+      position: relative;
+      transform-style: preserve-3d;
+      animation: spin 6s linear infinite;
+    }
+
+    /* Each layer is a copy of the text pushed along Z to build depth */
+    .layer {
+      margin: 0;
+      font-size: clamp(2.5rem, 10vw, 6rem);
+      font-weight: 900;
+      white-space: nowrap;
+      color: hsl(260, 60%, calc(20% + var(--i) * 2%));
+      transform: translateZ(calc(var(--i) * 1.5px));
+    }
+
+    .layer:not(:first-child) {
+      position: absolute;
+      inset: 0;
+    }
+
+    .layer.front {
+      color: #fff;
+      text-shadow: 0 0 20px rgba(170, 140, 255, 0.8);
+    }
+
+    @keyframes spin {
+      from { transform: rotateX(-10deg) rotateY(0deg); }
+      to   { transform: rotateX(-10deg) rotateY(360deg); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .text { animation: none; transform: rotateX(-10deg) rotateY(-25deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="scene">
+    <div class="text" id="text" aria-label="Hello World"></div>
+  </div>
+
+  <script>
+    const LAYERS = 20;
+    const text = document.getElementById("text");
+    for (let i = 0; i < LAYERS; i++) {
+      const layer = document.createElement("h1");
+      layer.className = "layer" + (i === LAYERS - 1 ? " front" : "");
+      layer.style.setProperty("--i", i);
+      layer.textContent = "Hello World";
+      if (i > 0) layer.setAttribute("aria-hidden", "true");
+      text.appendChild(layer);
+    }
+  </script>
+</body>
+</html>

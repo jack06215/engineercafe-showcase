@@ -1,0 +1,100 @@
+load("@monorepo_pip//:requirements.bzl", "requirement")
+load("@rules_python//python:py_test.bzl", "py_test")
+load("//rules/python/lint:defs.bzl", "py_library")
+
+# Pure rules: no I/O and no third-party imports (SPEC §3.2). Everything the
+# store, catalogue, API and tutor layers decide goes through here.
+py_library(
+    name = "domain",
+    srcs = [
+        "attempts.py",
+        "constants.py",
+        "enums.py",
+        "ladder.py",
+        "paths.py",
+        "plan.py",
+        "ratings.py",
+        "review.py",
+        "timer.py",
+        "topics.py",
+        "urls.py",
+    ],
+    visibility = ["//packages/algo_tutor:__subpackages__"],
+)
+
+py_test(
+    name = "test_topics",
+    srcs = ["test_topics.py"],
+    data = ["//packages/algo_tutor/manifests"],
+    legacy_create_init = False,
+    main = "test_topics.py",
+    deps = [
+        ":domain",
+        requirement("pyyaml"),
+    ],
+)
+
+py_test(
+    name = "test_urls",
+    srcs = ["test_urls.py"],
+    legacy_create_init = False,
+    main = "test_urls.py",
+    deps = [":domain"],
+)
+
+py_test(
+    name = "test_ratings",
+    srcs = ["test_ratings.py"],
+    legacy_create_init = False,
+    main = "test_ratings.py",
+    deps = [":domain"],
+)
+
+py_test(
+    name = "test_ladder",
+    srcs = ["test_ladder.py"],
+    legacy_create_init = False,
+    main = "test_ladder.py",
+    deps = [":domain"],
+)
+
+py_test(
+    name = "test_review",
+    srcs = ["test_review.py"],
+    legacy_create_init = False,
+    main = "test_review.py",
+    deps = [":domain"],
+)
+
+py_test(
+    name = "test_timer",
+    srcs = ["test_timer.py"],
+    legacy_create_init = False,
+    main = "test_timer.py",
+    deps = [":domain"],
+)
+
+py_test(
+    name = "test_paths",
+    srcs = ["test_paths.py"],
+    legacy_create_init = False,
+    main = "test_paths.py",
+    deps = [":domain"],
+)
+
+# Ports BloomCode's recommendations, plan-changes and training-levels cases
+# through a small in-memory library (plan_harness.py) on the real topics.yaml.
+py_test(
+    name = "test_plan",
+    srcs = [
+        "plan_harness.py",
+        "test_plan.py",
+    ],
+    data = ["//packages/algo_tutor/manifests"],
+    legacy_create_init = False,
+    main = "test_plan.py",
+    deps = [
+        ":domain",
+        requirement("pyyaml"),
+    ],
+)

@@ -1,0 +1,104 @@
+load("@monorepo_pip//:requirements.bzl", "requirement")
+load("@rules_python//python:py_test.bzl", "py_test")
+load("//rules/python/lint:defs.bzl", "py_binary", "py_library")
+load("//rules/python/streamlit:defs.bzl", "streamlit_app")
+
+_SDK = [
+    requirement("claude-agent-sdk"),
+]
+
+py_binary(
+    name = "sample_code",
+    srcs = ["sample_code.py"],
+    main = "sample_code.py",
+    deps = _SDK,
+)
+
+# The run folder alone: what the app can use without importing the SDK.
+py_library(
+    name = "runs",
+    srcs = ["runs.py"],
+)
+
+py_library(
+    name = "chart_lib",
+    srcs = [
+        "chart_agent.py",
+        "chart_tools.py",
+    ],
+    deps = _SDK + [
+        ":runs",
+        "//packages/vibe_coding_club/vega_lite_chat:chart_core",
+        requirement("httpx"),
+        # Nothing here imports openpyxl: it is for the extract.py the agent
+        # writes, which runs under this binary's interpreter ($CHART_PYTHON).
+        requirement("openpyxl"),
+        requirement("pandas"),
+        requirement("pydantic"),
+    ],
+)
+
+py_binary(
+    name = "chart_agent",
+    srcs = ["chart_agent.py"],
+    main = "chart_agent.py",
+    deps = [":chart_lib"],
+)
+
+py_library(
+    name = "chart_ui",
+    srcs = ["ui.py"],
+    deps = [
+        ":runs",
+        requirement("pandas"),
+        requirement("streamlit"),
+    ],
+)
+
+# streamlit_app hands its `app` file over as data, which the lint macro never
+# sees, so main.py only calls ui.render_app().
+streamlit_app(
+    name = "chart_app",
+    app = "main.py",
+    # Streamlit otherwise listens on every interface, and each run spends your
+    # API key and executes generated code.
+    args = ["--server.address=localhost"],
+    deps = [
+        # Not imported by the page: runs.start_run starts this as a child process.
+        ":chart_lib",
+        ":chart_ui",
+    ],
+)
+
+_TESTS = [
+    "test_chart_agent",
+    "test_chart_tools",
+    "test_runs",
+]
+
+[
+    py_test(
+        name = name,
+        srcs = [name + ".py"],
+        legacy_create_init = False,
+        main = name + ".py",
+        deps = [":chart_lib"],
+    )
+    for name in _TESTS
+]
+
+# Drives the page headlessly through streamlit.testing's AppTest, which runs
+# main.py from next to the test in the runfiles.
+py_test(
+    name = "test_ui",
+    srcs = ["test_ui.py"],
+    data = ["main.py"],
+    legacy_create_init = False,
+    main = "test_ui.py",
+    deps = [":chart_ui"],
+)
+
+test_suite(
+    name = "test_all",
+    tests = _TESTS + ["test_ui"],
+)

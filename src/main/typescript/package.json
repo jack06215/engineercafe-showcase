@@ -1,0 +1,16 @@
+{
+  "name": "engineercafe-showcase-typescript",
+  "private": true,
+  "description": "pnpm workspace for the TypeScript packages under src/main/typescript/packages, built with Turborepo and outside Bazel; see README.md.",
+  "packageManager": "pnpm@11.22.0",
+  "scripts": {
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "type:check": "turbo run type:check"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15",
+    "turbo": "^2.11.10"
+  }
+}

@@ -1,0 +1,53 @@
+load("@monorepo_pip//:requirements.bzl", "requirement")
+load("@rules_python//python:py_test.bzl", "py_test")
+load("//rules/python/lint:defs.bzl", "py_library")
+
+py_library(
+    name = "langchain_util",
+    srcs = [
+        "api_client.py",
+        "base.py",
+        "basic.py",
+        "cache.py",
+        "observability.py",
+        "prompts.py",
+        "thinking.py",
+    ],
+    # thinking.py reads its reviewer prompts from next to the code at runtime.
+    data = glob(["templates/**/*.jinja"]),
+    imports = [".."],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//packages/common",
+        requirement("jinja2"),
+        requirement("langchain-core"),
+        requirement("langchain-ollama"),
+        requirement("langchain-openai"),
+        requirement("langgraph"),
+        requirement("openai"),
+        requirement("pydantic"),
+        requirement("tenacity"),
+    ],
+)
+
+_TEST_SRCS = glob(["test_*.py"])
+
+[
+    py_test(
+        name = src[:-len(".py")],
+        srcs = [src],
+        legacy_create_init = False,
+        main = src,
+        deps = [
+            ":langchain_util",
+            # test_base.py builds real openai errors, which need httpx requests.
+            requirement("httpx"),
+        ],
+    )
+    for src in _TEST_SRCS
+]
+
+test_suite(
+    name = "test_all",
+    tests = [src[:-len(".py")] for src in _TEST_SRCS],
+)

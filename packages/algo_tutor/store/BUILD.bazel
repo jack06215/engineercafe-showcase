@@ -1,0 +1,41 @@
+load("@monorepo_pip//:requirements.bzl", "requirement")
+load("@rules_python//python:py_test.bzl", "py_test")
+load("//rules/python/lint:defs.bzl", "py_library")
+
+# The database (SPEC §16): SQLAlchemy models, the engine with its pragmas,
+# schema versions, the rows seeded from files, and backups (§17).
+py_library(
+    name = "store",
+    srcs = [
+        "backups.py",
+        "db.py",
+        "migrations.py",
+        "models.py",
+        "seed.py",
+        "timeutil.py",
+    ],
+    visibility = ["//packages/algo_tutor:__subpackages__"],
+    deps = [
+        "//packages/algo_tutor/domain",
+        requirement("sqlalchemy"),
+    ],
+)
+
+[
+    py_test(
+        name = name,
+        srcs = [name + ".py"],
+        data = ["//packages/algo_tutor/manifests"],
+        legacy_create_init = False,
+        main = name + ".py",
+        deps = [
+            ":store",
+            requirement("pyyaml"),
+        ],
+    )
+    for name in [
+        "test_backups",
+        "test_models",
+        "test_seed",
+    ]
+]

@@ -1,0 +1,301 @@
+[
+  {
+    "basetime": "20260912080000",
+    "validtime": "20260912230000",
+    "member": "none",
+    "elements": [
+      "rasrf",
+      "rasrf_point",
+      "rasrf_nd"
+    ]
+  },
+  {
+    "basetime": "20260912080000",
+    "validtime": "20260912220000",
+    "member": "none",
+    "elements": [
+      "rasrf",
+      "rasrf_point",
+      "rasrf_nd"
+    ]
+  },
+  {
+    "basetime": "20260912080000",
+    "validtime": "20260912210000",
+    "member": "none",
+    "elements": [
+      "rasrf",
+      "rasrf_point",
+      "rasrf_nd"
+    ]
+  },
+  {
+    "basetime": "20260912080000",
+    "validtime": "20260912200000",
+    "member": "none",
+    "elements": [
+      "rasrf",
+      "rasrf_point",
+      "rasrf_nd"
+    ]
+  },
+  {
+    "basetime": "20260912080000",
+    "validtime": "20260912190000",
+    "member": "none",
+    "elements": [
+      "rasrf",
+      "rasrf_point",
+      "rasrf_nd"
+    ]
+  },
+  {
+    "basetime": "20260912080000",
+    "validtime": "20260912180000",
+    "member": "none",
+    "elements": [
+      "rasrf",
+      "rasrf_point",
+      "rasrf_nd"
+    ]
+  },
+  {
+    "basetime": "20260912080000",
+    "validtime": "20260912170000",
+    "member": "none",
+    "elements": [
+      "rasrf",
+      "rasrf_point",
+      "rasrf_nd"
+    ]
+  },
+  {
+    "basetime": "20260912080000",
+    "validtime": "20260912160000",
+    "member": "none",
+    "elements": [
+      "rasrf",
+      "rasrf_point",
+      "rasrf_nd"
+    ]
+  },
+  {
+    "basetime": "20260912080000",
+    "validtime": "20260912150000",
+    "member": "none",
+    "elements": [
+      "rasrf",
+      "rasrf_point",
+      "rasrf_nd"
+    ]
+  },
+  {
+    "basetime": "20260912085000",
+    "validtime": "20260912145000",
+    "member": "immed",
+    "elements": [
+      "rasrf",
+      "rasrf_point",
+      "rasrf_nd",
+      "rasrf03h",
+      "rasrf03h_point",
+      "rasrf03h_nd",
+      "rasrf24h",
+      "rasrf24h_point",
+      "rasrf24h_nd"
+    ]
+  },
+  {
+    "basetime": "20260912085000",
+    "validtime": "20260912135000",
+    "member": "immed",
+    "elements": [
+      "rasrf",
+      "rasrf_point",
+      "rasrf_nd",
+      "rasrf03h",
+      "rasrf03h_point",
+      "rasrf03h_nd",
+      "rasrf24h",
+      "rasrf24h_point",
+      "rasrf24h_nd"
+    ]
+  },
+  {
+    "basetime": "20260912085000",
+    "validtime": "20260912125000",
+    "member": "immed",
+    "elements": [
+      "rasrf",
+      "rasrf_point",
+      "rasrf_nd",
+      "rasrf03h",
+      "rasrf03h_point",
+      "rasrf03h_nd",
+      "rasrf24h",
+      "rasrf24h_point",
+      "rasrf24h_nd"
+    ]
+  },
+  {
+    "basetime": "20260912085000",
+    "validtime": "20260912115000",
+    "member": "immed",
+    "elements": [
+      "rasrf",
+      "rasrf_point",
+      "rasrf_nd",
+      "rasrf03h",
+      "rasrf03h_point",
+      "rasrf03h_nd",
+      "rasrf24h",
+      "rasrf24h_point",
+      "rasrf24h_nd"
+    ]
+  },
+  {
+    "basetime": "20260912085000",
+    "validtime": "20260912105000",
+    "member": "immed",
+    "elements": [
+      "rasrf",
+      "rasrf_point",
+      "rasrf_nd",
+      "rasrf03h",
+      "rasrf03h_point",
+      "rasrf03h_nd",
+      "rasrf24h",
+      "rasrf24h_point",
+      "rasrf24h_nd"
+    ]
+  },
+  {
+    "basetime": "20260912085000",
+    "validtime": "20260912095000",
+    "member": "immed",
+    "elements": [
+      "rasrf",
+      "rasrf_point",
+      "rasrf_nd",
+      "rasrf03h",
+      "rasrf03h_point",
+      "rasrf03h_nd",
+      "rasrf24h",
+      "rasrf24h_point",
+      "rasrf24h_nd"
+    ]
+  },
+  {
+    "basetime": "20260912085000",
+    "validtime": "20260912085000",
+    "member": "none",
+    "elements": [
+      "sjfcstmap"
+    ]
+  },
+  {
+    "basetime": "20260912084000",
+    "validtime": "20260912084000",
+    "member": "none",
+    "elements": [
+      "sjfcstmap"
+    ]
+  },
+  {
+    "basetime": "20260912083000",
+    "validtime": "20260912083000",
+    "member": "none",
+    "elements": [
+      "sjfcstmap"
+    ]
+  },
+  {
+    "basetime": "20260912082000",
+    "validtime": "20260912082000",
+    "member": "none",
+    "elements": [
+      "sjfcstmap"
+    ]
+  },
+  {
+    "basetime": "20260912081000",
+    "validtime": "20260912081000",
+    "member": "none",
+    "elements": [
+      "sjfcstmap"
+    ]
+  },
+  {
+    "basetime": "20260912080000",
+    "validtime": "20260912080000",
+    "member": "none",
+    "elements": [
+      "sjfcstmap"
+    ]
+  },
+  {
+    "basetime": "20260912090000",
+    "validtime": "20260912090000",
+    "member": "immed",
+    "elements": [
+      "rasrf",
+      "rasrf_point",
+      "rasrf_nd",
+      "rasrf03h",
+      "rasrf03h_point",
+      "rasrf03h_nd",
+      "rasrf24h",
+      "rasrf24h_point",
+      "rasrf24h_nd"
+    ]
+  },
+  {
+    "basetime": "20260912085000",
+    "validtime": "20260912085000",
+    "member": "immed",
+    "elements": [
+      "slmcs",
+      "slmcs_fcst",
+      "slmcs_unify",
+      "slmcs_unifyfcst"
+    ]
+  },
+  {
+    "basetime": "20260912083000",
+    "validtime": "20260912083000",
+    "member": "none",
+    "elements": [
+      "rasrf",
+      "rasrf_point",
+      "rasrf_nd",
+      "rasrf03h",
+      "rasrf03h_point",
+      "rasrf03h_nd",
+      "rasrf24h",
+      "rasrf24h_point",
+      "rasrf24h_nd",
+      "slmcs",
+      "slmcs_fcst",
+      "slmcs_unify"
+    ]
+  },
+  {
+    "basetime": "20260912080000",
+    "validtime": "20260912080000",
+    "member": "none",
+    "elements": [
+      "rasrf",
+      "rasrf_point",
+      "rasrf_nd",
+      "rasrf03h",
+      "rasrf03h_point",
+      "rasrf03h_nd",
+      "rasrf24h",
+      "rasrf24h_point",
+      "rasrf24h_nd",
+      "slmcs",
+      "slmcs_fcst",
+      "slmcs_unify"
+    ]
+  }
+]

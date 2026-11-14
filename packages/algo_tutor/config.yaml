@@ -1,0 +1,20 @@
+# algo_tutor's committed defaults (SPEC.md §3.4). No secrets: API keys and
+# endpoints for openai/azure come from the environment variables
+# packages/langchain_util checks.
+#
+# Override any key in config.local.yaml beside this file (gitignored); it is
+# merged key by key on top. `--config FILE` replaces both.
+server:
+  host: 127.0.0.1          # loopback only; anything else is refused at startup
+  port: 4317
+tutor:
+  enabled: true
+  default:                 # passed to langchain_util.get_langchain_client
+    provider: ollama       # ollama | openai | azure
+    model: qwen3.6:35b
+    temperature: 0
+    reasoning: false       # Ollama "thinking"
+  tasks:                   # per-task overrides of `default`, all keys optional
+    report: { reasoning: true, timeout_s: 180 }
+    hint:   { timeout_s: 90 }
+    test:   { timeout_s: 90 }

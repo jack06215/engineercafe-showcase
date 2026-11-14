@@ -1,0 +1,122 @@
+load("@monorepo_pip//:requirements.bzl", "requirement")
+load("@rules_python//python:py_test.bzl", "py_test")
+load("//rules/python/lint:defs.bzl", "py_binary", "py_library")
+
+# The HTTP contract (SPEC §15): request and response bodies only.
+py_library(
+    name = "schemas",
+    srcs = ["schemas.py"],
+    visibility = ["//packages/algo_tutor:__subpackages__"],
+    deps = [
+        "//packages/algo_tutor/domain",
+        requirement("pydantic"),
+    ],
+)
+
+# Writes the contract for the web client's generated types.
+py_binary(
+    name = "export_schema",
+    srcs = ["export_schema.py"],
+    main = "export_schema.py",
+    deps = [
+        ":schemas",
+        requirement("pydantic"),
+    ],
+)
+
+# Error shapes and the local-only guard.
+py_library(
+    name = "http",
+    srcs = [
+        "errors.py",
+        "guard.py",
+    ],
+    deps = [
+        ":schemas",
+        "//packages/algo_tutor/catalogue",
+        "//packages/algo_tutor/domain",
+        requirement("fastapi"),
+        requirement("starlette"),
+    ],
+)
+
+# The app. Every `routes_*.py` is mounted by app.py, so a new route module
+# needs no edit here.
+py_library(
+    name = "app",
+    srcs = [
+        "app.py",
+        "deps.py",
+        "engine.py",
+        "facts.py",
+    ] + glob(["routes_*.py"]),
+    visibility = ["//packages/algo_tutor:__subpackages__"],
+    deps = [
+        ":http",
+        ":schemas",
+        "//packages/algo_tutor:config",
+        "//packages/algo_tutor:runtime",
+        "//packages/algo_tutor/catalogue",
+        "//packages/algo_tutor/domain",
+        "//packages/algo_tutor/store",
+        "//packages/algo_tutor/tutor",
+        "//packages/algo_tutor/tutor:worker",
+        requirement("fastapi"),
+        requirement("pydantic"),
+        requirement("sqlalchemy"),
+        requirement("starlette"),
+    ],
+)
+
+py_library(
+    name = "testing",
+    testonly = True,
+    srcs = ["testing.py"],
+    deps = [
+        ":app",
+        "//packages/algo_tutor/catalogue:testing",
+        "//packages/algo_tutor/tutor:fake_models",
+        # Starlette's TestClient is built on httpx2.
+        requirement("httpx2"),
+    ],
+)
+
+py_test(
+    name = "test_guard",
+    srcs = ["test_guard.py"],
+    legacy_create_init = False,
+    main = "test_guard.py",
+    deps = [
+        ":http",
+        requirement("httpx"),
+    ],
+)
+
+py_test(
+    name = "test_schemas",
+    srcs = ["test_schemas.py"],
+    legacy_create_init = False,
+    main = "test_schemas.py",
+    deps = [
+        ":export_schema",
+        ":schemas",
+    ],
+)
+
+# One target per `test_api_*.py`, each on a temporary repo root and data
+# folder through testing.py.
+[
+    py_test(
+        name = src[:-len(".py")],
+        size = "medium",
+        srcs = [src],
+        data = ["//packages/algo_tutor/manifests"],
+        legacy_create_init = False,
+        main = src,
+        deps = [
+            ":testing",
+            "//packages/algo_tutor/catalogue:testing",
+        ],
+    )
+    for src in glob(["test_api_*.py"])
+]

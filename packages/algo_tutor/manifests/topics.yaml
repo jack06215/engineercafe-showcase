@@ -1,0 +1,259 @@
+# algo_tutor's 34 topics (SPEC.md Appendices A–D).
+#
+# priority:   most specific first; picks a problem's primary topic from its
+#             LeetCode tags (SPEC §5.7, Appendix B). Unique, 1..34.
+# curriculum: fundamentals first; breaks ties between equally weak topics in
+#             the daily plan (SPEC §10.2). Unique, 1..34.
+# tags:       the LeetCode topic tags that map to this topic (Appendix A).
+# folder:     where a new LeetCode solution file for this topic goes, under
+#             packages/programming_exercise/leetcode/src/ (Appendix D).
+topics:
+  - id: monotonic-queue
+    name: Monotonic Queue
+    priority: 1
+    curriculum: 23
+    tags: [Monotonic Queue]
+    folder: 01_data_structures/stacks_and_queues
+  - id: monotonic-stack
+    name: Monotonic Stack
+    priority: 2
+    curriculum: 22
+    tags: [Monotonic Stack]
+    folder: 01_data_structures/stacks_and_queues
+  - id: union-find
+    name: Union Find
+    priority: 3
+    curriculum: 21
+    tags: [Union Find]
+    folder: 02_trees_and_graphs/union_find
+  - id: trie
+    name: Trie
+    priority: 4
+    curriculum: 20
+    tags: [Trie]
+    folder: 02_trees_and_graphs/tries
+  - id: shortest-path
+    name: Shortest Path
+    priority: 5
+    curriculum: 29
+    tags: [Shortest Path]
+    folder: 02_trees_and_graphs/graphs
+  - id: sweep-line
+    name: Sweep Line
+    priority: 6
+    curriculum: 30
+    tags: [Line Sweep]
+    folder: 03_algorithms/sweep_line
+  - id: sorted-container
+    name: Sorted Container
+    priority: 7
+    curriculum: 24
+    tags: [Ordered Set]
+    folder: 04_advanced_and_design/segment_trees
+  - id: sliding-window
+    name: Sliding Window
+    priority: 8
+    curriculum: 5
+    tags: [Sliding Window]
+    folder: 01_data_structures/arrays_and_strings
+  - id: prefix-sum
+    name: Prefix Sum
+    priority: 9
+    curriculum: 6
+    tags: [Prefix Sum]
+    folder: 01_data_structures/arrays_and_strings
+  - id: priority-queue
+    name: Priority Queue
+    priority: 10
+    curriculum: 16
+    tags: [Heap (Priority Queue)]
+    folder: 01_data_structures/heaps
+  - id: binary-search-tree
+    name: Binary Search Tree
+    priority: 11
+    curriculum: 13
+    tags: [Binary Search Tree]
+    folder: 02_trees_and_graphs/binary_search_trees
+  - id: backtracking
+    name: Backtracking
+    priority: 12
+    curriculum: 17
+    tags: [Backtracking]
+    folder: 03_algorithms/backtracking
+  - id: dynamic-programming
+    name: Dynamic Programming
+    priority: 13
+    curriculum: 26
+    tags: [Dynamic Programming, Memoization]
+    folder: 03_algorithms/dynamic_programming
+  - id: bit-manipulation
+    name: Bit Manipulation
+    priority: 14
+    curriculum: 27
+    tags: [Bit Manipulation, Bitmask]
+    folder: 04_advanced_and_design/bit_manipulation
+  - id: binary-search
+    name: Binary Search
+    priority: 15
+    curriculum: 10
+    tags: [Binary Search]
+    folder: 03_algorithms/binary_search
+  - id: two-pointers
+    name: Two Pointers
+    priority: 16
+    curriculum: 4
+    tags: [Two Pointers]
+    folder: 01_data_structures/arrays_and_strings
+  - id: divide-and-conquer
+    name: Divide And Conquer
+    priority: 17
+    curriculum: 25
+    tags: [Divide and Conquer, Merge Sort, Quickselect]
+    folder: 03_algorithms/divide_and_conquer
+  - id: observation
+    name: Observation
+    priority: 18
+    curriculum: 34
+    tags: [Brainteaser]
+    folder: 01_data_structures/arrays_and_strings
+  - id: design
+    name: Design
+    priority: 19
+    curriculum: 31
+    tags: [Design, Data Stream, Iterator]
+    folder: 04_advanced_and_design/system_design_lc
+  - id: graph
+    name: Graph
+    priority: 20
+    curriculum: 19
+    tags:
+      - Graph
+      - Topological Sort
+      - Minimum Spanning Tree
+      - Strongly Connected Component
+      - Eulerian Circuit
+      - Biconnected Component
+    folder: 02_trees_and_graphs/graphs
+  - id: bfs
+    name: BFS
+    priority: 21
+    curriculum: 15
+    tags: [Breadth-First Search]
+    folder: 02_trees_and_graphs/graphs
+  - id: dfs
+    name: DFS
+    priority: 22
+    curriculum: 14
+    tags: [Depth-First Search]
+    folder: 02_trees_and_graphs/graphs
+  - id: tree
+    name: Tree
+    priority: 23
+    curriculum: 12
+    tags: [Tree, Binary Tree]
+    folder: 02_trees_and_graphs/binary_trees
+  - id: linked-list
+    name: Linked List
+    priority: 24
+    curriculum: 9
+    tags: [Linked List, Doubly-Linked List]
+    folder: 01_data_structures/linked_lists
+  - id: stack
+    name: Stack
+    priority: 25
+    curriculum: 7
+    tags: [Stack]
+    folder: 01_data_structures/stacks_and_queues
+  - id: queue
+    name: Queue
+    priority: 26
+    curriculum: 8
+    tags: [Queue]
+    folder: 01_data_structures/stacks_and_queues
+  - id: greedy
+    name: Greedy
+    priority: 27
+    curriculum: 18
+    tags: [Greedy]
+    folder: 03_algorithms/greedy
+  - id: recursion
+    name: Recursion
+    priority: 28
+    curriculum: 11
+    tags: [Recursion]
+    folder: 03_algorithms/recursion
+  - id: simulation
+    name: Simulation
+    priority: 29
+    curriculum: 32
+    tags: [Simulation]
+    folder: 01_data_structures/arrays_and_strings
+  - id: brute-force
+    name: Brute Force
+    priority: 30
+    curriculum: 33
+    tags: [Enumeration]
+    folder: 01_data_structures/arrays_and_strings
+  - id: math
+    name: Math
+    priority: 31
+    curriculum: 28
+    tags:
+      - Math
+      - Number Theory
+      - Combinatorics
+      - Geometry
+      - Game Theory
+      - Probability and Statistics
+      - Randomized
+      - Reservoir Sampling
+      - Rejection Sampling
+    folder: 04_advanced_and_design/math_and_number_theory
+  - id: hash-table
+    name: Hash Table
+    priority: 32
+    curriculum: 3
+    tags: [Hash Table, Counting, Hash Function]
+    folder: 01_data_structures/hash_tables
+  - id: string
+    name: String
+    priority: 33
+    curriculum: 2
+    tags: [String, String Matching, Rolling Hash, Suffix Array]
+    folder: 01_data_structures/arrays_and_strings
+  - id: array
+    name: Array
+    priority: 34
+    curriculum: 1
+    tags: [Array, Matrix, Sorting, Counting Sort, Bucket Sort, Radix Sort]
+    folder: 01_data_structures/arrays_and_strings
+
+# LeetCode tags that map to no topic. They stay on the problem as plain tags,
+# and a bank refresh doesn't report them as unknown (SPEC §5.4).
+unmapped_tags: [Segment Tree, Binary Indexed Tree, Interactive]
+
+# Problems carrying any of these are left out of the bank (SPEC §5.4).
+excluded_tags: [Database, Shell, Concurrency]
+
+# NeetCode category → topic, tried before the tag priority for problems in
+# the NeetCode list (Appendix C). null: no topic, use the tag priority.
+# Categories missing here ("JavaScript") also fall through.
+neetcode_categories:
+  Arrays & Hashing: null
+  Two Pointers: two-pointers
+  Sliding Window: sliding-window
+  Stack: stack
+  Binary Search: binary-search
+  Linked List: linked-list
+  Trees: tree
+  Tries: trie
+  Heap / Priority Queue: priority-queue
+  Backtracking: backtracking
+  Graphs: graph
+  Advanced Graphs: graph
+  1-D Dynamic Programming: dynamic-programming
+  2-D Dynamic Programming: dynamic-programming
+  Greedy: greedy
+  Intervals: sweep-line
+  Math & Geometry: math
+  Bit Manipulation: bit-manipulation

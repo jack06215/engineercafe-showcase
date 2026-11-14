@@ -1,0 +1,32 @@
+load("@buildifier_prebuilt//:rules.bzl", "buildifier")
+load("//rules/markdown:defs.bzl", "markdown_docs")
+
+# Markdown: .markdownlint.jsonc is data for the //rules/markdown lint targets.
+exports_files(
+    srcs = [
+        ".markdownlint.jsonc",
+    ],
+)
+
+markdown_docs(
+    name = "docs",
+    srcs = glob(["*.md"]),
+)
+
+buildifier(
+    name = "buildifier.check",
+    exclude_patterns = [
+        "./.git/*",
+    ],
+    lint_mode = "warn",
+    mode = "diff",
+)
+
+buildifier(
+    name = "buildifier.fix",
+    exclude_patterns = [
+        "./.git/*",
+    ],
+    lint_mode = "fix",
+    mode = "fix",
+)

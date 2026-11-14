@@ -1,0 +1,59 @@
+load("@monorepo_pip//:requirements.bzl", "requirement")
+load("@rules_python//python:py_test.bzl", "py_test")
+load("//rules/python/lint:defs.bzl", "py_binary", "py_library")
+
+filegroup(
+    name = "testdata",
+    srcs = glob(["testdata/*"]),
+)
+
+py_library(
+    name = "md2docx_lib",
+    srcs = [
+        "converter.py",
+        "diagrams.py",
+        "google_docs.py",
+        "md2docx_cli.py",
+        "numbering.py",
+        "ooxml.py",
+    ],
+    visibility = ["//packages:__pkg__"],
+    deps = [
+        "//packages:cli_complete",
+        # markdown-it-py's gfm-like preset turns linkify on, which imports it.
+        requirement("linkify-it-py"),
+        requirement("markdown-it-py"),
+        requirement("mdit-py-plugins"),
+        requirement("pydantic"),
+        requirement("python-docx"),
+    ],
+)
+
+# Public: the `.docx` targets of markdown_docs() (//rules/markdown:defs.bzl)
+# run it from whichever package calls the macro.
+py_binary(
+    name = "md2docx",
+    srcs = ["md2docx_cli.py"],
+    main = "md2docx_cli.py",
+    visibility = ["//visibility:public"],
+    deps = [":md2docx_lib"],
+)
+
+_TEST_SRCS = glob(["test_*.py"])
+
+[
+    py_test(
+        name = src[:-len(".py")],
+        srcs = [src],
+        data = [":testdata"],
+        legacy_create_init = False,
+        main = src,
+        deps = [":md2docx_lib"],
+    )
+    for src in _TEST_SRCS
+]
+
+test_suite(
+    name = "test_all",
+    tests = [src[:-len(".py")] for src in _TEST_SRCS],
+)

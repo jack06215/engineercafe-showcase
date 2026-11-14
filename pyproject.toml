@@ -1,0 +1,83 @@
+[project]
+authors = [{ name = "Jack Cho" }]
+description = "Projects from Fukuoka Engineer Cafe"
+name = "engineercafe-showcase"
+readme = "README.md"
+requires-python = "==3.14.6"
+version = "0.1.0"
+
+dependencies = [
+  "altair==6.3.0",
+  "claude-agent-sdk==0.2.182",
+  "fastapi==0.162.7",
+  "httpx==0.28.1",
+  "httpx2==2.16.0",
+  "jinja2==3.1.6",
+  "jsonschema==4.26.0",
+  "langchain-core==1.8.0",
+  "langchain-ollama==1.1.0",
+  "langchain-openai==1.8.0",
+  "langgraph==1.2.22",
+  "linkify-it-py==2.2.0",
+  "markdown-it-py==4.3.0",
+  "mdit-py-plugins==0.7.0",
+  "numpy==2.5.4",
+  "ollama==0.6.3",
+  "openai==3.51.0",
+  "openpyxl==3.1.5",
+  "pandas==3.1.1",
+  "pillow==13.0.0",
+  "pydantic==2.14.3",
+  "python-docx==1.2.0",
+  "pyyaml==6.0.3",
+  "requests==2.34.2",
+  "rich==15.0.0",
+  "sqlalchemy==2.1.8",
+  "starlette==1.10.0",
+  "streamlit==1.67.0",
+  "tenacity==9.2.1",
+  "textual==8.2.8",
+  "uvicorn==0.54.0",
+]
+
+[dependency-groups]
+# //rules/python/lint loads ruff and mypy from @monorepo_pip, so removing either
+# one from this file breaks every `.lint` target.
+dev = [
+  "mypy==2.4.1",
+  "pandas-stubs==3.1.0.261029",
+  "pytest==9.2.0",
+  "ruff==0.17.5",
+  "types-PyYAML==6.0.12.20261113",
+]
+
+[tool.uv]
+default-groups = ["dev"]
+package = false
+required-version = ">=0.13.6"
+
+[tool.mypy]
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_untyped_defs = true
+enable_error_code = [
+  "ignore-without-code",
+  "redundant-expr",
+  "truthy-bool",
+  "truthy-iterable",
+]
+explicit_package_bases = true
+extra_checks = true
+
+[tool.pyright]
+exclude = [
+  "**/__pycache__",
+  "**/.*",
+  "bazel-*",
+  "external",
+]
+
+[tool.ruff]
+# ruff formats Python code blocks in Markdown too. The code blocks in the
+# DESIGN.md files are sketches with aligned comments, which ruff would collapse.
+extend-exclude = ["*.md"]

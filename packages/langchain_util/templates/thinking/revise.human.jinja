@@ -1,0 +1,28 @@
+Your answer was reviewed and needs revising.
+{%- if _thinking_problems %}
+
+It fails these automatic checks. Fix every one:
+{%- for problem in _thinking_problems %}
+- {{ problem }}
+{%- endfor %}
+{%- endif %}
+{%- if _thinking_failed %}
+
+It does not yet meet these checks:
+{%- for check in _thinking_failed %}
+- {{ check.question }}
+  Reviewer: {{ check.evidence }}
+{%- if check.fix %}
+  Suggested fix: {{ check.fix }}
+{%- endif %}
+{%- endfor %}
+{%- endif %}
+{%- if _thinking_passed %}
+
+It already meets these, so keep whatever makes them true:
+{%- for question in _thinking_passed %}
+- {{ question }}
+{%- endfor %}
+{%- endif %}
+
+Change only what the failures above require and leave the rest of the answer as it is. Reply with the complete revised answer, in the same format as before.

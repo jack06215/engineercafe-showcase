@@ -1,0 +1,72 @@
+load("@monorepo_pip//:requirements.bzl", "requirement")
+load("@rules_python//python:py_test.bzl", "py_test")
+load("//rules/markdown:defs.bzl", "markdown_docs")
+load("//rules/python/lint:defs.bzl", "py_binary", "py_library")
+
+py_library(
+    name = "fukuoka_tenki_lib",
+    srcs = [
+        "area.py",
+        "charts.py",
+        "formatting.py",
+        "fukuoka_tenki_cli.py",
+        "jma_client.py",
+        "jma_parser.py",
+        "jma_radar.py",
+        "jma_timeseries.py",
+        "model.py",
+        "rain_levels.py",
+        "render_text.py",
+        "tui_app.py",
+        "tui_radar.py",
+        "tui_widgets.py",
+        "weather_codes.py",
+    ],
+    deps = [
+        requirement("pillow"),
+        requirement("pydantic"),
+        requirement("rich"),
+        requirement("textual"),
+    ],
+)
+
+py_binary(
+    name = "fukuoka_tenki",
+    srcs = ["fukuoka_tenki_cli.py"],
+    main = "fukuoka_tenki_cli.py",
+    deps = [":fukuoka_tenki_lib"],
+)
+
+py_library(
+    name = "fixtures",
+    testonly = True,
+    srcs = ["fixtures.py"],
+    data = glob(["testdata/*.json"]),
+    deps = [":fukuoka_tenki_lib"],
+)
+
+_TEST_SRCS = glob(["test_*.py"])
+
+[
+    py_test(
+        name = src[:-len(".py")],
+        srcs = [src],
+        legacy_create_init = False,
+        main = src,
+        deps = [
+            ":fixtures",
+            ":fukuoka_tenki_lib",
+        ],
+    )
+    for src in _TEST_SRCS
+]
+
+test_suite(
+    name = "test_all",
+    tests = [src[:-len(".py")] for src in _TEST_SRCS],
+)
+
+markdown_docs(
+    name = "docs",
+    srcs = glob(["*.md"]),
+)

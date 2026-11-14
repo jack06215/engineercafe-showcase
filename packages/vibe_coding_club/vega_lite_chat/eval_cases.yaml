@@ -1,0 +1,268 @@
+# Live eval cases for live_eval.py, run against the real Ollama before a demo.
+#
+# Each case: a sample CSV, an optional current chart (a refinement), the requests typed before it,
+# the request itself (or first_chart: true for the automatic first chart), and partial expectations.
+# expect:
+#   chart: false          -> the model must ask back (chart: null) instead of drawing
+#   mark: [line, area]    -> one of these marks
+#   fields: [月, 地域]     -> each column is used on some channel
+#   encodings: {x: {field: 月, type: [temporal], timeUnit: [yearmonth]}}  -> per channel, each key optional
+#   filters: true / filter_field: 月 / top_n: true
+# Every case with a current chart also fails when the message still names a value of a filter that
+# the new chart dropped (e.g. 「2025年の…」 with no filter on 月).
+cases:
+  - name: sales-first-chart
+    sample: sales_by_region.csv
+    first_chart: true
+    expect:
+      mark: [line, area, bar]
+      fields: [月, 売上（万円）]
+
+  - name: sales-trend
+    sample: sales_by_region.csv
+    request: 月ごとの売上の推移を見せて
+    expect:
+      mark: [line, area]
+      encodings:
+        x: {field: 月, type: [temporal, ordinal]}
+        y: {field: 売上（万円）}
+
+  - name: sales-region-bar
+    sample: sales_by_region.csv
+    request: 地域ごとの売上の合計を棒グラフで
+    expect:
+      mark: [bar]
+      fields: [地域, 売上（万円）]
+
+  - name: sales-color-by-region
+    sample: sales_by_region.csv
+    current:
+      mark: line
+      x: {field: 月, type: temporal, timeUnit: yearmonth}
+      y: {field: 売上（万円）, type: quantitative, aggregate: sum}
+    recent: [月ごとの売上の推移を見せて]
+    request: 地域で色分けして
+    expect:
+      mark: [line]
+      encodings:
+        x: {field: 月}
+        color: {field: 地域}
+
+  - name: sales-stack-by-region
+    sample: sales_by_region.csv
+    current:
+      mark: bar
+      x: {field: 月, type: temporal, timeUnit: yearmonth}
+      y: {field: 売上（万円）, type: quantitative, aggregate: sum}
+    recent: [月ごとの売上を棒グラフで]
+    request: 地域で積み上げにして
+    expect:
+      mark: [bar]
+      encodings:
+        color: {field: 地域}
+
+  - name: sales-only-2025
+    sample: sales_by_region.csv
+    current:
+      mark: line
+      x: {field: 月, type: temporal, timeUnit: yearmonth}
+      y: {field: 売上（万円）, type: quantitative, aggregate: sum}
+      color: {field: 地域, type: nominal}
+    recent: [地域で色分けして]
+    request: 2025年だけにして
+    expect:
+      mark: [line]
+      filters: true
+      filter_field: 月
+
+  - name: sales-top-3-regions
+    sample: sales_by_region.csv
+    request: 売上の多い上位3地域だけ、地域ごとの売上合計を棒グラフで
+    expect:
+      mark: [bar]
+      fields: [地域, 売上（万円）]
+      top_n: true
+
+  - name: sales-share-pie
+    sample: sales_by_region.csv
+    request: 地域ごとの売上の割合を円グラフで
+    expect:
+      mark: [arc]
+      encodings:
+        theta: {field: 売上（万円）}
+        color: {field: 地域}
+
+  - name: sales-unknown-column
+    sample: sales_by_region.csv
+    request: 利益の推移を見せて
+    expect:
+      chart: false
+
+  - name: sales-two-regions
+    sample: sales_by_region.csv
+    current:
+      mark: line
+      x: {field: 月, type: temporal, timeUnit: yearmonth}
+      y: {field: 売上（万円）, type: quantitative, aggregate: sum}
+      color: {field: 地域, type: nominal}
+    recent: [地域で色分けして]
+    request: 福岡と東京だけ比べて
+    expect:
+      mark: [line]
+      filters: true
+      filter_field: 地域
+
+  # A filtered chart, then a request for a different chart. The filter used to be dropped while the
+  # message still said 2025年 (fixed by making `filters` required and first after `mark`).
+  - name: sales-2025-region-bar
+    sample: sales_by_region.csv
+    current: &sales_2025_bars
+      mark: bar
+      filters: [{field: 月, op: equal, value: 2025, timeUnit: year}]
+      x: {field: 月, type: temporal, timeUnit: yearmonth}
+      y: {field: 売上（万円）, type: quantitative, aggregate: sum, stack: zero}
+      color: {field: 地域, type: nominal}
+    recent: [棒グラフにして, 2025年だけにして]
+    request: 地域別の総売上を比較する棒グラフを描いて
+    expect:
+      mark: [bar]
+      fields: [地域, 売上（万円）]
+      filter_field: 月
+
+  - name: sales-2025-pie
+    sample: sales_by_region.csv
+    current: *sales_2025_bars
+    recent: [棒グラフにして, 2025年だけにして]
+    request: 地域ごとの売上の割合を円グラフで
+    expect:
+      mark: [arc]
+      filter_field: 月
+
+  - name: sales-2025-remove-filter
+    sample: sales_by_region.csv
+    current: *sales_2025_bars
+    recent: [棒グラフにして, 2025年だけにして]
+    request: 2024年も含めて全期間にして
+    expect:
+      mark: [bar]
+      filters: false
+
+  - name: stores-scatter
+    sample: stores.csv
+    request: 床面積と月商の関係を散布図で見せて
+    expect:
+      mark: [point]
+      fields: [床面積（m²）, 月商（万円）]
+
+  - name: stores-facet-by-region
+    sample: stores.csv
+    current:
+      mark: point
+      x: {field: 床面積（m²）, type: quantitative}
+      y: {field: 月商（万円）, type: quantitative}
+    recent: [床面積と月商の関係を散布図で見せて]
+    request: 地域ごとに分けて並べて
+    expect:
+      mark: [point]
+      fields: [床面積（m²）, 月商（万円）, 地域]
+
+  - name: stores-boxplot
+    sample: stores.csv
+    request: 地域ごとの月商のばらつきを箱ひげ図で
+    expect:
+      mark: [boxplot]
+      fields: [地域, 月商（万円）]
+
+  - name: weather-temperature-trend
+    sample: fukuoka_weather.csv
+    request: 平均気温の推移を見せて
+    expect:
+      mark: [line, area]
+      encodings:
+        x: {field: 年月}
+        y: {field: 平均気温（℃）}
+
+  - name: weather-heatmap
+    sample: fukuoka_weather.csv
+    request: 年と月で平均気温のヒートマップを描いて
+    expect:
+      mark: [rect]
+      fields: [年月, 平均気温（℃）]
+
+# Routing: does the chat model call vega_lite_tool (draw: true) or answer in prose (draw: false)?
+# One call each; the tool itself doesn't run. current is the chart on screen, if any.
+routing:
+  - name: route-bar
+    sample: sales_by_region.csv
+    current: &sales_line
+      mark: line
+      x: {field: 月, type: temporal, timeUnit: yearmonth}
+      y: {field: 売上（万円）, type: quantitative, aggregate: sum}
+      color: {field: 地域, type: nominal}
+    request: 棒グラフにして
+    draw: true
+
+  - name: route-year-filter
+    sample: sales_by_region.csv
+    current: *sales_line
+    request: 2025年だけにして
+    draw: true
+
+  - name: route-pie
+    sample: sales_by_region.csv
+    current: *sales_line
+    request: 地域ごとの売上の割合を円グラフで
+    draw: true
+
+  - name: route-missing-column
+    sample: sales_by_region.csv
+    current: *sales_line
+    request: 利益の推移を見せて
+    draw: true
+
+  - name: route-compare-two
+    sample: sales_by_region.csv
+    current: *sales_line
+    request: 福岡と東京だけ比べて
+    draw: true
+
+  - name: route-top-n
+    sample: sales_by_region.csv
+    current: *sales_line
+    request: 売上の多い上位3地域だけ、地域ごとの売上合計を棒グラフで
+    draw: true
+
+  - name: route-scatter
+    sample: stores.csv
+    request: 床面積と月商の関係を散布図で見せて
+    draw: true
+
+  - name: route-columns-question
+    sample: sales_by_region.csv
+    current: *sales_line
+    request: この表にはどんな列がある？
+    draw: false
+
+  - name: route-general-question
+    sample: sales_by_region.csv
+    current: *sales_line
+    request: Vega-Lite って何？
+    draw: false
+
+  - name: route-greeting
+    sample: sales_by_region.csv
+    current: *sales_line
+    request: こんにちは
+    draw: false
+
+  - name: route-current-chart-question
+    sample: sales_by_region.csv
+    current: *sales_line
+    request: 今のグラフは何を表している？
+    draw: false
+
+  - name: route-date-range-question
+    sample: sales_by_region.csv
+    current: *sales_line
+    request: データは何年から何年まで？
+    draw: false

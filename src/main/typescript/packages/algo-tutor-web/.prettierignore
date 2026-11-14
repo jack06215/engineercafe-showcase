@@ -1,0 +1,12 @@
+.git
+node_modules
+coverage
+pnpm-lock.yaml
+yarn-debug.log*
+yarn-error.log*
+# Written by the TanStack Router plugin in its own style.
+src/routeTree.gen.ts
+# The API contract, written by `bazel run //packages/algo_tutor/api:export_schema`
+# and `pnpm api:types` in their own style.
+src/api/schema.json
+src/api/schema.gen.ts

@@ -1,0 +1,24 @@
+// markdownlint config for //rules/markdown targets (`bazel test //:docs.lint`).
+// Passed to markdownlint explicitly by lint.sh / fix.sh rather than discovered:
+// the test runs in the sandbox runfiles tree, where an undeclared config file
+// would silently not be there.
+{
+  "MD013": {
+    // Prose is hand-wrapped at 80. Tables can't be wrapped without breaking
+    // them, and code blocks hold commands and output that must stay verbatim,
+    // so both are exempt. A package can turn the limit off with its own config
+    // that extends this one, as packages/algo_tutor does.
+    "line_length": 80,
+    "tables": false,
+    "code_blocks": false
+  },
+
+  // Off to match jack06215/monorepo, so that a note copied from there lints the
+  // same here. Its long-form notes split into `# Part N` sections, each a
+  // top-level heading of its own.
+  "MD025": false,
+
+  // fukuoka_tenki_forcast/DESIGN.md uses bold labels on their own line, such as
+  // **タブ 1 今日・明日**, inside a section rather than as headings for it.
+  "MD036": false
+}
