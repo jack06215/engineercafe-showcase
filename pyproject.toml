@@ -78,6 +78,14 @@ exclude = [
 ]
 
 [tool.ruff]
-# ruff formats Python code blocks in Markdown too. The code blocks in the
-# DESIGN.md files are sketches with aligned comments, which ruff would collapse.
+# ruff formats Python code blocks in Markdown too.
 extend-exclude = ["*.md"]
+
+[tool.ruff.lint]
+extend-select = ["D"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/test_*.py" = ["D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
