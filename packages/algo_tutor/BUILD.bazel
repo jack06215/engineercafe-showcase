@@ -42,14 +42,10 @@ py_library(
         "cli.py",
         "serve.py",
     ],
-    visibility = [
-        "//packages:__pkg__",
-        "//packages/algo_tutor:__subpackages__",
-    ],
+    visibility = ["//packages/algo_tutor:__subpackages__"],
     deps = [
         ":config",
         ":runtime",
-        "//packages:cli_complete",
         "//packages/algo_tutor/api:app",
         "//packages/algo_tutor/catalogue",
         "//packages/algo_tutor/store",
