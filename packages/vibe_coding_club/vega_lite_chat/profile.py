@@ -14,6 +14,8 @@ Scalar = str | int | float | None
 
 @dataclass(frozen=True)
 class ColumnProfile:
+    """What the model is told about one column."""
+
     name: str
     dtype: str  # pandas' dtype name: "int64", "float64", "str", "datetime64[ns]"
     guess: FieldGuess
@@ -28,6 +30,8 @@ class ColumnProfile:
 
 @dataclass(frozen=True)
 class DataProfile:
+    """What the model is told about the data: columns and sample rows."""
+
     rows: int
     columns: tuple[ColumnProfile, ...]
     sample: tuple[
@@ -35,9 +39,11 @@ class DataProfile:
     ]  # chosen at random with a fixed seed, in file order
 
     def names(self) -> tuple[str, ...]:
+        """Return the column names in order."""
         return tuple(column.name for column in self.columns)
 
     def column(self, name: str) -> ColumnProfile | None:
+        """Return the profile of column *name*, or None."""
         return next((column for column in self.columns if column.name == name), None)
 
 
@@ -88,6 +94,7 @@ def profile_frame(
     seed: int,
     max_listed_values: int,
 ) -> DataProfile:
+    """Profile *df*: each column, plus a seeded random sample of rows."""
     columns = tuple(
         _profile_column(str(name), df[name], max_listed_values) for name in df.columns
     )

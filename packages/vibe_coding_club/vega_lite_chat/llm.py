@@ -34,6 +34,8 @@ class OllamaUnavailable(Exception):
 
 @dataclass(frozen=True)
 class RawReply:
+    """The model's raw reply and, if it parsed, the turn."""
+
     text: str  # the model's reply as sent, for the repair request and for showing failures
     turn: AssistantTurn | None  # set when the reply parsed
     parse_error: str | None
@@ -43,7 +45,10 @@ class RawReply:
 # pydantic checks a class it doesn't know with isinstance.
 @runtime_checkable
 class StructuredModel(Protocol):
-    def __call__(self, messages: Sequence[BaseMessage]) -> RawReply: ...
+    """A model that turns messages into a raw structured reply."""
+
+    def __call__(self, messages: Sequence[BaseMessage]) -> RawReply:
+        """Send *messages* and return the raw reply."""
 
 
 @dataclass(frozen=True)

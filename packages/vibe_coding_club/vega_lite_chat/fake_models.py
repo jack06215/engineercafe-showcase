@@ -42,14 +42,18 @@ def calls_tool(request: str) -> AIMessage:
 
 
 class ScriptedModel:
-    """The translator's model: answers with the scripted replies in order; an exception in the
-    script is raised instead."""
+    """The translator's model, answering with the scripted replies in order.
+
+    An exception in the script is raised instead.
+    """
 
     def __init__(self, *script: RawReply | Exception) -> None:
+        """Reply with *script* in order; an exception in it is raised instead."""
         self.script = list(script)
         self.calls: list[list[BaseMessage]] = []
 
     def __call__(self, messages: Sequence[BaseMessage]) -> RawReply:
+        """Record *messages* and return the next scripted reply."""
         self.calls.append(list(messages))
         if not self.script:
             raise AssertionError("the chart model was called more often than scripted")
@@ -60,8 +64,11 @@ class ScriptedModel:
 
 
 class ScriptedChat(BaseChatModel):
-    """The chat model: streams the scripted replies in order, a character at a time, then any tool
-    calls; an exception in the script is raised instead."""
+    """The chat model, streaming the scripted replies in order.
+
+    Each reply streams a character at a time, then any tool calls. An exception in the script is
+    raised instead.
+    """
 
     script: list[Any]  # AIMessage | Exception
     calls: list[list[BaseMessage]] = Field(default_factory=list)
@@ -78,6 +85,7 @@ class ScriptedChat(BaseChatModel):
         tool_choice: str | None = None,
         **kwargs: Any,
     ) -> Runnable[LanguageModelInput, AIMessage]:
+        """Record the bound tool names and return this model unchanged."""
         self.bound.extend(str(getattr(tool, "name", tool)) for tool in tools)
         return self
 
@@ -137,13 +145,16 @@ class ScriptedModels:
         chart: Sequence[RawReply | Exception] = (),
         chat: Sequence[AIMessage | Exception] = (),
     ) -> None:
+        """Script the chart and chat models with *chart* and *chat*."""
         self.chart = ScriptedModel(*chart)
         self.chat = ScriptedChat(script=list(chat))
         self.reasoning: list[bool] = []
 
     def models(self) -> Models:
+        """Return the scripted models."""
         return Models(chat=self.chat, chart=self.chart)
 
     def factory(self, reasoning: bool) -> Models:
+        """Record *reasoning* and return the scripted models."""
         self.reasoning.append(reasoning)
         return self.models()

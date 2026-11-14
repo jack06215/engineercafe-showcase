@@ -184,6 +184,17 @@ class BuildMessagesTest(unittest.TestCase):
         self.assertNotIn("Timeunit", system)
         self.assertIn("title:", system)
 
+    def test_system_prompt_leaves_out_the_model_docstrings(self) -> None:
+        system = build_messages(self.book, _profile(), None, [], "x")[0].content
+        assert isinstance(system, str)
+
+        schema = yaml.safe_load(system.split("(shown as YAML):", 1)[1])
+        self.assertIsNotNone(AssistantTurn.__doc__)
+        for name, model in [("AssistantTurn", schema), *schema["$defs"].items()]:
+            self.assertNotIn("description", model, name)
+        # The field descriptions are kept.
+        self.assertIn("description", schema["properties"]["chart"])
+
     def test_user_message_format(self) -> None:
         messages = build_messages(
             self.book,

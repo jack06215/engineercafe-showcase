@@ -13,6 +13,7 @@ router = APIRouter(tags=["reviews"])
 
 
 def target_out(row: models.ReviewTarget) -> ReviewTargetOut:
+    """Return the API view of a stored review target."""
     target = engine.target_from_row(row)
     return ReviewTargetOut(
         problem_id=target.problem_id,

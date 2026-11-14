@@ -49,6 +49,7 @@ class Mmdc:
         scale: int = 2,
         timeout_s: float = _TIMEOUT_S,
     ) -> None:
+        """Wrap the mmdc binary at *executable*, caching PNGs in *cache_dir* if set."""
         self._executable = executable
         self._cache_dir = cache_dir
         self._scale = scale
@@ -56,6 +57,7 @@ class Mmdc:
         self._version: str | None = None
 
     def __call__(self, source: str) -> bytes:
+        """Render Mermaid *source* to PNG bytes, using the cache when it can."""
         cached = self._cache_path(source)
         if cached is not None and cached.is_file():
             return cached.read_bytes()

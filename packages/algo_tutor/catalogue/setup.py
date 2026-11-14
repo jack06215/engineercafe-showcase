@@ -22,6 +22,8 @@ from packages.algo_tutor.store.models import Settings
 
 @dataclass(frozen=True)
 class SetupState:
+    """The onboarding settings that the setup screen shows."""
+
     onboarding_complete: bool
     timezone: str
     questions_per_day: int
@@ -30,6 +32,8 @@ class SetupState:
 
 @dataclass(frozen=True)
 class SetupResult:
+    """What the client must do after setup is saved."""
+
     start_bank_download: bool
     course_list_id: str | None
 
@@ -42,6 +46,7 @@ def _settings(session: Session) -> Settings:
 
 
 def setup_state(session: Session) -> SetupState:
+    """Return the current onboarding settings."""
     s = _settings(session)
     return SetupState(
         s.onboarding_complete, s.timezone, s.questions_per_day, s.bank_status

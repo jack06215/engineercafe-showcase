@@ -44,6 +44,7 @@ MANIFESTS = Path(__file__).resolve().parent.parent / "manifests"
 
 
 def load_catalog() -> TopicCatalog:
+    """Load the topic catalog from the bundled topics.yaml."""
     return TopicCatalog.from_mapping(
         yaml.safe_load((MANIFESTS / "topics.yaml").read_text())
     )
@@ -51,6 +52,8 @@ def load_catalog() -> TopicCatalog:
 
 @dataclass
 class Problem:
+    """A problem in the test library."""
+
     title: str
     source: Source
     label: Difficulty | None
@@ -67,6 +70,8 @@ class Problem:
 
 @dataclass
 class Done:
+    """A finished attempt in the test library."""
+
     id: str
     problem_id: str
     started_at: datetime
@@ -79,6 +84,8 @@ class Done:
 
 @dataclass
 class Library:
+    """In-memory problems and attempts for exercising the planner in tests."""
+
     now: datetime
     target: int = 1850
     include_paid_only: bool = False
@@ -91,9 +98,11 @@ class Library:
 
     @property
     def today(self) -> date:
+        """The UTC date of `now`."""
         return self.now.astimezone(UTC).date()
 
     def at(self, iso: str) -> None:
+        """Move the clock to the ISO time *iso*."""
         self.now = datetime.fromisoformat(iso)
 
     def add(
@@ -108,6 +117,7 @@ class Library:
         paid_only: bool = False,
         attempted_before: bool = False,
     ) -> str:
+        """Add a problem and return its ID, which is its title."""
         self.problems[title] = Problem(
             title,
             source,
@@ -121,10 +131,12 @@ class Library:
         return title
 
     def rating(self, pid: str) -> Rating | None:
+        """Return the rating of problem *pid*, if it has one."""
         p = self.problems[pid]
         return problem_rating(p.source, p.label, p.exact)
 
     def levels(self) -> list[TopicLevel]:
+        """Compute the learner's level in each topic from the attempts."""
         ladder = [
             LadderAttempt(
                 attempt_id=a.id,
@@ -145,9 +157,11 @@ class Library:
         )
 
     def level(self, topic_id: str) -> TopicLevel:
+        """Return the learner's level in *topic_id*."""
         return next(lv for lv in self.levels() if lv.topic_id == topic_id)
 
     def facts(self) -> list[ProblemFacts]:
+        """Return the planner's view of every problem."""
         done = [a.problem_id for a in self.attempts]
         return [
             ProblemFacts(
@@ -168,6 +182,7 @@ class Library:
         ]
 
     def context(self, day: date | None = None) -> PlanContext:
+        """Build the planner context for *day*, by default today."""
         return PlanContext(
             today=day or self.today,
             target=self.target,
@@ -183,6 +198,7 @@ class Library:
         self.lists[source] = (name, {t: before.get(t, self.now) for t in titles})
 
     def study_list(self, source: Source) -> StudyList | None:
+        """Return the active study list for *source*, if one is set."""
         if source not in self.lists:
             return None
         name, entries = self.lists[source]
@@ -206,6 +222,7 @@ class Library:
         day: date | None = None,
         current: CurrentAttempt | None = None,
     ) -> list[PlannedItem]:
+        """Build the daily plan for *day* from the current library."""
         return build_plan(
             self.context(day),
             questions_per_day=questions_per_day,
@@ -216,6 +233,7 @@ class Library:
         )
 
     def start(self, pid: str, item: PlannedItem | None = None) -> StartFacts:
+        """Start problem *pid*, optionally from plan *item*, and return its facts."""
         p = self.problems[pid]
         facts = start_facts(
             from_plan=item is not None,
@@ -272,6 +290,7 @@ class Library:
         return facts
 
     def snooze(self, pid: str, until: date) -> None:
+        """Snooze the review of problem *pid* until *until*."""
         self.targets[pid] = snooze_target(self.targets.get(pid), pid, until)
 
 

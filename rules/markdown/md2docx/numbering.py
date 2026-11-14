@@ -26,6 +26,8 @@ _NUMBER_FORMATS = ("decimal", "lowerLetter", "lowerRoman")
 
 
 class ListKind(enum.Enum):
+    """The kinds of Markdown list that get their own Word numbering."""
+
     BULLET = "bullet"
     ORDERED = "ordered"
     TASK_OPEN = "task_open"
@@ -55,6 +57,7 @@ class Numbering:
     """The document's list definitions, added on first use."""
 
     def __init__(self, document: DocxDocument) -> None:
+        """Attach to the numbering part of *document*."""
         self._numbering = document.part.numbering_part.element
         self._shared: dict[ListKind, int] = {}
 

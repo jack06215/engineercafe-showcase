@@ -20,6 +20,8 @@ _SLUG = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 @dataclass(frozen=True)
 class ProblemRef:
+    """A problem's source and ID, enough to build its URL."""
+
     source: Source
     external_id: str  # LeetCode slug or AtCoder task id
     contest: str | None = None  # AtCoder only
@@ -43,4 +45,5 @@ def parse_problem_url(url: str) -> ProblemRef | None:
 
 
 def is_leetcode_slug(text: str) -> bool:
+    """Return whether *text* looks like a LeetCode problem slug."""
     return bool(_SLUG.match(text))

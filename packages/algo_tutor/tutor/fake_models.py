@@ -10,8 +10,11 @@ from pydantic import Field
 
 
 class ScriptedChat(BaseChatModel):
-    """Answers with the scripted replies in order; an exception in the
-    script is raised instead. `calls` keeps every request's messages."""
+    """Answers with the scripted replies in order.
+
+    An exception in the script is raised instead. `calls` keeps every request's
+    messages.
+    """
 
     script: list[Any]  # str | Exception
     calls: list[list[BaseMessage]] = Field(default_factory=list)

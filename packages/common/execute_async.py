@@ -1,3 +1,5 @@
+"""Asyncio version of `execute`: stream a subprocess's output line by line."""
+
 import asyncio
 import logging
 import os
@@ -13,10 +15,13 @@ LineEvent = tuple[Literal["stdout", "stderr"], str]
 
 @dataclass(frozen=True, slots=True)
 class Redactor:
+    """Redact secrets from strings."""
+
     secret_values: tuple[str, ...] = ()
     patterns: tuple[Pattern[str], ...] = ()
 
     def redact(self, s: str) -> str:
+        """Replace each secret value and pattern match in *s* with `<REDACTED>`."""
         if not s:
             return s
 
@@ -36,6 +41,7 @@ def default_redactor(
     extra_patterns: Iterable[str] = (),
     include_env: bool = True,
 ) -> Redactor:
+    """Build a Redactor for well-known credential env vars and the extras given."""
     env_keys = (
         "AWS_ACCESS_KEY_ID",
         "AWS_SECRET_ACCESS_KEY",
@@ -78,6 +84,8 @@ def default_redactor(
 
 @dataclass(frozen=True, slots=True)
 class CommandResult:
+    """Exit code and decoded output of a finished command."""
+
     cmd: list[str]
     returncode: int
     stdout: str
@@ -85,6 +93,7 @@ class CommandResult:
     combined: str
 
     def check_returncode(self) -> None:
+        """Raise CalledProcessError if the command exited with a non-zero code."""
         if self.returncode != 0:
             raise subprocess.CalledProcessError(
                 self.returncode,
@@ -177,6 +186,7 @@ async def run_command_stream_async(
     logger: logging.Logger | None = None,
     redactor: Redactor | None = None,
 ) -> CommandResult:
+    """Run *args* to completion, logging each output line as it arrives."""
     stdout: list[str] = []
     stderr: list[str] = []
     combined: list[str] = []

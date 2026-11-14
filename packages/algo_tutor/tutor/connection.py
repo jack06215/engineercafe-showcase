@@ -13,6 +13,8 @@ from packages.algo_tutor.tutor.schemas import ConnectionReply
 
 @dataclass(frozen=True)
 class ConnectionResult:
+    """Outcome of a test call to the tutor model."""
+
     ok: bool
     provider: str
     model: str
@@ -22,6 +24,7 @@ class ConnectionResult:
 
 
 def check_connection(chat: BaseChatModel, task: TaskConfig) -> ConnectionResult:
+    """Send a test prompt to *chat* and report whether it answered."""
     try:
         answer = ask(chat, ConnectionReply, prompts.CONNECTION, {}, "English", task)
     except TutorError as failure:

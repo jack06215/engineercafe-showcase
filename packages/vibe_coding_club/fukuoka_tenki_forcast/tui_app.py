@@ -76,6 +76,7 @@ class TenkiApp(App[None]):
         self.source = source
 
     def compose(self) -> ComposeResult:
+        """Lay out the header, error banner and tabs."""
         yield Header()
         yield ErrorBanner()
         with TabbedContent(id="tabs"):
@@ -90,9 +91,11 @@ class TenkiApp(App[None]):
         yield Footer()
 
     def on_mount(self) -> None:
+        """Load the data when the app starts."""
         self.action_reload()
 
     def action_reload(self) -> None:
+        """Reload the forecast, the hourly strip and the radar."""
         for view in self.query("#today-view, #week-view"):
             view.loading = True
         self.query_one(HourlyStrip).loading = True
@@ -103,16 +106,19 @@ class TenkiApp(App[None]):
             radar.reload()
 
     def action_show_tab(self, tab: str) -> None:
+        """Switch to the tab with ID *tab*."""
         self.query_one(TabbedContent).active = tab
 
     def on_tabbed_content_tab_activated(
         self, event: TabbedContent.TabActivated
     ) -> None:
+        """Start the radar when its tab opens."""
         if event.pane.id == "radar":
             self.query_one(RadarPanel).activate()
 
     @work(thread=True, exclusive=True, group="forecast")
     def load_forecast(self) -> None:
+        """Fetch the forecast in a worker thread and show it."""
         try:
             forecast = self.source.forecast()
         except ForecastError as e:
@@ -124,6 +130,7 @@ class TenkiApp(App[None]):
 
     @work(thread=True, exclusive=True, group="hourly")
     def load_hourly(self) -> None:
+        """Fetch the 3-hourly forecast in a worker thread and show it."""
         try:
             hours = self.source.hourly()
         except ForecastError as e:
@@ -134,6 +141,7 @@ class TenkiApp(App[None]):
             self.call_from_thread(self.show_hourly, hours)
 
     def show_forecast(self, forecast: Forecast) -> None:
+        """Show *forecast* in the day cards and the weekly table."""
         self.sub_title = format_report(forecast)
         self.query_one(ErrorBanner).set_error(None)
 
@@ -147,16 +155,19 @@ class TenkiApp(App[None]):
             view.loading = False
 
     def show_error(self, message: str) -> None:
+        """Show *message* and stop the loading indicators."""
         self.query_one(ErrorBanner).set_error(message)
         for view in self.query("#today-view, #week-view"):
             view.loading = False
 
     def show_hourly(self, hours: tuple[Hourly, ...]) -> None:
+        """Show *hours* in the hourly strip."""
         strip = self.query_one(HourlyStrip)
         strip.show_hours(hours)
         strip.loading = False
 
     def show_hourly_error(self, message: str) -> None:
+        """Show *message* in the hourly strip."""
         strip = self.query_one(HourlyStrip)
         strip.show_error(message)
         strip.loading = False

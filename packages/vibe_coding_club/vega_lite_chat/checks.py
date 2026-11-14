@@ -46,6 +46,7 @@ _UNIT_RANGE: dict[TimeUnit, tuple[int, int]] = {
 
 
 def check_chart(spec: ChartSpec, profile: DataProfile) -> list[str]:
+    """Return what is wrong with *spec* for this data, or an empty list."""
     errors: list[str] = []
     for channel, encoding in spec.encodings():
         errors += _check_encoding(channel, encoding, spec, profile)

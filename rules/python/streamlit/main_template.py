@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Template for a Streamlit launcher; `expand_template` fills its placeholders."""
+
 import socket
 import subprocess
 import sys

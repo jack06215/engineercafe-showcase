@@ -94,6 +94,7 @@ def fetch_tile(url: str, what: str) -> bytes | None:
 
 
 def radar_tile_url(frame: RadarFrame, zoom: int, x: int, y: int) -> str:
+    """Return the URL of one radar tile for *frame*."""
     return RADAR_TILE_URL.format(
         product=frame.product.value,
         basetime=frame.basetime,
@@ -114,17 +115,21 @@ class JmaSource:
     """
 
     def __init__(self, area: Area) -> None:
+        """Read forecasts for *area*, keeping recent radar tiles in memory."""
         self.area = area
         self._tiles = _TileCache(CACHED_TILES)
 
     def forecast(self) -> Forecast:
+        """Fetch the forecast for the area."""
         return load_forecast(self.area)
 
     def hourly(self) -> tuple[Hourly, ...]:
+        """Fetch the 3-hourly forecast for the area's region."""
         url = HOURLY_URL.format(region=self.area.region)
         return parse_hourly(fetch_json(url, "3時間ごとの予報"))
 
     def radar_frames(self, product: RadarProduct) -> tuple[RadarFrame, ...]:
+        """Fetch the list of available frames for *product*."""
         if product is RadarProduct.NOWCAST:
             return parse_nowcast_frames(
                 fetch_json(NOWCAST_OBSERVED_URL, "雨雲レーダー"),
@@ -137,6 +142,7 @@ class JmaSource:
     def radar_map(
         self, frame: RadarFrame, zoom: int, width: int, height: int
     ) -> RadarMap:
+        """Fetch the map and radar tiles around the city and compose them."""
         window = window_around(self.area.lat, self.area.lon, zoom, width, height)
         keys = window.tiles()
         pngs = self._fetch_all(
@@ -148,6 +154,7 @@ class JmaSource:
         return compose(frame, window, base, radar)
 
     def rain_at_city(self, frames: Sequence[RadarFrame]) -> tuple[RainPoint, ...]:
+        """Read the rain rate at the city's pixel in each of *frames*."""
         (x, y), pixel = city_tile(self.area.lat, self.area.lon, CITY_ZOOM)
         pngs = self._fetch_all(
             [(radar_tile_url(frame, CITY_ZOOM, x, y), "雨雲の地図") for frame in frames]

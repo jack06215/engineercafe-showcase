@@ -30,6 +30,8 @@ class ProblemInfo:
 
 @dataclass(frozen=True)
 class AttemptInfo:
+    """The attempt that the report reviews."""
+
     code: str
     notes: str
     language: Language
@@ -41,6 +43,8 @@ class AttemptInfo:
 
 @dataclass(frozen=True)
 class EarlierAttempt:
+    """Summary of an earlier attempt at the same problem."""
+
     study_date: date
     outcome: Outcome
     help: Help
@@ -53,12 +57,16 @@ class EarlierAttempt:
 
 @dataclass(frozen=True)
 class CheckOf:
+    """The original problem when the attempt is a transfer or practice check."""
+
     title: str
     kind: Literal["transfer", "practice"]
 
 
 @dataclass(frozen=True)
 class ReportInput:
+    """What the report prompt needs to review one attempt."""
+
     problem: ProblemInfo
     attempt: AttemptInfo
     takeaway: str | None  # only for choosing the language
@@ -67,6 +75,7 @@ class ReportInput:
 
 
 def mmss(seconds: int) -> str:
+    """Format *seconds* as mm:ss."""
     return f"{seconds // 60:02d}:{seconds % 60:02d}"
 
 
@@ -93,6 +102,7 @@ def context(report_input: ReportInput) -> dict[str, object]:
 def generate(
     chat: BaseChatModel, task: TaskConfig, report_input: ReportInput
 ) -> Answer[ReportReply]:
+    """Ask the model for a report on the attempt."""
     lang = language.for_report(report_input.attempt.notes, report_input.takeaway)
     return ask(
         chat,
@@ -110,6 +120,7 @@ def to_column(reply: ReportReply) -> dict[str, Any]:
 
 
 def from_column(value: dict[str, Any] | None) -> ReportReply | None:
+    """Parse a stored report column, or return None if it is empty."""
     if not value:
         return None
     return ReportReply.model_validate(value)

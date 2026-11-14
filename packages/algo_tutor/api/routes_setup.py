@@ -1,5 +1,6 @@
-"""Setup, settings, the problem bank, backups and the tutor's status
-(SPEC §5.4, §12.1, §13, §14 Setup, §17).
+"""Routes for setup, settings, the problem bank, backups and the tutor.
+
+See SPEC §5.4, §12.1, §13, §14 Setup and §17.
 
 These routes don't take the per-request transaction (`deps.Db`): the bank
 service and the backup open their own sessions, and every transaction here
@@ -39,8 +40,10 @@ _SHOWN: dict[BankState, Literal["never", "running", "done", "failed"]] = {
 
 
 def bank_service(state: AppState) -> BankService:
-    """The app's one bank service, made on first use. Tests put their own
-    (with a stubbed fetch) in `state.jobs` first."""
+    """The app's one bank service, made on first use.
+
+    Tests put their own (with a stubbed fetch) in `state.jobs` first.
+    """
     service = state.jobs.get(BANK_JOB)
     if not isinstance(service, BankService):
         runtime = state.runtime
@@ -55,6 +58,7 @@ def bank_service(state: AppState) -> BankService:
 
 
 def bank_status(state: AppState) -> schemas.BankStatus:
+    """Return the bank download status with the estimate count."""
     status = bank_service(state).status()
     with state.runtime.sessions() as session:
         estimated = (
@@ -75,6 +79,7 @@ def bank_status(state: AppState) -> schemas.BankStatus:
 
 
 def settings_out(state: AppState) -> schemas.SettingsOut:
+    """Return the API view of the settings."""
     with state.runtime.sessions() as session:
         row = deps.settings_row(session)  # loaded; stays readable once closed
     return schemas.SettingsOut(
@@ -96,6 +101,7 @@ def settings_out(state: AppState) -> schemas.SettingsOut:
 
 @router.get("/setup")
 def get_setup(state: deps.State) -> schemas.SetupState:
+    """Return the onboarding state."""
     with state.runtime.sessions() as session:
         current = setup_state(session)
     return schemas.SetupState(
@@ -107,8 +113,10 @@ def get_setup(state: deps.State) -> schemas.SetupState:
 
 @router.post("/setup")
 def post_setup(body: schemas.SetupIn, state: deps.State) -> schemas.SetupState:
-    """Finish setup once (409 afterwards). The bank download starts after
-    the setup commits, in the background."""
+    """Finish setup once (409 afterwards).
+
+    The bank download starts after the setup commits, in the background.
+    """
     runtime = state.runtime
     with transaction(runtime.sessions) as session:
         result = complete_setup(
@@ -130,6 +138,7 @@ def post_setup(body: schemas.SetupIn, state: deps.State) -> schemas.SetupState:
 
 @router.get("/settings")
 def get_settings(state: deps.State) -> schemas.SettingsOut:
+    """Return the settings."""
     return settings_out(state)
 
 
@@ -152,13 +161,16 @@ def patch_settings(
 
 @router.get("/bank")
 def get_bank(state: deps.State) -> schemas.BankStatus:
+    """Return the bank download status."""
     return bank_status(state)
 
 
 @router.post("/bank/refresh")
 def refresh_bank(state: deps.State) -> schemas.BankStatus:
-    """Start a download in the background (or keep the running one); poll
-    GET /bank every 2 s for its status."""
+    """Start a bank download in the background, or keep the running one.
+
+    Poll GET /bank every 2 s for its status.
+    """
     bank_service(state).start()
     return bank_status(state)
 
@@ -167,6 +179,7 @@ def refresh_bank(state: deps.State) -> schemas.BankStatus:
 
 
 def backup_status(state: AppState) -> schemas.BackupStatus:
+    """Return when the last backup was taken and where."""
     files = list_backups(state.runtime.paths.backups_dir)
     with state.runtime.sessions() as session:
         last = deps.settings_row(session).last_backup_at
@@ -179,11 +192,13 @@ def backup_status(state: AppState) -> schemas.BackupStatus:
 
 @router.get("/backup")
 def get_backup(state: deps.State) -> schemas.BackupStatus:
+    """Return the backup status."""
     return backup_status(state)
 
 
 @router.post("/backup")
 def post_backup(state: deps.State) -> schemas.BackupStatus:
+    """Take a database backup now and return the new status."""
     try:
         take_backup(state.runtime, state.clock())
     except (BackupError, OSError) as failure:
@@ -196,6 +211,7 @@ def post_backup(state: deps.State) -> schemas.BackupStatus:
 
 @router.get("/tutor/status")
 def tutor_status(state: deps.State) -> schemas.TutorStatus:
+    """Return the tutor's config and its pending report count."""
     tutor = state.runtime.config.tutor
     with state.runtime.sessions() as session:
         pending = pending_count(session)
@@ -210,8 +226,10 @@ def tutor_status(state: deps.State) -> schemas.TutorStatus:
 
 @router.post("/tutor/test")
 def tutor_test(state: deps.State) -> schemas.TutorTest:
-    """One tiny structured call (SPEC §12.1). Synchronous: up to the test
-    task's timeout."""
+    """One tiny structured call (SPEC §12.1).
+
+    Synchronous: up to the test task's timeout.
+    """
     tutor = state.runtime.config.tutor
     task = tutor.task("test")
     if not tutor.enabled:

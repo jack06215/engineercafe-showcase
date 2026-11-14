@@ -544,8 +544,10 @@ def _base_format(where: _Where) -> _Format:
 
 
 def _inlines(node: SyntaxTreeNode) -> list[SyntaxTreeNode]:
-    """The inline content of a block, skipping anything else it holds (a
-    footnote's back-reference sits beside the inline node, not inside it)."""
+    """The inline content of a block, skipping anything else it holds.
+
+    A footnote's back-reference sits beside the inline node, not inside it.
+    """
     return [
         child
         for inline in node.children
@@ -622,8 +624,11 @@ def _rule(paragraph: Paragraph, side: str, *, size: int, space: int) -> None:
 
 
 def _table_look(table: Table, *, width: int, indent: int) -> None:
-    """Google Docs' default table: full width in equal columns, 1pt black grid,
-    5pt padding. `width` and `indent` are in twips."""
+    """Google Docs' default table style.
+
+    Full width in equal columns, a 1pt black grid and 5pt padding. `width` and
+    `indent` are in twips.
+    """
     properties = table._tbl.tblPr
     # Fixed layout, as Google exports it, so renderers keep the equal columns
     # instead of shrinking the table around its content.

@@ -47,6 +47,7 @@ def escape_field(name: str) -> str:
 def compile_chart(
     spec: ChartSpec, profile: DataProfile, *, height: int
 ) -> dict[str, Any]:
+    """Compile *spec* into a Vega-Lite spec for the data in *profile*."""
     faceted = spec.column is not None or spec.row is not None
     compiled: dict[str, Any] = {"$schema": SCHEMA_URL}
     if spec.title:

@@ -24,6 +24,8 @@ NEW_STUCK_AFTER_SECONDS = 180
 
 @dataclass(frozen=True)
 class Message:
+    """One message in a hint conversation."""
+
     role: HintRole
     text: str
     stuck_at_seconds: int | None = None  # learner messages only
@@ -31,6 +33,8 @@ class Message:
 
 @dataclass(frozen=True)
 class HintInput:
+    """What the hint prompt needs to answer one learner message."""
+
     problem: ProblemInfo
     language: Language
     code: str  # the linked file now, or the editor's draft
@@ -41,6 +45,7 @@ class HintInput:
 
 
 def is_new_stuck(history: Sequence[Message], stuck_at_seconds: int) -> bool:
+    """Return whether *stuck_at_seconds* starts a new stuck moment in *history*."""
     previous = [
         m.stuck_at_seconds
         for m in history
@@ -52,6 +57,7 @@ def is_new_stuck(history: Sequence[Message], stuck_at_seconds: int) -> bool:
 
 
 def context(hint_input: HintInput) -> dict[str, object]:
+    """Build the template variables for the hint prompt."""
     conversation = [
         *hint_input.history,
         Message(HintRole.LEARNER, hint_input.message, hint_input.stuck_at_seconds),
@@ -75,6 +81,7 @@ def context(hint_input: HintInput) -> dict[str, object]:
 def generate(
     chat: BaseChatModel, task: TaskConfig, hint_input: HintInput
 ) -> Answer[HintReply]:
+    """Ask the model for a reply to the learner's latest message."""
     lang = language.for_hint(hint_input.message, hint_input.notes)
     answer = ask(
         chat,
@@ -114,6 +121,7 @@ def notes_block(reply: HintReply, stuck_at_seconds: int, new_stuck: bool) -> str
 
 
 def append_to_notes(notes: str, block: str, new_stuck: bool) -> str:
+    """Append *block* to *notes*, with a blank line before a new stuck moment."""
     if not notes.strip():
         return block
     separator = "\n\n" if new_stuck else "\n"

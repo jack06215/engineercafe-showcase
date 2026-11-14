@@ -19,6 +19,7 @@ from packages.algo_tutor.store.models import Problem, RatingEstimate
 def rating_of(
     problem: Problem, manifests: Manifests, estimate: int | None
 ) -> Rating | None:
+    """Return the exact or estimated rating of *problem*, if it has one."""
     exact = (
         manifests.exact_ratings.get(problem.external_id)
         if problem.source == Source.LEETCODE
@@ -43,12 +44,14 @@ def estimates(
 def ratings(
     session: Session, manifests: Manifests, problems: Iterable[Problem]
 ) -> dict[str, Rating | None]:
+    """Return the rating of each problem, by problem ID."""
     rows = list(problems)
     fitted = estimates(session, [p.id for p in rows])
     return {p.id: rating_of(p, manifests, fitted.get(p.id)) for p in rows}
 
 
 def rating_out(rating: Rating | None) -> RatingOut | None:
+    """Convert a rating to its API shape."""
     return (
         None
         if rating is None
@@ -57,6 +60,7 @@ def rating_out(rating: Rating | None) -> RatingOut | None:
 
 
 def brief(problem: Problem, rating: Rating | None) -> ProblemBrief:
+    """Return the short API view of *problem*."""
     return ProblemBrief(
         id=problem.id,
         source=Source(problem.source),
@@ -72,5 +76,6 @@ def brief(problem: Problem, rating: Rating | None) -> ProblemBrief:
 
 
 def brief_one(session: Session, manifests: Manifests, problem: Problem) -> ProblemBrief:
+    """Return the short API view of one problem, looking up its rating."""
     fitted = estimates(session, [problem.id])
     return brief(problem, rating_of(problem, manifests, fitted.get(problem.id)))

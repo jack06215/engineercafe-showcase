@@ -34,9 +34,12 @@ _REQUESTABLE = frozenset({ReportStatus.NONE.value, ReportStatus.FAILED.value})
 
 
 def request_report(session: Session, attempt: Attempt, tutor_enabled: bool) -> bool:
-    """Queue a report for a completed attempt. False when it isn't queued:
-    the tutor is off, the attempt isn't completed, or a report is already
-    pending, generating or done ("not repeated once a report exists")."""
+    """Queue a report for a completed attempt.
+
+    False when it isn't queued: the tutor is off, the attempt isn't completed,
+    or a report is already pending, generating or done ("not repeated once a
+    report exists").
+    """
     if not tutor_enabled or attempt.status != AttemptStatus.COMPLETED.value:
         return False
     if attempt.report_status not in _REQUESTABLE:
@@ -59,6 +62,7 @@ def recover(session: Session) -> int:
 
 
 def pending_count(session: Session) -> int:
+    """Return how many attempts wait for a report or are generating one."""
     return len(
         session.scalars(
             select(Attempt.id).where(
@@ -72,6 +76,8 @@ def pending_count(session: Session) -> int:
 
 @dataclass(frozen=True)
 class Job:
+    """One report to generate for an attempt."""
+
     attempt_id: str
     report_input: report.ReportInput
 
@@ -158,6 +164,7 @@ class ReportWorker:
         chat_factory: ChatFactory = chat_model,
         on_idle: Callable[[], None] | None = None,
     ) -> None:
+        """Set up the worker; call `start` to run it."""
         self._sessions = sessions
         self._config = config
         self._chat_factory = chat_factory
@@ -167,6 +174,7 @@ class ReportWorker:
         self._thread: threading.Thread | None = None
 
     def start(self) -> None:
+        """Recover reports left mid-run, then start the background thread."""
         with self._sessions() as session, session.begin():
             recover(session)
         self._thread = threading.Thread(
@@ -176,9 +184,11 @@ class ReportWorker:
         self.wake()
 
     def wake(self) -> None:
+        """Wake the worker to check for pending reports now."""
         self._wake.set()
 
     def stop(self, timeout: float = 5.0) -> None:
+        """Stop the worker and wait up to *timeout* seconds for its thread."""
         self._stop.set()
         self._wake.set()
         if self._thread is not None:

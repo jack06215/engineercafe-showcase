@@ -31,6 +31,7 @@ class TutorError(Exception):
     """Why a tutor call produced nothing. `kind` is what the panel shows."""
 
     def __init__(self, kind: TutorErrorKind, message: str) -> None:
+        """Store the error *kind* with its *message*."""
         super().__init__(message)
         self.kind = kind
         self.message = message
@@ -40,9 +41,12 @@ ChatFactory = Callable[[TaskConfig], BaseChatModel]
 
 
 def chat_model(task: TaskConfig) -> BaseChatModel:
-    """The task's client: `langchain_util.get_langchain_client` with the
-    merged config. `reasoning` is Ollama's thinking switch, so only Ollama
-    gets it; the OpenAI clients don't retry, so the timeout is the ceiling."""
+    """The task's chat client, built from the merged config.
+
+    It comes from `langchain_util.get_langchain_client`. `reasoning` is Ollama's
+    thinking switch, so only Ollama gets it; the OpenAI clients don't retry, so
+    the timeout is the ceiling.
+    """
     match task.provider:
         case "ollama":
             return get_langchain_client(
@@ -74,6 +78,8 @@ def chat_model(task: TaskConfig) -> BaseChatModel:
 
 @dataclass(frozen=True)
 class Answer[T: BaseModel]:
+    """A validated model reply, and whether it needed a repair."""
+
     value: T
     repaired: bool
     latency_ms: int
@@ -130,8 +136,11 @@ def _invoke(
     messages: Sequence[BaseMessage],
     task: TaskConfig,
 ) -> str:
-    """The model's raw reply text. Real providers are constrained to the
-    schema; anything else (the tests' scripted model) is called as is."""
+    """The model's raw reply text.
+
+    Real providers are constrained to the schema; anything else (the tests'
+    scripted model) is called as is.
+    """
     try:
         if isinstance(chat, ChatOllama | ChatOpenAI | AzureChatOpenAI):
             structured = chat.with_structured_output(

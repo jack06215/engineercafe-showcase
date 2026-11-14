@@ -123,7 +123,8 @@ class ChainFactory(Protocol):
         template: BasePromptTemplate[str],
         chat: ChatLLM,
         parser: Parser,
-    ) -> Parser: ...
+    ) -> Parser:
+        """Compose *template*, *chat* and *parser* into one chain."""
 
 
 def default_chain_factory(

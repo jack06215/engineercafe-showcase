@@ -8,15 +8,19 @@ SAMPLES_DIR = Path(__file__).with_name("sample_data")
 
 @dataclass(frozen=True)
 class Sample:
+    """A bundled sample CSV and its button label."""
+
     file_name: str
     label: str  # the button label
     credit: str | None = None  # shown under the chat when the sample is loaded
 
     @property
     def path(self) -> Path:
+        """The sample's file path."""
         return SAMPLES_DIR / self.file_name
 
     def read_bytes(self) -> bytes:
+        """Return the sample file's content."""
         return self.path.read_bytes()
 
 
@@ -29,6 +33,7 @@ SAMPLES: tuple[Sample, ...] = (
 
 
 def sample_named(file_name: str) -> Sample:
+    """Return the sample with *file_name*; raise KeyError if there is none."""
     for sample in SAMPLES:
         if sample.file_name == file_name:
             return sample

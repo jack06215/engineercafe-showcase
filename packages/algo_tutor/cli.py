@@ -51,6 +51,7 @@ def add_location_flags(parser: argparse.ArgumentParser) -> None:
 
 
 def add_serve_flags(parser: argparse.ArgumentParser) -> None:
+    """Add the flags that override where the server listens."""
     parser.add_argument(
         "--host", help="loopback address to listen on (default: config server.host)"
     )
@@ -147,8 +148,11 @@ def serve(
     host: str | None = None,
     port: int | None = None,
 ) -> None:
-    """Open everything, back up if the last backup is over a day old, and
-    serve the API until interrupted (SPEC §3.1, §17). Loopback only."""
+    """Serve the API on loopback until interrupted (SPEC §3.1, §17).
+
+    It opens everything first, and backs up if the last backup is over a day
+    old.
+    """
     # FastAPI, uvicorn and LangChain load only for `serve`.
     import uvicorn
 
@@ -218,6 +222,7 @@ def run_cli(namespace: argparse.Namespace) -> None:
 
 
 def main() -> None:
+    """Run the CLI with the command-line arguments."""
     run_cli(build_parser().parse_args())
 
 

@@ -35,6 +35,8 @@ class ReviewDateRequired(ValueError):
 
 @dataclass(frozen=True)
 class Recommendation:
+    """The recommended date and stage of the next review."""
+
     date: date
     stage: ReviewStage
 
@@ -71,6 +73,8 @@ def recommendation(
 
 @dataclass(frozen=True)
 class ReviewTarget:
+    """When and how a problem is next due for review."""
+
     problem_id: str
     recommended_date: date | None
     effective_date: date | None  # what is shown and used; None = "No scheduled review"
@@ -89,7 +93,8 @@ class Choice:
     day: date | None = None  # required for manual and snooze
 
     @classmethod
-    def from_finish(cls, choice: ReviewChoice, chosen: date | None = None) -> "Choice":
+    def from_finish(cls, choice: ReviewChoice, chosen: date | None = None) -> Choice:
+        """Build a Choice from the review choice made when finishing an attempt."""
         return cls(ReviewAction(choice.value), chosen)
 
 
@@ -243,8 +248,11 @@ def _atcoder_finish(
     choice: Choice,
     study_date: date,
 ) -> ReviewTarget:
-    """SPEC §8.5. A re-solve is never `unseen`, so BloomCode's retirement
-    (two `mixed` results) can't fire; count solo solves at `transfer` instead."""
+    """SPEC §8.5.
+
+    A re-solve is never `unseen`, so BloomCode's retirement (two `mixed`
+    results) can't fire; count solo solves at `transfer` instead.
+    """
     if (
         prior is not None
         and prior.action in (ReviewAction.MANUAL, ReviewAction.SNOOZE)
@@ -310,9 +318,11 @@ def title_key(title: str) -> tuple[str, str]:
 
 
 def due_checks(problems: Iterable[DueCandidate], today: date) -> list[DueCheck]:
-    """Checks due today (SPEC §8.3): an effective date today or earlier, not
-    in an unfinished attempt, and at least one completed attempt (a snoozed
-    never-attempted problem is just new again). Sorted by date, then title.
+    """Checks due today (SPEC §8.3), sorted by date, then title.
+
+    A check is due when its effective date is today or earlier, it is not in an
+    unfinished attempt, and it has at least one completed attempt (a snoozed
+    never-attempted problem is just new again).
     """
     checks: list[DueCheck] = []
     for p in problems:

@@ -29,6 +29,7 @@ LABEL_TEXT = {
 
 
 def notebook(row: Pattern) -> schemas.Notebook:
+    """Return the API view of a pattern's notebook."""
     return schemas.Notebook(
         cues=row.cues,
         pitfalls=row.pitfalls,
@@ -41,8 +42,11 @@ def notebook(row: Pattern) -> schemas.Notebook:
 
 
 def attempted_counts(session: Session) -> dict[str, int]:
-    """Attempted problems per pattern: the only ones a pattern page lists,
-    so browsing it can't expose unseen problems."""
+    """Attempted problems per pattern.
+
+    These are the only problems a pattern page lists, so browsing it can't
+    expose unseen problems.
+    """
     rows = session.execute(
         select(
             ProblemPattern.pattern_id,
@@ -55,6 +59,7 @@ def attempted_counts(session: Session) -> dict[str, int]:
 
 
 def pattern_summary(row: Pattern, counts: dict[str, int]) -> schemas.PatternSummary:
+    """Return the API summary of a pattern with its attempted-problem count."""
     return schemas.PatternSummary(
         id=row.id,
         name=row.name,
@@ -67,6 +72,7 @@ def pattern_summary(row: Pattern, counts: dict[str, int]) -> schemas.PatternSumm
 def notebook_problems(
     session: Session, state: AppState, pattern_id: str
 ) -> list[schemas.NotebookProblem]:
+    """Return the attempted problems of *pattern_id* for its notebook page."""
     problems = list(
         session.scalars(
             select(Problem)
@@ -101,6 +107,7 @@ def notebook_problems(
 
 
 def get_pattern(session: Session, pattern_id: str) -> Pattern:
+    """Return the pattern with *pattern_id*; raise 404 if there is none."""
     row = session.get(Pattern, pattern_id)
     if row is None:
         raise not_found("Pattern")
@@ -118,6 +125,7 @@ def read_readme(state: AppState, row: Pattern) -> str | None:
 
 @router.get("/patterns")
 def list_patterns(session: deps.Db) -> list[schemas.PatternSummary]:
+    """Return every pattern in order, with attempted-problem counts."""
     deps.forbid_during_assessment(session)
     counts = attempted_counts(session)
     return [
@@ -130,6 +138,7 @@ def list_patterns(session: deps.Db) -> list[schemas.PatternSummary]:
 def pattern_page(
     pattern_id: str, state: deps.State, session: deps.Db
 ) -> schemas.PatternDetail:
+    """Return a pattern with its README, notebook and attempted problems."""
     deps.forbid_during_assessment(session)
     row = get_pattern(session, pattern_id)
     return schemas.PatternDetail(
@@ -166,8 +175,10 @@ def mistakes(
     q: Annotated[str | None, Query(max_length=200)] = None,
     label: MistakeLabel | None = None,
 ) -> schemas.MistakeList:
-    """Completed attempts with a mistake label or a takeaway, newest first;
-    `q` searches the title, the takeaway and the labels."""
+    """Completed attempts with a mistake label or a takeaway, newest first.
+
+    `q` searches the title, the takeaway and the labels.
+    """
     deps.forbid_during_assessment(session)
     rows = session.execute(
         select(Attempt, Problem)

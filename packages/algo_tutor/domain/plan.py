@@ -49,18 +49,22 @@ ATCODER_REVIEW_REASON = "Due for review — solve it again"
 
 
 def ladder_reason(topic: str, level: int) -> str:
+    """Plan reason for a problem picked at the learner's level."""
     return f"{topic} · your level {level}"
 
 
 def practice_after_reason(topic: str, title: str) -> str:
+    """Plan reason for practice that follows the problem *title*."""
     return f"{topic} · practice after {title}"
 
 
 def repair_reason(topic: str, title: str) -> str:
+    """Plan reason for easier practice after the problem *title*."""
     return f"{topic} · easier practice after {title}"
 
 
 def named_list_reason(list_name: str) -> str:
+    """Plan reason for a problem taken from a study list."""
     return f"From {list_name}"
 
 
@@ -82,6 +86,7 @@ class ProblemFacts:
     target: ReviewTarget | None = None
 
     def due_candidate(self) -> DueCandidate | None:
+        """This problem as a due review, or None if it has no review target."""
         if self.target is None:
             return None
         return DueCandidate(
@@ -108,6 +113,7 @@ class PlanContext:
     include_paid_only: bool = False
 
     def topic_name(self, topic_id: str) -> str:
+        """Return the display name of *topic_id*."""
         return self.catalog.get(topic_id).name
 
     def checks(self, source: Source) -> list[DueCheck]:
@@ -120,11 +126,14 @@ class PlanContext:
         return due_checks(candidates, self.today)
 
     def allowed(self, p: ProblemFacts) -> bool:
+        """Return whether the plan may include *p*, given the paid-only setting."""
         return self.include_paid_only or not p.paid_only
 
 
 @dataclass(frozen=True)
 class Candidate:
+    """A problem that the plan may pick for a topic."""
+
     problem_id: str
     title: str
     topic_id: str
@@ -135,6 +144,8 @@ class Candidate:
 
 @dataclass(frozen=True)
 class TopicCandidates:
+    """The candidate problems for one topic at the learner's level."""
+
     topic_id: str
     level: int
     problems: tuple[Candidate, ...]
@@ -156,6 +167,8 @@ class PlanSpec:
 
 @dataclass(frozen=True)
 class PlannedItem:
+    """One item of a built daily plan."""
+
     lane: Lane
     position: int  # within its lane
     status: PlanItemStatus
@@ -168,6 +181,8 @@ class PlannedItem:
 
 @dataclass(frozen=True)
 class ListEntry:
+    """A problem on the active study list, with its completed attempts."""
+
     problem_id: str
     title: str
     added_at: datetime
@@ -385,9 +400,10 @@ def rule_picks(
     exclude: Iterable[str] = (),
     served: Iterable[str] = (),
 ) -> list[PlanSpec]:
-    """The LeetCode lane's built-in picks: due checks first (one slot each,
-    skipping ideas in `served`), then one problem per topic per round,
-    weakest topic first (SPEC §10.2 steps 3–4).
+    """The LeetCode lane's built-in picks (SPEC §10.2 steps 3–4).
+
+    Due checks come first, one slot each, skipping ideas in `served`. Then come
+    one problem per topic per round, weakest topic first.
     """
     picks: list[PlanSpec] = []
     if slots <= 0:
@@ -435,8 +451,11 @@ def list_picks(
     reason: str,
     exclude: Iterable[str] = (),
 ) -> list[PlanSpec]:
-    """The list's next entries that aren't done, in list order (repeats included:
-    a problem solved before it was listed is still on the list)."""
+    """The list's next entries that aren't done, in list order.
+
+    Repeats are included: a problem solved before it was listed is still on the
+    list.
+    """
     if study_list is None or count <= 0:
         return []
     skip = set(exclude)
@@ -473,8 +492,11 @@ def _place(
     has_active: bool,
     active_first: PlanSpec | None = None,
 ) -> list[PlannedItem]:
-    """Positions within each lane; one item active (the current attempt's, else
-    the first new one, LeetCode lane first), unless one already is."""
+    """Number the items within each lane and make one item active.
+
+    The active item is the current attempt's, else the first new one, LeetCode
+    lane first. Nothing changes if an item is already active.
+    """
     order = [*lanes[Lane.LEETCODE], *lanes[Lane.ATCODER]]
     active = None if has_active else (active_first or (order[0] if order else None))
     items: list[PlannedItem] = []
@@ -570,7 +592,9 @@ def rebuild_plan(
     leetcode_list: StudyList | None = None,
     atcoder_list: StudyList | None = None,
 ) -> Rebuild:
-    """ "Re-plan today" (SPEC §10.1): keep started and finished items, re-pick the rest.
+    """For "Re-plan today" (SPEC §10.1).
+
+    Started and finished items stay; the rest are picked again.
 
     The list takes the free slots first, then the rules; there is no
     room-for-a-check rule here, as upstream.
@@ -626,8 +650,9 @@ def replacement(
     items: Sequence[ExistingItem],
     atcoder_list: StudyList | None = None,
 ) -> PlanSpec | None:
-    """Replace (`swap`, SPEC §10.4): one rule-based replacement, or None
-    ("No other question fits your current training levels").
+    """Pick one rule-based replacement for a swapped item (SPEC §10.4), or None.
+
+    None means "No other question fits your current training levels".
 
     LeetCode: the rules' next pick, never a problem already on the plan nor
     an idea another live item checks. AtCoder: the active list's next entry.

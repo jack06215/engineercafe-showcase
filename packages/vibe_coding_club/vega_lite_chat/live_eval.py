@@ -86,6 +86,8 @@ class EncodingExpect(_Strict):
 
 
 class Expect(_Strict):
+    """What a case's chart must contain to pass."""
+
     chart: bool = True  # False: the model must ask back instead of drawing
     mark: list[Mark] | None = None
     fields: list[str] = Field(default_factory=list)  # each used on some channel
@@ -96,6 +98,8 @@ class Expect(_Strict):
 
 
 class EvalCase(_Strict):
+    """One chart request to send to the live model, with its expectations."""
+
     name: str
     sample: str
     first_chart: bool = False  # request is the prompt file's first_chart_request
@@ -112,6 +116,8 @@ class EvalCase(_Strict):
 
 
 class RoutingCase(_Strict):
+    """A request that checks whether the chat model draws or answers in prose."""
+
     name: str
     sample: str
     current: ChartSpec | None = None
@@ -120,11 +126,14 @@ class RoutingCase(_Strict):
 
 
 class CaseFile(_Strict):
+    """The eval cases file."""
+
     cases: list[EvalCase]
     routing: list[RoutingCase] = Field(default_factory=list)
 
 
 def load_cases(path: Path = DEFAULT_CASES) -> CaseFile:
+    """Load the eval cases from *path*."""
     return CaseFile.model_validate(yaml.safe_load(path.read_text(encoding="utf-8")))
 
 
@@ -199,6 +208,8 @@ def dropped_filter_claims(current: ChartSpec | None, turn: AssistantTurn) -> lis
 
 @dataclass(frozen=True)
 class CaseResult:
+    """The outcome of one eval case."""
+
     name: str
     outcome: Literal["PASS", "FAIL", "SKIP"]
     calls: int
@@ -209,6 +220,7 @@ class CaseResult:
 def run_case(
     case: EvalCase, model: StructuredModel, book: PromptBook, config: AppConfig
 ) -> CaseResult:
+    """Run one chart case against the live model and check the result."""
     try:
         sample = sample_named(case.sample)
     except KeyError:
@@ -294,6 +306,7 @@ def _shown(chart: ChartSpec, profile: DataProfile, config: AppConfig) -> Turn:
 
 
 def format_table(results: Sequence[CaseResult]) -> str:
+    """Format *results* as a fixed-width table."""
     width = max([len("case"), *(len(result.name) for result in results)])
     lines = [f"{'case':<{width}}  result  calls  seconds"]
     for result in results:
@@ -342,6 +355,7 @@ def run_cli(namespace: argparse.Namespace) -> int:
 
 
 def main(args: Args) -> int:
+    """Run the selected cases and return an exit code."""
     config = load_config()
     book = load_prompts(data=config.data)
     case_file = load_cases()

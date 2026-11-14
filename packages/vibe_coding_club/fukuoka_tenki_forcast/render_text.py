@@ -55,6 +55,7 @@ def render_text(forecast: Forecast) -> str:
 
 
 def render_hourly_text(hours: Sequence[Hourly]) -> str:
+    """Render the 3-hourly forecast as plain text."""
     lines = ["■ 3時間ごとの予報"]
     lines.extend("  " + line for line in hourly_chart(hours).plain.split("\n"))
     return "\n".join(lines)

@@ -179,6 +179,7 @@ class Attempt[T]:
         return (-len(self.problems), self.score)
 
     def meets(self, accept_score: float) -> bool:
+        """Return whether the attempt is clean and scores at least *accept_score*."""
         return not self.problems and self.score >= accept_score
 
 
@@ -203,6 +204,7 @@ class ThinkingPolicy:
     max_checks: int = 8
 
     def __post_init__(self) -> None:
+        """Reject a negative `max_revisions` or a `patience` below 1."""
         if self.max_revisions < 0:
             msg = f"max_revisions must be >= 0, got {self.max_revisions}"
             raise ValueError(msg)
@@ -243,6 +245,7 @@ class ThinkingResult[T]:
 
     @property
     def best(self) -> Attempt[T]:
+        """The attempt at `best_index`."""
         return self.attempts[self.best_index]
 
 

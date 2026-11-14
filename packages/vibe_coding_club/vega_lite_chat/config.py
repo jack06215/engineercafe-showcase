@@ -14,6 +14,8 @@ class _Section(BaseModel):
 
 
 class OllamaConfig(_Section):
+    """How to reach and run the Ollama model."""
+
     model: str
     base_url: str
     temperature: float = Field(ge=0)
@@ -23,15 +25,21 @@ class OllamaConfig(_Section):
 
 
 class ChatConfig(_Section):
+    """Settings for the chat model."""
+
     history_turns: int = Field(ge=0)  # earlier turns the chat model sees, newest last
 
 
 class TranslatorConfig(_Section):
+    """Settings for the chart translator and its repair loop."""
+
     max_calls: int = Field(ge=1)
     recent_requests: int = Field(ge=0)
 
 
 class DataConfig(_Section):
+    """Limits for loading and profiling the data."""
+
     row_warning: int = Field(ge=1)
     sample_rows: int = Field(ge=0)
     sample_seed: int
@@ -39,10 +47,14 @@ class DataConfig(_Section):
 
 
 class ChartConfig(_Section):
+    """Settings for drawing charts."""
+
     height: int = Field(gt=0)
 
 
 class AppConfig(_Section):
+    """The whole app config."""
+
     ollama: OllamaConfig
     chat: ChatConfig
     translator: TranslatorConfig

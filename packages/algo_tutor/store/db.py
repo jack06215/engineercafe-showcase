@@ -47,6 +47,7 @@ def create_sqlite_engine(path: Path) -> Engine:
 
 
 def session_factory(engine: Engine) -> sessionmaker[Session]:
+    """Return a session factory whose objects stay usable after commit."""
     # expire_on_commit=False: rows read in a request stay usable after commit.
     return sessionmaker(engine, expire_on_commit=False)
 

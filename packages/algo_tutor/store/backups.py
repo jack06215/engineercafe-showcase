@@ -29,6 +29,8 @@ class BackupError(RuntimeError):
 
 @dataclass(frozen=True)
 class Backup:
+    """One database backup file and when it was made."""
+
     path: Path
     created_at: str  # ISO-8601 UTC
 

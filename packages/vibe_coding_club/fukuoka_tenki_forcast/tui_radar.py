@@ -106,16 +106,19 @@ class RadarImage(Widget):
         """The image changed size, so a map that fits should be fetched."""
 
     def __init__(self) -> None:
+        """Start with no map."""
         super().__init__()
         self.radar_map: RadarMap | None = None
         self._pixels: list[RGB] = []
 
     def show_map(self, radar_map: RadarMap) -> None:
+        """Show *radar_map* and redraw."""
         self.radar_map = radar_map
         self._pixels = map_pixels(radar_map)
         self.refresh()
 
     def render_line(self, y: int) -> Strip:
+        """Render row *y* with half blocks, two map pixels per cell."""
         width = self.size.width
         radar_map = self.radar_map
         if radar_map is None:
@@ -130,6 +133,7 @@ class RadarImage(Widget):
         return Strip(segments, width).simplify()
 
     def on_resize(self, _: events.Resize) -> None:
+        """Tell the panel that the image size changed."""
         self.post_message(self.Resized())
 
     def _pixel(self, x: int, y: int) -> RGB:
@@ -169,6 +173,7 @@ class RadarPanel(Vertical, can_focus=True):
     ]
 
     def __init__(self, source: WeatherSource) -> None:
+        """Show radar for *source*, starting with the nowcast at the default zoom."""
         super().__init__()
         self.source = source
         self.product = RadarProduct.NOWCAST
@@ -182,6 +187,7 @@ class RadarPanel(Vertical, can_focus=True):
         self._map_pending = False
 
     def compose(self) -> ComposeResult:
+        """Lay out the info line, image, timeline, summary and legend."""
         yield Static(id="radar-info")
         yield RadarImage()
         yield Static(id="radar-timeline")
@@ -189,6 +195,7 @@ class RadarPanel(Vertical, can_focus=True):
         yield Static(legend(), id="radar-legend")
 
     def on_mount(self) -> None:
+        """Create the paused timer that plays the frames."""
         self._player = self.set_interval(PLAY_SECONDS, self._advance, pause=True)
 
     def activate(self) -> None:
@@ -198,6 +205,7 @@ class RadarPanel(Vertical, can_focus=True):
         self.focus()
 
     def reload(self) -> None:
+        """Drop the loaded frames and fetch them again."""
         # The info line says it is loading. Not `RadarImage.loading`: that
         # hides the image behind an indicator and reports its size as 0×0,
         # and the image's size is what the map is fetched for.
@@ -208,10 +216,12 @@ class RadarPanel(Vertical, can_focus=True):
         self._load_frames(self.product)
 
     def action_step(self, delta: int) -> None:
+        """Show the frame *delta* steps away, within the frame list."""
         if self.frames:
             self._show_frame(min(max(self.index + delta, 0), len(self.frames) - 1))
 
     def action_play(self) -> None:
+        """Start or stop playing the frames."""
         if not self.frames:
             return
         self.playing = not self.playing
@@ -222,6 +232,7 @@ class RadarPanel(Vertical, can_focus=True):
         self._refresh_text()
 
     def action_zoom(self, delta: int) -> None:
+        """Zoom by *delta* levels, within the allowed zooms."""
         position = min(max(ZOOMS.index(self.zoom) + delta, 0), len(ZOOMS) - 1)
         if ZOOMS[position] != self.zoom:
             self.zoom = ZOOMS[position]
@@ -229,6 +240,7 @@ class RadarPanel(Vertical, can_focus=True):
             self._request_map()
 
     def action_switch_product(self) -> None:
+        """Switch between the nowcast and the short-range forecast."""
         self.product = (
             RadarProduct.SHORT_RANGE
             if self.product is RadarProduct.NOWCAST
@@ -239,6 +251,7 @@ class RadarPanel(Vertical, can_focus=True):
         self.reload()
 
     def on_radar_image_resized(self, _: RadarImage.Resized) -> None:
+        """Fetch a map that fits the new image size."""
         self._request_map()
 
     @work(thread=True, exclusive=True, group="radar-frames")

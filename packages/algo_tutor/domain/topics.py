@@ -11,6 +11,8 @@ from typing import Any
 
 @dataclass(frozen=True)
 class Topic:
+    """One algorithm topic and the LeetCode tags that map to it."""
+
     id: str
     name: str
     priority: int  # most specific first; picks the primary topic
@@ -25,13 +27,15 @@ class TopicCatalogError(ValueError):
 
 @dataclass(frozen=True)
 class TopicCatalog:
+    """Every topic, with the tag and NeetCode category mappings."""
+
     topics: tuple[Topic, ...]  # in priority order
     unmapped_tags: frozenset[str]
     excluded_tags: frozenset[str]
     neetcode_categories: Mapping[str, str | None]
 
     @classmethod
-    def from_mapping(cls, raw: Mapping[str, Any]) -> "TopicCatalog":
+    def from_mapping(cls, raw: Mapping[str, Any]) -> TopicCatalog:
         """Build and validate the catalogue from parsed `topics.yaml`."""
         try:
             entries = raw["topics"]
@@ -86,18 +90,22 @@ class TopicCatalog:
         )
 
     def get(self, topic_id: str) -> Topic:
+        """Return the topic with *topic_id*; raise KeyError if there is none."""
         for t in self.topics:
             if t.id == topic_id:
                 return t
         raise KeyError(topic_id)
 
     def ids(self) -> list[str]:
+        """Return the topic IDs in priority order."""
         return [t.id for t in self.topics]
 
     def by_curriculum(self) -> list[Topic]:
+        """Return the topics in curriculum order, fundamentals first."""
         return sorted(self.topics, key=lambda t: t.curriculum)
 
     def topic_for_tag(self, tag: str) -> Topic | None:
+        """Return the highest-priority topic that has *tag*, or None."""
         for t in self.topics:
             if tag in t.tags:
                 return t

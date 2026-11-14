@@ -23,6 +23,8 @@ class _Reply(BaseModel):
 
 
 class ReportReply(_Reply):
+    """The model's report on an attempt, one section per heading."""
+
     summary: Section = Field(description="Summary: 1-4 short lines.")
     strengths: Section = Field(description="What went well: 1-4 short lines.")
     improvements: Section = Field(description="What to improve: 1-4 short lines.")
@@ -33,6 +35,8 @@ class ReportReply(_Reply):
 
 
 class HintReply(_Reply):
+    """The model's reply to a learner's message, with a one-line hint."""
+
     reply: Annotated[
         str, StringConstraints(strip_whitespace=True, min_length=1, max_length=3000)
     ] = Field(description="What you say to the candidate now. Markdown allowed.")
@@ -66,6 +70,7 @@ class HintReply(_Reply):
 
     @property
     def hint_level(self) -> HintLevel:
+        """The `level` field as a HintLevel."""
         return HintLevel(self.level)
 
 

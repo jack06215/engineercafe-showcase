@@ -25,11 +25,14 @@ from packages.algo_tutor.store.timeutil import iso_utc, new_id
 
 @dataclass(frozen=True)
 class Added:
+    """A problem and whether adding it created a new row."""
+
     problem: Problem
     created: bool
 
 
 def find_problem(session: Session, source: Source, external_id: str) -> Problem | None:
+    """Return the problem with *source* and *external_id*, or None."""
     return session.scalar(
         select(Problem).where(
             Problem.source == source.value, Problem.external_id == external_id
@@ -155,7 +158,9 @@ def add_problem_by_url(
     title: str | None = None,
     bank: dict[str, BankQuestion] | None = None,
 ) -> Added:
-    """ "Add problem" in the library (SPEC §14). An existing problem comes back as is.
+    """For "Add problem" in the library (SPEC §14).
+
+    An existing problem comes back as is.
 
     AtCoder needs `title`; LeetCode finds its own when `title` is None.
     """

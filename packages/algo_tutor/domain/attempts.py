@@ -11,6 +11,8 @@ from packages.algo_tutor.domain.enums import Context, Evidence, PlanItemKind
 
 @dataclass(frozen=True)
 class StartFacts:
+    """How an attempt counts, decided when it starts."""
+
     context: Context
     evidence: Evidence
 

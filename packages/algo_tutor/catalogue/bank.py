@@ -58,6 +58,8 @@ from packages.algo_tutor.store.timeutil import iso_utc, new_id, now_utc
 
 @dataclass(frozen=True)
 class Popularity:
+    """Likes, dislikes and percentile of a LeetCode problem."""
+
     likes: int
     dislikes: int
     percentile: int
@@ -65,6 +67,8 @@ class Popularity:
 
 @dataclass(frozen=True)
 class Bank:
+    """The processed LeetCode bank: kept problems, estimates and popularity."""
+
     model: RatingModel
     estimates: dict[str, int]  # slug → fitted rating, for problems without an exact one
     popularity: dict[str, Popularity]  # slug → popularity, algorithm problems only
@@ -75,6 +79,8 @@ class Bank:
 
 @dataclass(frozen=True)
 class BankReport:
+    """Counts from one bank import."""
+
     downloaded: int
     kept: int
     added: int
@@ -83,6 +89,7 @@ class BankReport:
     unknown_tags: list[str]
 
     def as_json(self) -> dict[str, Any]:
+        """Return the report as a JSON-ready dict."""
         return {
             "downloaded": self.downloaded,
             "kept": self.kept,
@@ -265,6 +272,8 @@ BankState = Literal["idle", "running", "done", "failed"]
 
 @dataclass(frozen=True)
 class BankStatus:
+    """The bank download's state and the library's LeetCode counts."""
+
     state: BankState
     message: str | None
     problems: int  # LeetCode problems in the library
@@ -276,6 +285,7 @@ class BankStatus:
 def bank_summary(
     session: Session,
 ) -> tuple[int, str | None, str | None, dict[str, Any] | None]:
+    """Return the problem count, estimate method, fetch time and last report."""
     problems = session.scalar(
         select(func.count())
         .select_from(Problem)
@@ -316,6 +326,7 @@ class BankService:
         sleep: Callable[[float], None] | None = None,
         clock: Callable[[], datetime] = now_utc,
     ) -> None:
+        """Set up the service; *post*, *sleep* and *clock* are injectable for tests."""
         self._sessions = sessions
         self._manifests = manifests
         self._bank_file = bank_file
@@ -328,6 +339,7 @@ class BankService:
         self._thread: threading.Thread | None = None
 
     def status(self) -> BankStatus:
+        """Return the bank's current state and counts."""
         with self._sessions() as session:
             problems, method, fetched_at, report = bank_summary(session)
             settings = session.get(Settings, 1)
@@ -364,6 +376,7 @@ class BankService:
         return report
 
     def join(self, timeout: float | None = None) -> None:
+        """Wait for a running download to finish, up to *timeout* seconds."""
         if self._thread is not None:
             self._thread.join(timeout)
 

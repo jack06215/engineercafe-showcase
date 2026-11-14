@@ -1,5 +1,7 @@
-"""Algo-chan's instructions, reworded from BloomCode's (© Pritan Barai, MIT;
-python/reviews/review.py and python/interview/hint.py at b0a6975).
+"""Algo-chan's instructions, reworded from BloomCode's.
+
+Source: © Pritan Barai, MIT; python/reviews/review.py and
+python/interview/hint.py at b0a6975.
 
 Changes from upstream: Algo-chan is a coding-interview tutor, not a
 "LeetCode tutor", and the source is named per problem; the LeetCode-editor
@@ -81,6 +83,7 @@ _SOURCE_NAMES = {Source.LEETCODE: "LeetCode", Source.ATCODER: "AtCoder"}
 
 
 def report_instructions(source: Source) -> str:
+    """Return the report prompt filled in for *source*."""
     return REPORT.format(
         source_name=_SOURCE_NAMES[source],
         source_note=_SOURCE_NOTES[source],
@@ -89,6 +92,7 @@ def report_instructions(source: Source) -> str:
 
 
 def hint_instructions(source: Source) -> str:
+    """Return the hint prompt filled in for *source*."""
     return HINT.format(
         source_name=_SOURCE_NAMES[source],
         source_note=_SOURCE_NOTES[source],

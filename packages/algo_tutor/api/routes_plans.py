@@ -48,6 +48,7 @@ _DONE = (PlanItemStatus.COMPLETED.value, PlanItemStatus.SKIPPED.value)
 
 
 def plan_items(session: Session, plan_id: str) -> list[models.PlanItem]:
+    """Return the items of a plan, ordered by lane and position."""
     rows = session.scalars(
         select(models.PlanItem).where(models.PlanItem.plan_id == plan_id)
     ).all()
@@ -103,6 +104,7 @@ def plan_out(session: Session, state: AppState, row: models.DailyPlan) -> PlanOu
 
 
 def find_plan(session: Session, day: date, timezone: str) -> models.DailyPlan | None:
+    """Return the plan for *day* in *timezone*, if one exists."""
     return session.scalars(
         select(models.DailyPlan).where(
             models.DailyPlan.date == day.isoformat(),
@@ -112,6 +114,7 @@ def find_plan(session: Session, day: date, timezone: str) -> models.DailyPlan | 
 
 
 def get_plan(session: Session, plan_id: str) -> models.DailyPlan:
+    """Return the plan with *plan_id*; raise 404 if there is none."""
     row = session.get(models.DailyPlan, plan_id)
     if row is None:
         raise not_found("Plan")
@@ -135,7 +138,9 @@ def current_plan(session: Session, state: AppState) -> models.DailyPlan | None:
 @router.get("/desk")
 def desk(session: deps.Db, state: deps.State) -> Desk:
     """Today's plan in both lanes, checks due and any attempt in progress.
-    During a hidden assessment only "Assessment in progress" + Resume."""
+
+    During a hidden assessment only "Assessment in progress" + Resume.
+    """
     settings = engine.settings_row(session)
     day = engine.today(state, settings)
     attempt = engine.unfinished_attempt(session)
@@ -256,13 +261,17 @@ def ensure_plan(session: Session, state: AppState) -> models.DailyPlan:
 
 @router.post("/plans/today/ensure")
 def ensure(session: deps.Db, state: deps.State) -> PlanOut:
-    """Locked during a hidden assessment like every plan route: the other
-    items' reasons name topics. The desk shows "Assessment in progress"."""
+    """Locked during a hidden assessment, like every plan route.
+
+    The other items' reasons name topics. The desk shows "Assessment in
+    progress".
+    """
     deps.forbid_during_assessment(session)
     return plan_out(session, state, ensure_plan(session, state))
 
 
 def existing_items(session: Session, plan_id: str) -> list[plan.ExistingItem]:
+    """Return the plan's items as the planner sees them."""
     return [
         plan.ExistingItem(
             id=i.id,
@@ -293,8 +302,7 @@ def rebuild(
     state: deps.State,
     key: deps.IdempotencyKey,
 ) -> JSONResponse:
-    """ "Re-plan today": keep started and finished items, re-pick the rest."""
-
+    """For "Re-plan today": keep started and finished items, re-pick the rest."""
     deps.forbid_during_assessment(session)
 
     def run() -> PlanOut:
@@ -327,6 +335,7 @@ def rebuild(
 
 
 def get_item(session: Session, plan_id: str, item_id: str) -> models.PlanItem:
+    """Return item *item_id* of plan *plan_id*; raise 404 if there is none."""
     item = session.get(models.PlanItem, item_id)
     if item is None or item.plan_id != plan_id:
         raise not_found("Plan item")
@@ -337,7 +346,7 @@ def get_item(session: Session, plan_id: str, item_id: str) -> models.PlanItem:
 def activate(
     plan_id: str, item_id: str, body: PlanVersionIn, session: deps.Db, state: deps.State
 ) -> PlanOut:
-    """ "Make next": this item becomes the active one."""
+    """For "Make next": this item becomes the active one."""
     deps.forbid_during_assessment(session)
     row = get_plan(session, plan_id)
     deps.check_version(row.version, body.version, "The plan")

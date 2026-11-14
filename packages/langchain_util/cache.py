@@ -60,6 +60,7 @@ class SQLiteCache(BaseCache):
     """
 
     def __init__(self, database_path: str | Path) -> None:
+        """Open the cache database at *database_path*, creating it if needed."""
         self.database_path = Path(database_path).expanduser()
         self.database_path.parent.mkdir(parents=True, exist_ok=True)
         self._lock = threading.Lock()
@@ -72,6 +73,7 @@ class SQLiteCache(BaseCache):
         return _Transaction(connection)
 
     def lookup(self, prompt: str, llm_string: str) -> RETURN_VAL_TYPE | None:
+        """Return the cached generations for *prompt* and *llm_string*, or None."""
         with self._lock, self._transaction() as connection:
             rows = connection.execute(
                 "SELECT value FROM cache WHERE prompt = ? AND llm = ? ORDER BY idx",
@@ -92,6 +94,7 @@ class SQLiteCache(BaseCache):
         llm_string: str,
         return_val: RETURN_VAL_TYPE,
     ) -> None:
+        """Store *return_val* as the generations for *prompt* and *llm_string*."""
         rows = [
             (prompt, llm_string, index, dumps(generation))
             for index, generation in enumerate(return_val)
@@ -108,6 +111,7 @@ class SQLiteCache(BaseCache):
             )
 
     def clear(self, **kwargs: Any) -> None:
+        """Delete every cached generation."""
         with self._lock, self._transaction() as connection:
             connection.execute("DELETE FROM cache")
 

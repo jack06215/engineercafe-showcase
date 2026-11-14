@@ -1,4 +1,4 @@
-"""Prompt repair, and what a repaired call costs.
+r"""Prompt repair, and what a repaired call costs.
 
 `pydantic_output.py` turns repair on, but its dry run replays a reply that
 parses on the first try, so the repair never runs. This dry run scripts a model
@@ -9,13 +9,13 @@ that gets the schema wrong once and right on the second attempt, so you can see:
   visible in `usage.prompt` for the attempt that succeeded,
 * `attempts == 2` on the result, and a cost once a price is registered.
 
-    bazel run //packages/langchain_util/examples:prompt_repair -- \\
+    bazel run //packages/langchain_util/examples:prompt_repair -- \
         --dry-run "I was charged twice this month and support hasn't answered."
 
 Against a provider, repair only happens when the model gets the schema wrong,
 which a good model rarely does. Pass `--price` to see cost:
 
-    bazel run //packages/langchain_util/examples:prompt_repair -- \\
+    bazel run //packages/langchain_util/examples:prompt_repair -- \
         --provider openai --price gpt-4o-mini-2024-07-18 0.15 0.60 "..."
 
 Two things the numbers do not say:
@@ -94,6 +94,7 @@ DRY_RUN_REPLIES = (
 
 
 def build_prompt(parser: PydanticOutputParser[Triage]) -> ChatPromptTemplate:
+    """Load the triage prompt with the parser's format instructions."""
     return load_chat_prompt(
         [
             ("system", "triage.system.jinja"),
@@ -126,6 +127,7 @@ def triage(
     provider: Provider,
     dry_run: bool,
 ) -> InvocationResult[Triage]:
+    """Triage *ticket* and return the parsed `Triage` with the call details."""
     parser = PydanticOutputParser(pydantic_object=Triage)
 
     return invoke_llm_detailed(
@@ -181,6 +183,7 @@ def register_prices(prices: Sequence[Sequence[str]], *, dry_run: bool) -> None:
 
 
 def main() -> int:
+    """Parse the command line, run the example and return an exit code."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("ticket", help="Support ticket text to triage")
     parser.add_argument(

@@ -38,6 +38,8 @@ class _Model(BaseModel):
 
 
 class Encoding(_Model):
+    """How one channel shows a column."""
+
     # Required but nullable: Ollama emits a schema's required keys first and may skip optional
     # ones, and an optional `field` came back missing (`x: {"type": "nominal"}`).
     field: str | None = Field(
@@ -55,6 +57,8 @@ class Encoding(_Model):
 
 
 class Filter(_Model):
+    """A condition on one column that rows must meet."""
+
     field: str
     op: FilterOp
     value: FilterScalar | list[FilterScalar] = Field(
@@ -68,6 +72,8 @@ class Filter(_Model):
 
 
 class TopN(_Model):
+    """Keep the top *n* categories of a column, ranked by another column's sum."""
+
     field: str = Field(
         description="The column whose categories are ranked, e.g. a region."
     )
@@ -80,6 +86,8 @@ def _require_filters(schema: dict[str, Any]) -> None:
 
 
 class ChartSpec(_Model):
+    """A chart that the model asks for, before it is compiled to Vega-Lite."""
+
     # `filters` is required in the JSON schema (Python keeps the [] default) and sits right after
     # `mark`. Optional, and last, the model could close the object without it: after a 2025-only
     # chart, 「地域別の総売上を比較する棒グラフ」 lost the filter while the message still said 2025年.
@@ -113,6 +121,8 @@ class ChartSpec(_Model):
 
 
 class AssistantTurn(_Model):
+    """The translator's reply: an optional chart and a short message."""
+
     # `chart` comes first: Ollama generates keys in schema order, so the message is written after the
     # chart and describes what was actually drawn (constrained decoding can swap in a different chart).
     chart: ChartSpec | None = Field(

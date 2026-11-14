@@ -1,4 +1,4 @@
-"""A prompt chosen at runtime, confined with `resolve_prompt_path`.
+r"""A prompt chosen at runtime, confined with `resolve_prompt_path`.
 
 In the other examples every template name is a literal, so `root=` is a habit
 rather than a defence. Here the name comes from the command line: `--tone
@@ -6,16 +6,16 @@ formal` loads `prompts/tones/formal.jinja` as the system message. That is the
 case `root` exists for. A jinja2 template is executable code, so whoever can
 choose the file can choose the code.
 
-    bazel run //packages/langchain_util/examples:prompt_selection -- \\
+    bazel run //packages/langchain_util/examples:prompt_selection -- \
         --provider openai --tone terse "Hi all! Just a quick heads-up ..."
 
-    bazel run //packages/langchain_util/examples:prompt_selection -- \\
+    bazel run //packages/langchain_util/examples:prompt_selection -- \
         --dry-run --tone friendly "The build is broken. Do not merge."
 
 A name that tries to leave the tones directory is refused before anything is
 read or sent:
 
-    bazel run //packages/langchain_util/examples:prompt_selection -- \\
+    bazel run //packages/langchain_util/examples:prompt_selection -- \
         --dry-run --tone ../incident_report "anything"
 
 If the set of names is fixed, argparse `choices=` is the stronger check and
@@ -52,6 +52,7 @@ DRY_RUN_REPLY = (
 
 
 def available_tones() -> list[str]:
+    """Return the tone names that have a template in the tones folder."""
     return sorted(path.stem for path in TONE_DIR.glob("*.jinja"))
 
 
@@ -80,6 +81,7 @@ def build_prompt(tone: str) -> ChatPromptTemplate:
 
 
 def build_chat(*, provider: Provider, dry_run: bool) -> ChatLLM:
+    """Return a fake chat model on a dry run, else the provider's client."""
     if dry_run:
         return FakeListChatModel(responses=["<replaced by dry_run>"])
 
@@ -94,6 +96,7 @@ def rewrite(
     provider: Provider,
     dry_run: bool,
 ) -> str:
+    """Rewrite *text* in *tone* with the selected template."""
     return invoke_llm(
         template=template,
         chat=build_chat(provider=provider, dry_run=dry_run),
@@ -109,6 +112,7 @@ def rewrite(
 
 
 def main() -> int:
+    """Parse the command line, run the example and return an exit code."""
     tones = available_tones()
 
     parser = argparse.ArgumentParser(description=__doc__)

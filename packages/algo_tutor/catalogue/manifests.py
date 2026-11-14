@@ -55,6 +55,8 @@ class KnownProblem:
 
 @dataclass(frozen=True)
 class CourseSection:
+    """A named section of a bundled course."""
+
     name: str
     slugs: tuple[str, ...]
 
@@ -69,11 +71,14 @@ class Course:
     sections: tuple[CourseSection, ...]
 
     def slugs(self) -> list[str]:
+        """Return the slugs of every section, in order."""
         return [slug for section in self.sections for slug in section.slugs]
 
 
 @dataclass(frozen=True)
 class ExactRating:
+    """A problem's zerotrac contest rating."""
+
     rating: int  # zerotrac's contest rating, rounded
     number: int  # LeetCode's problem number
     title: str
@@ -81,6 +86,8 @@ class ExactRating:
 
 @dataclass(frozen=True)
 class Manifests:
+    """The bundled data files, loaded and merged."""
+
     topics: TopicCatalog
     exact_ratings: dict[str, ExactRating]  # by slug
     neetcode: dict[str, KnownProblem]  # every row of the NeetCode list, by slug
@@ -114,7 +121,7 @@ def _difficulty(value: Any) -> Difficulty | None:
 
 
 def parse_zerotrac(text: str) -> dict[str, ExactRating]:
-    """zerotrac's TSV: Rating, ID, Title, Title ZH, Title Slug, Contest Slug, Problem Index."""
+    """Zerotrac's TSV: Rating, ID, Title, Title ZH, Title Slug, Contest Slug, Problem Index."""
     out = {}
     for line in text.splitlines()[1:]:
         if not line.strip():

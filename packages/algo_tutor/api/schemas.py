@@ -73,16 +73,22 @@ class In(BaseModel):
 
 
 class ErrorDetail(Out):
+    """The code, message and optional tutor error kind of an API error."""
+
     code: str  # SPEC §18.1, e.g. STALE, ACTIVE_ATTEMPT, HIDDEN_ASSESSMENT
     message: str
     kind: TutorErrorKind | None = None  # only with TUTOR_UNAVAILABLE
 
 
 class ErrorBody(Out):
+    """The body of every error response."""
+
     error: ErrorDetail
 
 
 class Health(Out):
+    """GET /health."""
+
     status: Literal["ok"] = "ok"
 
 
@@ -90,13 +96,18 @@ class Health(Out):
 
 
 class RatingOut(Out):
+    """A problem rating, exact or estimated."""
+
     value: int
     estimated: bool  # shown with "≈"
 
 
 class ProblemBrief(Out):
-    """Enough to show a row and link out. Never carries topic, tags or patterns,
-    so it is safe inside a hidden assessment."""
+    """Enough to show a row and link out.
+
+    Never carries topic, tags or patterns, so it is safe inside a hidden
+    assessment.
+    """
 
     id: str
     source: Source
@@ -109,6 +120,8 @@ class ProblemBrief(Out):
 
 
 class Notebook(Out):
+    """A notebook of cues, pitfalls and notes, versioned for edits."""
+
     cues: str
     pitfalls: str
     notes: str
@@ -117,6 +130,8 @@ class Notebook(Out):
 
 
 class NotebookPatch(In):
+    """PATCH body for a notebook; omitted fields stay unchanged."""
+
     version: Version
     cues: NotebookText | None = None
     pitfalls: NotebookText | None = None
@@ -127,12 +142,16 @@ class NotebookPatch(In):
 
 
 class SetupState(Out):
+    """GET /setup: the onboarding state."""
+
     onboarding_complete: bool
     timezone: str
     questions_per_day: int
 
 
 class SetupIn(In):
+    """POST /setup: the first-run choices."""
+
     questions_per_day: Annotated[int, Field(ge=1, le=20)] = (
         constants.QUESTIONS_PER_DAY_DEFAULT
     )
@@ -141,6 +160,8 @@ class SetupIn(In):
 
 
 class BankStatus(Out):
+    """The LeetCode bank download status and catalogue counts."""
+
     status: Literal["never", "running", "done", "failed"]
     fetched_at: datetime | None
     pages_done: int
@@ -153,6 +174,8 @@ class BankStatus(Out):
 
 
 class SettingsOut(Out):
+    """The learner's settings."""
+
     timezone: str
     questions_per_day: int
     atcoder_per_day: int
@@ -166,6 +189,8 @@ class SettingsOut(Out):
 
 
 class SettingsPatch(In):
+    """PATCH body for settings; omitted fields stay unchanged."""
+
     questions_per_day: Annotated[int, Field(ge=1, le=20)] | None = None
     atcoder_per_day: Annotated[int, Field(ge=0, le=10)] | None = None
     target_rating: Annotated[int, Field(ge=1200, le=2600, multiple_of=50)] | None = None
@@ -176,6 +201,8 @@ class SettingsPatch(In):
 
 
 class ReviewTargetOut(Out):
+    """When and how a problem is next due for review."""
+
     problem_id: str
     recommended_date: date | None
     effective_date: date | None
@@ -185,6 +212,8 @@ class ReviewTargetOut(Out):
 
 
 class AttemptSummary(Out):
+    """A short view of one attempt."""
+
     id: str
     problem_id: str
     status: AttemptStatus
@@ -215,6 +244,8 @@ class ProblemRow(Out):
 
 
 class ProblemPage(Out):
+    """One page of the problem library."""
+
     items: list[ProblemRow]
     total: int
     page: int
@@ -249,11 +280,15 @@ class ProblemQuery(In):
 
 
 class ListRef(Out):
+    """The ID and name of a study list."""
+
     id: str
     name: str
 
 
 class ProblemDetail(Out):
+    """The full view of one problem."""
+
     problem: ProblemBrief
     external_id: str
     paid_only: bool
@@ -270,14 +305,19 @@ class ProblemDetail(Out):
 
 
 class ProblemCreate(In):
+    """POST body to add a problem by URL."""
+
     url: str
     title: Title | None = None  # required for AtCoder (never fetched)
     difficulty: Difficulty | None = None
 
 
 class ProblemPatch(In):
-    """Send `topic_id` to override the primary topic (null = "None"); send
-    `reset_topic: true` to go back to the automatic topic."""
+    """PATCH body for a problem's notes, topic and pattern labels.
+
+    Send `topic_id` to override the primary topic (null = "None"); send
+    `reset_topic: true` to go back to the automatic topic.
+    """
 
     notes: Notes | None = None
     topic_id: str | None = None
@@ -286,11 +326,15 @@ class ProblemPatch(In):
 
 
 class SuggestedPath(Out):
+    """A suggested solution file path, and whether the file exists."""
+
     path: str  # repo-relative
     exists: bool
 
 
 class ReviewPatch(In):
+    """PATCH body to reschedule a problem's next review."""
+
     version: Version
     action: ReviewAction
     review_date: date | None = None  # required for manual and snooze
@@ -300,11 +344,15 @@ class ReviewPatch(In):
 
 
 class Signals(Out):
+    """The learner's own signals about an attempt."""
+
     accepted_first_try: bool | None
     difficulty: DifficultyFeel | None
 
 
 class Report(Out):
+    """The tutor's report on an attempt, by section."""
+
     status: ReportStatus
     summary: str | None
     strengths: str | None
@@ -318,8 +366,11 @@ class Report(Out):
 
 
 class AttemptOut(Out):
-    """One attempt. While a hidden assessment runs, the reflection fields,
-    signals and report of completed attempts are null (SPEC §9)."""
+    """One attempt.
+
+    While a hidden assessment runs, the reflection fields, signals and report of
+    completed attempts are null (SPEC §9).
+    """
 
     id: str
     problem: ProblemBrief
@@ -355,14 +406,19 @@ class AttemptOut(Out):
 
 
 class AttemptStart(In):
+    """POST body to start an attempt."""
+
     problem_id: str
     plan_item_id: str | None = None
     language: Language = Language.PYTHON
 
 
 class DraftPatch(In):
-    """Send `solution_path` with a path to link (and copy) a file, or with null
-    to switch to the in-app editor."""
+    """PATCH body for an attempt's draft.
+
+    Send `solution_path` with a path to link (and copy) a file, or with null to
+    switch to the in-app editor.
+    """
 
     version: Version
     code: Code | None = None
@@ -372,12 +428,16 @@ class DraftPatch(In):
 
 
 class TimerIn(In):
+    """A timer event for an attempt."""
+
     version: Version
     action: TimerAction
     include_gap: bool | None = None  # required to resume after a gap
 
 
 class FinishIn(In):
+    """POST body to finish an attempt."""
+
     version: Version
     outcome: Outcome
     help: Help
@@ -391,12 +451,16 @@ class FinishIn(In):
 
 
 class FinishOut(Out):
+    """The finished attempt and its next review."""
+
     attempt: AttemptOut
     next_review_date: date | None
     review_stage: ReviewStage
 
 
 class ReflectionPatch(In):
+    """PATCH body for an attempt's mistake labels and takeaway."""
+
     version: Version
     mistake_labels: Annotated[
         list[MistakeLabel], Field(max_length=constants.MAX_MISTAKE_LABELS)
@@ -405,11 +469,15 @@ class ReflectionPatch(In):
 
 
 class SignalsPatch(In):
+    """PATCH body for an attempt's signals; omitted fields stay unchanged."""
+
     accepted_first_try: bool | None = None
     difficulty: DifficultyFeel | None = None
 
 
 class HintMessage(Out):
+    """One message of an attempt's hint conversation."""
+
     id: str
     position: int
     role: HintRole
@@ -422,17 +490,24 @@ class HintMessage(Out):
 
 
 class HintConversation(Out):
+    """An attempt's hint conversation and the strongest hint given."""
+
     messages: list[HintMessage]
     strongest_level: HintLevel | None
 
 
 class HintIn(In):
+    """POST body with the learner's message to the tutor."""
+
     text: Annotated[str, StringConstraints(min_length=1, max_length=4000)]
 
 
 class HintReply(Out):
-    """The tutor's reply. Hints append to the attempt's notes, which bumps its
-    version; the client must adopt `attempt_version` and `notes`."""
+    """The tutor's reply.
+
+    Hints append to the attempt's notes, which bumps its version; the client
+    must adopt `attempt_version` and `notes`.
+    """
 
     message: HintMessage
     attempt_version: int
@@ -460,6 +535,8 @@ class PlanItemOut(Out):
 
 
 class PlanOut(Out):
+    """A daily plan with the items of both lanes."""
+
     id: str
     plan_date: date
     timezone: str
@@ -468,6 +545,8 @@ class PlanOut(Out):
 
 
 class ActiveAttemptBrief(Out):
+    """The running attempt; its title is hidden during the assessment."""
+
     id: str
     problem_title: str | None  # None during a hidden assessment
     context: Context
@@ -475,8 +554,11 @@ class ActiveAttemptBrief(Out):
 
 
 class Desk(Out):
-    """GET /desk. During a hidden assessment only `hidden_assessment` and
-    `active_attempt` are filled ("Assessment in progress" + Resume)."""
+    """GET /desk.
+
+    During a hidden assessment only `hidden_assessment` and `active_attempt` are
+    filled ("Assessment in progress" + Resume).
+    """
 
     hidden_assessment: bool
     active_attempt: ActiveAttemptBrief | None
@@ -489,16 +571,22 @@ class Desk(Out):
 
 
 class PlanVersionIn(In):
+    """A body that carries only the plan version."""
+
     version: Version
 
 
 class ReorderIn(In):
+    """The new order of every item in one plan lane."""
+
     version: Version
     lane: Lane
     item_ids: list[str]  # every item of the lane, once
 
 
 class DispositionIn(In):
+    """Swap, snooze or skip a plan item."""
+
     version: Version
     action: Disposition
     snooze_until: date | None = None  # required for snooze, in the future
@@ -508,6 +596,8 @@ class DispositionIn(In):
 
 
 class ListSummary(Out):
+    """A study list with its progress."""
+
     id: str
     name: str
     source: Source
@@ -521,6 +611,8 @@ class ListSummary(Out):
 
 
 class ListEntryOut(Out):
+    """One problem on a study list."""
+
     problem: ProblemBrief
     position: int
     section: str | None
@@ -529,11 +621,15 @@ class ListEntryOut(Out):
 
 
 class UnresolvedLine(Out):
+    """A pasted line that matched no problem, and why."""
+
     line: str
     reason: str
 
 
 class ListDetail(Out):
+    """A study list with its entries."""
+
     summary: ListSummary
     entries: list[ListEntryOut]
     # PATCH with `add_text`: the lines that couldn't be added.
@@ -541,11 +637,15 @@ class ListDetail(Out):
 
 
 class ListEntriesIn(In):
+    """Body to create lists from pasted text, one entry per line."""
+
     name: Title
     text: Annotated[str, StringConstraints(max_length=200_000)]  # one entry per line
 
 
 class ResolvedEntry(Out):
+    """A pasted line matched to a problem."""
+
     line: str
     problem_id: str | None  # None: will be added to the library
     title: str
@@ -553,26 +653,35 @@ class ResolvedEntry(Out):
 
 
 class PreviewGroup(Out):
+    """The entries that will form the list for one source."""
+
     source: Source
     name: str  # the list each source becomes
     entries: list[ResolvedEntry]
 
 
 class ListPreview(Out):
+    """Preview of the lists that pasted text would create."""
+
     groups: list[PreviewGroup]
     unresolved: list[str]  # lines that matched nothing
     unresolved_reasons: list[UnresolvedLine] = Field(default_factory=list)
 
 
 class ListCreated(Out):
+    """The lists created from pasted text, and the lines left out."""
+
     lists: list[ListSummary]
     unresolved: list[str]
     unresolved_reasons: list[UnresolvedLine] = Field(default_factory=list)
 
 
 class ListPatch(In):
-    """Own lists only. `problem_ids` is the full new order (drop an id to
-    remove it); `add_text` resolves and appends more entries."""
+    """Own lists only.
+
+    `problem_ids` is the full new order (drop an id to remove it); `add_text`
+    resolves and appends more entries.
+    """
 
     name: Title | None = None
     problem_ids: list[str] | None = None
@@ -580,6 +689,8 @@ class ListPatch(In):
 
 
 class PackReport(Out):
+    """The result of importing or dry-running a question pack."""
+
     import_id: str
     dry_run: bool
     already_applied: bool
@@ -597,6 +708,8 @@ class PackReport(Out):
 
 
 class LevelChange(Out):
+    """The last change to a topic level and the attempt that caused it."""
+
     delta: int
     attempt_id: str
     problem_title: str
@@ -607,6 +720,8 @@ class LevelChange(Out):
 
 
 class TopicLevel(Out):
+    """The learner's level in one topic."""
+
     id: str
     name: str
     curriculum: int
@@ -617,17 +732,23 @@ class TopicLevel(Out):
 
 
 class TopicLevels(Out):
+    """The learner's level in every topic."""
+
     target_rating: int
     topics: list[TopicLevel]  # curriculum order
 
 
 class NotebookProblem(Out):
+    """An attempted problem shown on a notebook page."""
+
     problem: ProblemBrief
     attempts: int
     latest_outcome: Outcome | None
 
 
 class TopicDetail(Out):
+    """A topic page: level, notebook and attempted problems."""
+
     level: TopicLevel
     target_rating: int
     notebook: Notebook
@@ -636,6 +757,8 @@ class TopicDetail(Out):
 
 
 class PatternSummary(Out):
+    """A pattern with its attempted-problem count."""
+
     id: str
     name: str
     position: int
@@ -644,6 +767,8 @@ class PatternSummary(Out):
 
 
 class PatternDetail(Out):
+    """A pattern page: README, notebook and attempted problems."""
+
     pattern: PatternSummary
     readme_path: str  # repo-relative
     readme_markdown: str | None  # None: "README not found at <readme_path>"
@@ -652,6 +777,8 @@ class PatternDetail(Out):
 
 
 class MistakeEntry(Out):
+    """A finished attempt with its mistake labels and takeaway."""
+
     attempt_id: str
     problem: ProblemBrief
     finished_at: datetime
@@ -660,6 +787,8 @@ class MistakeEntry(Out):
 
 
 class MistakeList(Out):
+    """Attempts with mistakes, newest first."""
+
     items: list[MistakeEntry]  # newest first
 
 
@@ -667,6 +796,8 @@ class MistakeList(Out):
 
 
 class TutorStatus(Out):
+    """The tutor's settings and pending report count."""
+
     enabled: bool
     provider: Literal["ollama", "openai", "azure"]
     model: str
@@ -675,6 +806,8 @@ class TutorStatus(Out):
 
 
 class TutorTest(Out):
+    """Result of a test call to the tutor model."""
+
     ok: bool
     provider: str
     model: str
@@ -684,6 +817,8 @@ class TutorTest(Out):
 
 
 class BackupStatus(Out):
+    """The last backup and how many backups are kept."""
+
     last_backup_at: datetime | None
     path: str | None
     kept: int

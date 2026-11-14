@@ -31,6 +31,8 @@ class Language(StrEnum):
 
 
 class AttemptStatus(StrEnum):
+    """Whether an attempt is running, paused or finished."""
+
     ACTIVE = "active"
     PAUSED = "paused"
     COMPLETED = "completed"
@@ -44,18 +46,24 @@ class Context(StrEnum):
 
 
 class Evidence(StrEnum):
+    """What kind of evidence an attempt gives about the learner's skill."""
+
     RETENTION = "retention"
     NEAR_TRANSFER = "near_transfer"
     UNSEEN = "unseen"
 
 
 class Outcome(StrEnum):
+    """How an attempt ended."""
+
     SOLVED = "solved"
     NOT_SOLVED = "not_solved"
     STOPPED = "stopped"
 
 
 class Help(StrEnum):
+    """How much help the learner used during an attempt."""
+
     UNKNOWN = "unknown"
     NONE = "none"
     SMALL = "small"
@@ -79,12 +87,16 @@ class DifficultyFeel(StrEnum):
 
 
 class MistakeLabel(StrEnum):
+    """The kind of mistake behind a failed attempt."""
+
     MISSED_EDGE_CASE = "missed_edge_case"
     WRONG_APPROACH = "wrong_approach"
     IMPLEMENTATION_BUG = "implementation_bug"
 
 
 class ReviewAction(StrEnum):
+    """How the next review of a problem was scheduled."""
+
     RECOMMENDED = "recommended"
     MANUAL = "manual"
     SNOOZE = "snooze"
@@ -92,6 +104,8 @@ class ReviewAction(StrEnum):
 
 
 class ReviewStage(StrEnum):
+    """Where a problem is in the spaced-review cycle."""
+
     REPAIR = "repair"
     RECONSTRUCTION = "reconstruction"
     TRANSFER = "transfer"
@@ -117,6 +131,8 @@ class Lane(StrEnum):
 
 
 class PlanItemStatus(StrEnum):
+    """Where a daily-plan item is in its life cycle."""
+
     ACTIVE = "active"
     QUEUED = "queued"
     COMPLETED = "completed"
@@ -124,20 +140,27 @@ class PlanItemStatus(StrEnum):
 
 
 class PlanItemKind(StrEnum):
-    """A plan item's kind. A transfer check has no kind (None), which is
-    what makes its attempt `mixed` (SPEC §6.2)."""
+    """A plan item's kind.
+
+    A transfer check has no kind (None), which is what makes its attempt `mixed`
+    (SPEC §6.2).
+    """
 
     TOPIC = "topic"
     LIST = "list"
 
 
 class Disposition(StrEnum):
+    """What to do with a plan item that the learner does not want now."""
+
     SWAP = "swap"
     SNOOZE = "snooze"
     SKIP = "skip"
 
 
 class ListKind(StrEnum):
+    """Where a study list came from: a bundled course, the learner or a pack."""
+
     BUNDLED = "bundled"
     OWN = "own"
     PACK = "pack"
@@ -165,16 +188,22 @@ class TutorErrorKind(StrEnum):
 
 
 class HintLevel(StrEnum):
+    """How much a hint gives away."""
+
     SMALL = "small"
     MAJOR = "major"
 
 
 class HintRole(StrEnum):
+    """Who wrote a hint message."""
+
     LEARNER = "learner"
     TUTOR = "tutor"
 
 
 class TimerAction(StrEnum):
+    """An event that the attempt timer receives from the client."""
+
     HEARTBEAT = "heartbeat"
     PAUSE = "pause"
     RESUME = "resume"

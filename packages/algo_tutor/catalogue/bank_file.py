@@ -36,11 +36,13 @@ HEADERS = {
 
 
 class BankFetchError(RuntimeError):
-    pass
+    """The LeetCode bank could not be downloaded."""
 
 
 @dataclass(frozen=True)
 class BankQuestion:
+    """One problem from the LeetCode bank download."""
+
     slug: str
     title: str
     difficulty: Difficulty | None
@@ -63,10 +65,12 @@ class HttpPost(Protocol):
 
     def __call__(
         self, url: str, *, json: Any, headers: Mapping[str, str], timeout: float
-    ) -> _Response: ...
+    ) -> _Response:
+        """Send a POST request with a JSON body."""
 
 
 def parse_question(raw: Mapping[str, Any]) -> BankQuestion:
+    """Build a BankQuestion from one raw question of the download."""
     number_text = str(raw.get("questionFrontendId") or "")
     label = raw.get("difficulty")
     return BankQuestion(

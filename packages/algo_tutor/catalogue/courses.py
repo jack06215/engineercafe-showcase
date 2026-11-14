@@ -23,6 +23,8 @@ from packages.algo_tutor.store.timeutil import iso_utc, new_id
 
 @dataclass(frozen=True)
 class Followed:
+    """Result of following a bundled course."""
+
     study_list: StudyList
     created: bool  # False: the course was already followed
     problems_added: int  # new to the library
@@ -35,6 +37,7 @@ def follow_course(
     now: datetime,
     bank: dict[str, BankQuestion] | None = None,
 ) -> Followed:
+    """Follow *course_id* by creating its study list, unless it already exists."""
     course = manifests.courses[course_id]
     existing = session.scalar(
         select(StudyList).where(

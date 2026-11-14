@@ -25,6 +25,8 @@ class AttemptCompleted(ValueError):
 
 @dataclass(frozen=True)
 class TimerState:
+    """The attempt timer's state, as stored between requests."""
+
     status: AttemptStatus
     active_seconds: int
     gap_seconds: int
@@ -33,7 +35,7 @@ class TimerState:
     needs_gap_decision: bool
 
     @classmethod
-    def started(cls, now: datetime) -> "TimerState":
+    def started(cls, now: datetime) -> TimerState:
         """A new attempt: running from `now`."""
         return cls(AttemptStatus.ACTIVE, 0, 0, now, now, False)
 

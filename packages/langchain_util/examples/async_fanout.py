@@ -1,18 +1,18 @@
-"""Many calls at once: `ainvoke_llm` fanned out, `astream_llm` for streaming.
+r"""Many calls at once: `ainvoke_llm` fanned out, `astream_llm` for streaming.
 
 Reuses the `prompts/explain.*.jinja` pair from `string_output.py`, so the only
 new thing here is the concurrency.
 
 Run it against a provider:
 
-    bazel run //packages/langchain_util/examples:async_fanout -- \\
+    bazel run //packages/langchain_util/examples:async_fanout -- \
         --provider openai bazel docker kubernetes
 
 Or without spending anything. `--dry-run` swaps in a fake model that takes a
 second per reply, so the fan-out is something you can see: four topics finish
 in about one second, not four.
 
-    bazel run //packages/langchain_util/examples:async_fanout -- \\
+    bazel run //packages/langchain_util/examples:async_fanout -- \
         --dry-run bazel docker kubernetes nix
 
 `--stream` switches to `astream_llm` and prints each answer as it arrives.
@@ -57,6 +57,7 @@ RETRY_POLICY = RetryPolicy(attempts=3, max_wait=10.0, deadline=60.0)
 
 
 def build_prompt() -> ChatPromptTemplate:
+    """Load the explain prompt from the example templates."""
     return load_chat_prompt(
         [
             ("system", "explain.system.jinja"),
@@ -167,6 +168,7 @@ async def stream_all(
 
 
 def main() -> int:
+    """Parse the command line, run the example and return an exit code."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("topics", nargs="+", help="Topics to explain")
     parser.add_argument(

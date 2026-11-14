@@ -1,4 +1,4 @@
-"""Structured output example.
+r"""Structured output example.
 
 The prompt lives in `prompts/incident_report.jinja` and is loaded by
 `langchain_util.prompts.load_prompt`. Two jinja2 features earn their keep there:
@@ -8,7 +8,7 @@ list removes the section instead of leaving a dangling header.
 
 Run it against a provider:
 
-    bazel run //packages/langchain_util/examples:pydantic_output -- \\
+    bazel run //packages/langchain_util/examples:pydantic_output -- \
         --provider openai "The 14:00 deploy failed twice; rolled back at 14:20."
 
 Or without spending anything -- `--dry-run` feeds the canned JSON below through
@@ -188,6 +188,7 @@ def extract(
 
 
 def main() -> int:
+    """Parse the command line, run the example and return an exit code."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("note", help="Free-text incident note to structure")
     parser.add_argument(

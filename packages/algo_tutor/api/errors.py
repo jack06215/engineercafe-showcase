@@ -20,6 +20,7 @@ class ApiError(Exception):
         message: str,
         kind: TutorErrorKind | None = None,
     ) -> None:
+        """Store the HTTP *status*, error *code* and *message* for the response."""
         super().__init__(message)
         self.status = status
         self.code = code
@@ -28,20 +29,24 @@ class ApiError(Exception):
 
 
 def not_found(what: str) -> ApiError:
+    """Return a 404 NOT_FOUND error for *what*."""
     return ApiError(404, "NOT_FOUND", f"{what} not found")
 
 
 def stale(what: str) -> ApiError:
+    """Return a 409 STALE error for *what*."""
     return ApiError(409, "STALE", f"{what} changed elsewhere; reload it")
 
 
 def hidden_assessment() -> ApiError:
+    """Return the 403 error for data locked during the hidden assessment."""
     return ApiError(403, "HIDDEN_ASSESSMENT", "Locked until you finish the assessment")
 
 
 def error_response(
     status: int, code: str, message: str, kind: TutorErrorKind | None = None
 ) -> JSONResponse:
+    """Build the JSON response for an API error."""
     body = ErrorBody(error=ErrorDetail(code=code, message=message, kind=kind))
     return JSONResponse(
         status_code=status, content=body.model_dump(mode="json", exclude_none=True)

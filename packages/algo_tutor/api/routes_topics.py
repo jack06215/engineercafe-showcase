@@ -33,6 +33,7 @@ router = APIRouter(tags=["topics"])
 def level_out(
     topic: models.Topic, level: ladder.TopicLevel, timezone: str
 ) -> TopicLevel:
+    """Return the API view of a topic level."""
     change = level.last_change
     return TopicLevel(
         id=topic.id,
@@ -64,6 +65,7 @@ def _levels(
 
 
 def notebook_out(topic: models.Topic) -> Notebook:
+    """Return the API view of a topic's notebook."""
     return Notebook(
         cues=topic.cues,
         pitfalls=topic.pitfalls,
@@ -124,8 +126,11 @@ def notebook_problems(
 
 @router.get("/topics/{topic_id}")
 def read_topic(topic_id: str, session: deps.Db, state: deps.State) -> TopicDetail:
-    """A topic page. Unseen problems are only counted, never listed, so
-    browsing can't expose them and drain the transfer-check pool."""
+    """A topic page.
+
+    Unseen problems are only counted, never listed, so browsing can't expose
+    them and drain the transfer-check pool.
+    """
     deps.forbid_during_assessment(session)
     topic = _topic(session, topic_id)
     settings, by_id = _levels(session, state)
@@ -149,6 +154,7 @@ def read_topic(topic_id: str, session: deps.Db, state: deps.State) -> TopicDetai
 def edit_topic_notebook(
     topic_id: str, body: NotebookPatch, session: deps.Db, state: deps.State
 ) -> Notebook:
+    """Update the sent fields of a topic's notebook."""
     deps.forbid_during_assessment(session)
     topic = _topic(session, topic_id)
     deps.check_version(topic.notebook_version, body.version, "This notebook")

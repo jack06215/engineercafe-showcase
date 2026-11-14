@@ -29,6 +29,8 @@ class _Strict(BaseModel):
 
 
 class ServerConfig(_Strict):
+    """Where the API server listens; loopback addresses only."""
+
     host: str = "127.0.0.1"
     port: int = Field(default=4317, ge=1, le=65535)
 
@@ -78,6 +80,8 @@ class TaskConfig(_Strict):
 
 
 class TutorConfig(_Strict):
+    """LLM tutor settings: the default model and per-task overrides."""
+
     enabled: bool = True
     default: ModelConfig = ModelConfig()
     tasks: dict[TaskName, TaskOverride] = {}
@@ -92,6 +96,8 @@ class TutorConfig(_Strict):
 
 
 class AppConfig(_Strict):
+    """The whole app config, merged from the config files."""
+
     server: ServerConfig = ServerConfig()
     tutor: TutorConfig = TutorConfig()
 

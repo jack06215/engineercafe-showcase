@@ -63,6 +63,8 @@ MAX_REPORT_ERROR_MESSAGE_CHARS = 2000
 
 
 class Base(DeclarativeBase):
+    """Declarative base with the constraint naming convention and JSON types."""
+
     metadata = MetaData(naming_convention=_NAMING)
     type_annotation_map: ClassVar[dict[Any, Any]] = {
         dict[str, Any]: JSON,
@@ -179,6 +181,8 @@ class Pattern(Base):
 
 
 class Problem(Base):
+    """A problem from one source, unique by source and external ID."""
+
     __tablename__ = "problems"
     __table_args__ = (
         UniqueConstraint("source", "external_id"),
@@ -216,6 +220,8 @@ class Problem(Base):
 
 
 class ProblemPattern(Base):
+    """Links a problem to one of its patterns."""
+
     __tablename__ = "problem_patterns"
 
     problem_id: Mapped[str] = mapped_column(
@@ -240,6 +246,8 @@ class RatingEstimate(Base):
 
 
 class ProblemPopularity(Base):
+    """A problem's popularity percentile."""
+
     __tablename__ = "problem_popularity"
     __table_args__ = (
         CheckConstraint(_between("percentile", 0, 100), name="percentile"),
@@ -254,6 +262,8 @@ class ProblemPopularity(Base):
 
 
 class StudyList(Base):
+    """A named list of problems; names are unique, ignoring case."""
+
     __tablename__ = "lists"
     __table_args__ = (
         CheckConstraint(_one_of("source", Source), name="source"),
@@ -271,6 +281,8 @@ class StudyList(Base):
 
 
 class ListEntry(Base):
+    """A problem's membership in a study list."""
+
     __tablename__ = "list_entries"
 
     list_id: Mapped[str] = mapped_column(
@@ -285,6 +297,8 @@ class ListEntry(Base):
 
 
 class DailyPlan(Base):
+    """The plan for one date in one time zone."""
+
     __tablename__ = "daily_plans"
     __table_args__ = (UniqueConstraint("date", "timezone"),)
 
@@ -295,6 +309,8 @@ class DailyPlan(Base):
 
 
 class PlanItem(Base):
+    """One item of a daily plan, in one lane."""
+
     __tablename__ = "plan_items"
     __table_args__ = (
         CheckConstraint(_one_of("lane", Lane), name="lane"),
@@ -327,6 +343,8 @@ class PlanItem(Base):
 
 
 class Attempt(Base):
+    """One attempt at a problem, with its code, outcome and report."""
+
     __tablename__ = "attempts"
     __table_args__ = (
         CheckConstraint(_one_of("context", Context), name="context"),
@@ -433,6 +451,8 @@ class AttemptSignals(Base):
 
 
 class HintMessage(Base):
+    """One message of an attempt's hint conversation."""
+
     __tablename__ = "hint_messages"
     __table_args__ = (
         UniqueConstraint("attempt_id", "position"),
@@ -481,6 +501,8 @@ class ReviewTarget(Base):
 
 
 class ImportBatch(Base):
+    """A record of one bundled, pack or bank import and its report."""
+
     __tablename__ = "import_batches"
     __table_args__ = (
         CheckConstraint("kind IN ('bundled', 'pack', 'bank')", name="kind"),
@@ -495,6 +517,8 @@ class ImportBatch(Base):
 
 
 class Idempotency(Base):
+    """The stored response for one idempotency key."""
+
     __tablename__ = "idempotency"
     __table_args__ = (CheckConstraint(_json("response"), name="response"),)
 

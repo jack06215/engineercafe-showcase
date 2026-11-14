@@ -26,6 +26,8 @@ _NON_WORD = re.compile(r"[^a-z0-9]+")
 
 @dataclass(frozen=True)
 class PathSuggestion:
+    """Where to save the solution file for a problem."""
+
     path: str  # repo-relative
     exists: bool  # an existing file was found; otherwise a new path to create
     alternatives: tuple[str, ...] = ()  # other existing matches (e.g. `_v2` files)
@@ -80,9 +82,11 @@ def suggest_leetcode_path(
     topic_folder: str | None,
     existing: Iterable[str],
 ) -> PathSuggestion:
-    """An existing file whose name starts with the problem's 4-digit number
-    and has the language's extension, else a new path under the primary
-    topic's folder (the `leetcode/src` root with no topic).
+    """Suggest a solution path: an existing file if there is one, else a new one.
+
+    An existing file must start with the problem's 4-digit number and have the
+    language's extension. A new path goes under the primary topic's folder (the
+    `leetcode/src` root with no topic).
     """
     ext = EXTENSIONS[language]
     if number is not None:
