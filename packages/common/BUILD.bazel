@@ -1,0 +1,35 @@
+load("@rules_python//python:py_test.bzl", "py_test")
+load("//rules/python/lint:defs.bzl", "py_library")
+
+py_library(
+    name = "common",
+    srcs = [
+        "execute.py",
+        "execute_async.py",
+        "logging_util.py",
+    ],
+    imports = [".."],
+    visibility = ["//visibility:public"],
+    # The LangChain modules moved to //packages/langchain_util, which took the
+    # langchain/openai/tenacity dependencies with them. What is left here is
+    # stdlib only.
+    deps = [],
+)
+
+_TEST_SRCS = glob(["test_*.py"])
+
+[
+    py_test(
+        name = src[:-len(".py")],
+        srcs = [src],
+        legacy_create_init = False,
+        main = src,
+        deps = [":common"],
+    )
+    for src in _TEST_SRCS
+]
+
+test_suite(
+    name = "test_all",
+    tests = [src[:-len(".py")] for src in _TEST_SRCS],
+)

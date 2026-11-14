@@ -1,0 +1,81 @@
+load("@monorepo_pip//:requirements.bzl", "requirement")
+load("@rules_python//python:py_test.bzl", "py_test")
+load("//rules/python/lint:defs.bzl", "py_library")
+
+# Algo-chan (SPEC §12): prompts, reply schemas, the model call with one
+# repair, the report and hints. Logging, levels, reviews and plans never
+# depend on anything here.
+py_library(
+    name = "tutor",
+    srcs = [
+        "connection.py",
+        "hints.py",
+        "language.py",
+        "llm.py",
+        "prompts.py",
+        "report.py",
+        "schemas.py",
+    ],
+    visibility = ["//packages/algo_tutor:__subpackages__"],
+    deps = [
+        "//packages/algo_tutor:config",
+        "//packages/algo_tutor/domain",
+        "//packages/langchain_util",
+        requirement("httpx"),
+        requirement("langchain-core"),
+        requirement("langchain-ollama"),
+        requirement("langchain-openai"),
+        requirement("ollama"),
+        requirement("openai"),
+        requirement("pydantic"),
+    ],
+)
+
+# The report queue: one in-process thread over `attempts.report_status`.
+py_library(
+    name = "worker",
+    srcs = ["worker.py"],
+    visibility = ["//packages/algo_tutor:__subpackages__"],
+    deps = [
+        ":tutor",
+        "//packages/algo_tutor:config",
+        "//packages/algo_tutor/domain",
+        "//packages/algo_tutor/store",
+        requirement("sqlalchemy"),
+    ],
+)
+
+# The scripted chat model the tutor and API tests use instead of Ollama.
+# Not testonly: the lint macro's mypy binary can't depend on testonly targets.
+py_library(
+    name = "fake_models",
+    srcs = ["fake_models.py"],
+    visibility = ["//packages/algo_tutor:__subpackages__"],
+    deps = [
+        requirement("langchain-core"),
+        requirement("pydantic"),
+    ],
+)
+
+py_test(
+    name = "test_tutor",
+    srcs = ["test_tutor.py"],
+    legacy_create_init = False,
+    main = "test_tutor.py",
+    deps = [
+        ":fake_models",
+        ":tutor",
+    ],
+)
+
+py_test(
+    name = "test_worker",
+    srcs = ["test_worker.py"],
+    legacy_create_init = False,
+    main = "test_worker.py",
+    deps = [
+        ":fake_models",
+        ":worker",
+        "//packages/algo_tutor/catalogue:testing",
+    ],
+)

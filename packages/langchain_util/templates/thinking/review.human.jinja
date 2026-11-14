@@ -1,0 +1,13 @@
+<task>
+{{ task }}
+</task>
+
+<checklist>
+{%- for check in checks %}
+{{ check.id }}. {{ check.question }}
+{%- endfor %}
+</checklist>
+
+<answer>
+{{ answer }}
+</answer>

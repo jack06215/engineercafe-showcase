@@ -1,0 +1,65 @@
+load("@monorepo_pip//:requirements.bzl", "requirement")
+load("@rules_python//python:py_test.bzl", "py_test")
+load("//rules/python/lint:defs.bzl", "py_library")
+
+# Where problems and lists come from (SPEC §5): the bundled manifests, the
+# LeetCode problem bank and its rating model, courses, your own lists and
+# question packs, and first-run setup. Services take a SQLAlchemy Session
+# and leave committing to the caller.
+py_library(
+    name = "catalogue",
+    srcs = [
+        "bank.py",
+        "bank_file.py",
+        "courses.py",
+        "errors.py",
+        "lists.py",
+        "manifests.py",
+        "packs.py",
+        "problems.py",
+        "rating_model.py",
+        "setup.py",
+    ],
+    data = ["//packages/algo_tutor/manifests"],
+    visibility = ["//packages/algo_tutor:__subpackages__"],
+    deps = [
+        "//packages/algo_tutor/domain",
+        "//packages/algo_tutor/store",
+        requirement("pydantic"),
+        requirement("pyyaml"),
+        requirement("requests"),
+        requirement("sqlalchemy"),
+    ],
+)
+
+# Shared by the tests (the API's too): a migrated temporary database,
+# builders and the recorded bank pages. Not testonly: the lint macro's mypy
+# binary for //packages/algo_tutor/api:testing can't depend on testonly.
+py_library(
+    name = "testing",
+    srcs = ["testing.py"],
+    data = glob(["testdata/**"]),
+    visibility = ["//packages/algo_tutor:__subpackages__"],
+    deps = [":catalogue"],
+)
+
+[
+    py_test(
+        name = name,
+        srcs = [name + ".py"],
+        data = glob(["testdata/**"]),
+        legacy_create_init = False,
+        main = name + ".py",
+        deps = [":testing"],
+    )
+    for name in [
+        "test_bank",
+        "test_courses",
+        "test_lists",
+        "test_manifests",
+        "test_packs",
+        "test_problems",
+        "test_rating_model",
+        "test_setup",
+    ]
+]

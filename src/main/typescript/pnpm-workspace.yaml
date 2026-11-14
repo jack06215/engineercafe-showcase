@@ -1,0 +1,19 @@
+# This workspace's pnpm settings. pnpm stops at the first pnpm-workspace.yaml
+# above the current directory, so `pnpm` anywhere under here manages this
+# workspace.
+packages:
+  - packages/*
+
+# Ten days, in minutes: pnpm resolves no version published more recently, when
+# adding or re-resolving.
+minimumReleaseAge: 14400
+
+# Which dependencies may run install scripts; pnpm 11 fails the install on any
+# left undecided.
+#
+# esbuild, @parcel/watcher, unrs-resolver: the scripts only check or rebuild a
+# platform binary that an optional @scope/<platform> dependency already ships.
+allowBuilds:
+  esbuild: false
+  '@parcel/watcher': false
+  unrs-resolver: false

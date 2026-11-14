@@ -1,0 +1,15 @@
+.DS_Store
+.env
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.venv/
+**/__pycache__
+bazel-*
+# Word files that the `.docx` targets of markdown_docs write (rules/markdown/docx.sh).
+/build/
+# The Claude workshop's chart agent writes one folder per run here.
+/packages/vega_lite_ai/output/
+# algo_tutor's runtime data and local config overrides (packages/algo_tutor/SPEC.md §3.3).
+/packages/algo_tutor/.data/
+/packages/algo_tutor/config.local.yaml

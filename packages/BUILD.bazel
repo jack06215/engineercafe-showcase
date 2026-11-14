@@ -1,0 +1,10 @@
+load("//rules/python/lint:defs.bzl", "py_library")
+
+py_library(
+    name = "cli_complete",
+    srcs = ["cli_complete.py"],
+    visibility = [
+        "//packages:__subpackages__",
+        "//rules/markdown/md2docx:__pkg__",
+    ],
+)

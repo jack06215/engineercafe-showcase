@@ -1,0 +1,11 @@
+# Bundled data (SPEC §5.3). Read at runtime from the runfiles tree, next to
+# the code, so `bazel run` and `bazel test` see the same files.
+filegroup(
+    name = "manifests",
+    srcs = glob([
+        "*.json",
+        "*.txt",
+        "*.yaml",
+    ]),
+    visibility = ["//packages/algo_tutor:__subpackages__"],
+)

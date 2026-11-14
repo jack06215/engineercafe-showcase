@@ -1,0 +1,19 @@
+Extract a structured incident report from the note below.
+Use only what the note supports; do not invent details.
+
+Severity must be one of:
+{%- for level in severity_levels %}
+- {{ level }}
+{%- endfor %}
+{% if known_services %}
+Services that exist in this system, for matching names in the note:
+{%- for service in known_services %}
+- {{ service }}
+{%- endfor %}
+{% endif %}
+{{ format_instructions }}
+
+Note:
+---
+{{ note }}
+---

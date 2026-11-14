@@ -1,0 +1,103 @@
+load("@monorepo_pip//:requirements.bzl", "requirement")
+load("//rules/python/lint:defs.bzl", "py_binary")
+
+# The prompts are read at runtime from next to the script, so every example
+# needs its `.jinja` files in the runfiles tree.
+_PROMPTS = glob(["prompts/**/*.jinja"])
+
+py_binary(
+    name = "string_output",
+    srcs = ["string_output.py"],
+    data = _PROMPTS,
+    main = "string_output.py",
+    deps = [
+        "//packages/common",
+        "//packages/langchain_util",
+        requirement("langchain-core"),
+    ],
+)
+
+py_binary(
+    name = "pydantic_output",
+    srcs = ["pydantic_output.py"],
+    data = _PROMPTS,
+    main = "pydantic_output.py",
+    deps = [
+        "//packages/common",
+        "//packages/langchain_util",
+        requirement("langchain-core"),
+        requirement("pydantic"),
+    ],
+)
+
+py_binary(
+    name = "async_fanout",
+    srcs = ["async_fanout.py"],
+    data = _PROMPTS,
+    main = "async_fanout.py",
+    deps = [
+        "//packages/common",
+        "//packages/langchain_util",
+        requirement("langchain-core"),
+    ],
+)
+
+py_binary(
+    name = "llm_cache",
+    srcs = ["llm_cache.py"],
+    data = _PROMPTS,
+    main = "llm_cache.py",
+    deps = [
+        "//packages/common",
+        "//packages/langchain_util",
+        requirement("langchain-core"),
+    ],
+)
+
+py_binary(
+    name = "embeddings",
+    srcs = ["embeddings.py"],
+    main = "embeddings.py",
+    deps = [
+        "//packages/common",
+        "//packages/langchain_util",
+        requirement("langchain-core"),
+    ],
+)
+
+py_binary(
+    name = "prompt_repair",
+    srcs = ["prompt_repair.py"],
+    data = _PROMPTS,
+    main = "prompt_repair.py",
+    deps = [
+        "//packages/common",
+        "//packages/langchain_util",
+        requirement("langchain-core"),
+        requirement("pydantic"),
+    ],
+)
+
+py_binary(
+    name = "chain_factory",
+    srcs = ["chain_factory.py"],
+    data = _PROMPTS,
+    main = "chain_factory.py",
+    deps = [
+        "//packages/common",
+        "//packages/langchain_util",
+        requirement("langchain-core"),
+    ],
+)
+
+py_binary(
+    name = "prompt_selection",
+    srcs = ["prompt_selection.py"],
+    data = _PROMPTS,
+    main = "prompt_selection.py",
+    deps = [
+        "//packages/common",
+        "//packages/langchain_util",
+        requirement("langchain-core"),
+    ],
+)

@@ -1,0 +1,29 @@
+bazel_dep(name = "bazel_skylib", version = "1.9.2")
+bazel_dep(name = "rules_python", version = "2.3.2")
+bazel_dep(name = "rules_shell", version = "0.8.0")
+bazel_dep(name = "buildifier_prebuilt", version = "10.0.1")
+
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+
+python.single_version_override(
+    python_version = "3.14.6",
+    sha256 = {
+        "aarch64-apple-darwin": "1c7e8db27d1f5c029c232406103b7216baaa8a32a900a64f6dee20f8eaaca1af",
+        "aarch64-unknown-linux-gnu": "1001d13aaccbb3d1a855ec450e0f058f6501259011b74d5b1d086441b21c0dbe",
+        "x86_64-apple-darwin": "26e384a6000a2c6e7484bca9c6441553c0c9f701c87dcd2e632d994edd000e9c",
+        "x86_64-unknown-linux-gnu": "b1ff3bb3ca58e2af9f1cb2be63cd9ef00a6f60ed50bba77bab189a9a3df13675",
+    },
+    urls = ["20260728/cpython-{python_version}+20260728-{platform}-{build}.tar.gz"],
+)
+python.toolchain(
+    python_version = "3.14.6",
+)
+
+pip.parse(
+    hub_name = "monorepo_pip",
+    python_version = "3.14.6",
+    uv_lock = "//:uv.lock",
+)
+use_repo(pip, "monorepo_pip")

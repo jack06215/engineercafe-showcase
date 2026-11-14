@@ -1,0 +1,10 @@
+// ヒラギノの600を700(font-weight: bold)として識別できるようにする
+@font-face {
+  font-family: 'Hiragino Sans';
+  font-weight: 700;
+  src: local(hiraginosans-w6);
+}
+
+body {
+  line-height: 1.5;
+}

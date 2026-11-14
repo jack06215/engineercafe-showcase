@@ -1,0 +1,7 @@
+# uv's project venv (`uv sync`); Bazel uses its own hermetic toolchain.
+.venv
+
+# A pnpm + Turborepo workspace with its own pnpm-lock.yaml, built and tested by
+# Turborepo rather than Bazel (src/main/typescript/README.md). Ignoring the
+# whole tree also keeps Bazel out of the node_modules/ folders it installs.
+src/main/typescript

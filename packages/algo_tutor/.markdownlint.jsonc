@@ -1,0 +1,6 @@
+// SPEC.md keeps each paragraph on one line, so the 80-column limit is off in
+// this package. Every other rule comes from the root config.
+{
+  "extends": "../../.markdownlint.jsonc",
+  "MD013": false
+}

@@ -1,0 +1,104 @@
+load("@monorepo_pip//:requirements.bzl", "requirement")
+load("@rules_python//python:py_test.bzl", "py_test")
+load("//rules/markdown:defs.bzl", "markdown_docs")
+load("//rules/python/lint:defs.bzl", "py_binary", "py_library")
+
+# algo_tutor (SPEC.md): a local coding-interview practice tracker, ported
+# from BloomCode. One BUILD file per layer, so the layering is enforced:
+# domain (pure rules) ← store (database) ← catalogue (sources) ← api, tutor.
+
+# The config file (§3.4) and where files live (§3.3).
+py_library(
+    name = "config",
+    srcs = [
+        "config.py",
+        "paths.py",
+    ],
+    visibility = ["//packages/algo_tutor:__subpackages__"],
+    deps = [
+        requirement("pydantic"),
+        requirement("pyyaml"),
+    ],
+)
+
+# Opening everything: paths, config, manifests, the migrated database.
+# Apart from the CLI, so the API can use it and the CLI can serve the API.
+py_library(
+    name = "runtime",
+    srcs = ["runtime.py"],
+    visibility = ["//packages/algo_tutor:__subpackages__"],
+    deps = [
+        ":config",
+        "//packages/algo_tutor/catalogue",
+        "//packages/algo_tutor/store",
+    ],
+)
+
+# The code of the :cli and :serve binaries, as a library so that test_cli can
+# import it.
+py_library(
+    name = "algo_tutor_lib",
+    srcs = [
+        "cli.py",
+        "serve.py",
+    ],
+    visibility = [
+        "//packages:__pkg__",
+        "//packages/algo_tutor:__subpackages__",
+    ],
+    deps = [
+        ":config",
+        ":runtime",
+        "//packages:cli_complete",
+        "//packages/algo_tutor/api:app",
+        "//packages/algo_tutor/catalogue",
+        "//packages/algo_tutor/store",
+        requirement("pydantic"),
+        requirement("uvicorn"),
+    ],
+)
+
+# The API (SPEC §3.1): `bazel run //packages/algo_tutor:serve`, on
+# 127.0.0.1:4317. The same as `bazel run //packages/algo_tutor:cli -- serve`.
+py_binary(
+    name = "serve",
+    srcs = ["serve.py"],
+    main = "serve.py",
+    deps = [":algo_tutor_lib"],
+)
+
+py_binary(
+    name = "cli",
+    srcs = ["cli.py"],
+    main = "cli.py",
+    deps = [":algo_tutor_lib"],
+)
+
+py_test(
+    name = "test_config",
+    srcs = ["test_config.py"],
+    data = ["config.yaml"],
+    legacy_create_init = False,
+    main = "test_config.py",
+    deps = [":config"],
+)
+
+py_test(
+    name = "test_cli",
+    srcs = ["test_cli.py"],
+    data = ["config.yaml"],
+    legacy_create_init = False,
+    main = "test_cli.py",
+    deps = [
+        ":algo_tutor_lib",
+        requirement("fastapi"),
+        # Starlette's TestClient is built on httpx2.
+        requirement("httpx2"),
+    ],
+)
+
+markdown_docs(
+    name = "docs",
+    srcs = glob(["*.md"]),
+    config = ".markdownlint.jsonc",
+)

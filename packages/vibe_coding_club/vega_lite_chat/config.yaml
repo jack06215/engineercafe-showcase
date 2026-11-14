@@ -1,0 +1,19 @@
+ollama:
+  model: qwen3.6:35b
+  base_url: http://localhost:11434
+  temperature: 0
+  keep_alive: 1h
+  timeout_seconds: 60
+  thinking_default: false
+chat:
+  history_turns: 6
+translator:
+  max_calls: 3
+  recent_requests: 3
+data:
+  row_warning: 1000
+  sample_rows: 5
+  sample_seed: 0
+  max_listed_values: 20
+chart:
+  height: 400

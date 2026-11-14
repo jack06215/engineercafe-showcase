@@ -1,0 +1,12 @@
+load("//rules/markdown:defs.bzl", "markdown_docs")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    "main_template.py",
+])
+
+markdown_docs(
+    name = "docs",
+    srcs = glob(["*.md"]),
+)
