@@ -1,5 +1,6 @@
 load("@monorepo_pip//:requirements.bzl", "requirement")
 load("@rules_python//python:py_test.bzl", "py_test")
+load("//rules/markdown:defs.bzl", "markdown_docs")
 load("//rules/python/lint:defs.bzl", "py_binary", "py_library")
 
 # The HTTP contract (SPEC §15): request and response bodies only.
@@ -120,3 +121,8 @@ py_test(
     )
     for src in glob(["test_api_*.py"])
 ]
+
+markdown_docs(
+    name = "docs",
+    srcs = glob(["*.md"]),
+)

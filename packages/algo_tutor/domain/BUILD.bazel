@@ -1,5 +1,6 @@
 load("@monorepo_pip//:requirements.bzl", "requirement")
 load("@rules_python//python:py_test.bzl", "py_test")
+load("//rules/markdown:defs.bzl", "markdown_docs")
 load("//rules/python/lint:defs.bzl", "py_library")
 
 # Pure rules: no I/O and no third-party imports (SPEC §3.2). Everything the
@@ -97,4 +98,9 @@ py_test(
         ":domain",
         requirement("pyyaml"),
     ],
+)
+
+markdown_docs(
+    name = "docs",
+    srcs = glob(["*.md"]),
 )

@@ -1,5 +1,6 @@
 load("@monorepo_pip//:requirements.bzl", "requirement")
 load("@rules_python//python:py_test.bzl", "py_test")
+load("//rules/markdown:defs.bzl", "markdown_docs")
 load("//rules/python/lint:defs.bzl", "py_library")
 
 # Algo-chan (SPEC §12): prompts, reply schemas, the model call with one
@@ -78,4 +79,9 @@ py_test(
         ":worker",
         "//packages/algo_tutor/catalogue:testing",
     ],
+)
+
+markdown_docs(
+    name = "docs",
+    srcs = glob(["*.md"]),
 )

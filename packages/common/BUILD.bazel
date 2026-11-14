@@ -1,4 +1,5 @@
 load("@rules_python//python:py_test.bzl", "py_test")
+load("//rules/markdown:defs.bzl", "markdown_docs")
 load("//rules/python/lint:defs.bzl", "py_library")
 
 py_library(
@@ -32,4 +33,9 @@ _TEST_SRCS = glob(["test_*.py"])
 test_suite(
     name = "test_all",
     tests = [src[:-len(".py")] for src in _TEST_SRCS],
+)
+
+markdown_docs(
+    name = "docs",
+    srcs = glob(["*.md"]),
 )

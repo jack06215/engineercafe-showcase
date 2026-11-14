@@ -1,4 +1,5 @@
 load("@monorepo_pip//:requirements.bzl", "requirement")
+load("//rules/markdown:defs.bzl", "markdown_docs")
 load("//rules/python/lint:defs.bzl", "py_binary")
 
 # The prompts are read at runtime from next to the script, so every example
@@ -100,4 +101,9 @@ py_binary(
         "//packages/langchain_util",
         requirement("langchain-core"),
     ],
+)
+
+markdown_docs(
+    name = "docs",
+    srcs = glob(["*.md"]),
 )

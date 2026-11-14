@@ -1,5 +1,6 @@
 load("@monorepo_pip//:requirements.bzl", "requirement")
 load("@rules_python//python:py_test.bzl", "py_test")
+load("//rules/markdown:defs.bzl", "markdown_docs")
 load("//rules/python/lint:defs.bzl", "py_library")
 
 # The database (SPEC §16): SQLAlchemy models, the engine with its pragmas,
@@ -39,3 +40,8 @@ py_library(
         "test_seed",
     ]
 ]
+
+markdown_docs(
+    name = "docs",
+    srcs = glob(["*.md"]),
+)
