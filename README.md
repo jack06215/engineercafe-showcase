@@ -18,16 +18,56 @@ The Python packages build with Bazel. `src/main/typescript` is a separate pnpm
 and Turborepo workspace that Bazel ignores; see its
 [README](src/main/typescript/README.md).
 
+## System requirements
+
+macOS or Linux, on x86_64 or arm64. `MODULE.bazel` pins a Python build for
+those four platforms only.
+
+| Tool | Needed for | Install |
+| --- | --- | --- |
+| [Bazelisk](https://github.com/bazelbuild/bazelisk) | Building and testing the Python packages. It runs the Bazel version in `.bazelversion`, and Bazel downloads Python 3.14.6 and the packages in `uv.lock` itself. | `brew install bazelisk` |
+| `markdownlint` | The markdown `.lint` tests, which run the copy on your `PATH` | `brew install markdownlint-cli` |
+| [uv](https://docs.astral.sh/uv/) 0.13.6 or later | Changing Python dependencies, or a local `.venv` for your editor | `brew install uv` |
+| Node 24.22.1 | The web UI | `asdf install nodejs 24.22.1` |
+| pnpm 11.22.0 | The web UI. Corepack, which comes with Node 24, runs the version that `package.json` names. | `corepack enable pnpm` |
+
+Optional:
+
+| Tool | Needed for |
+| --- | --- |
+| `opencc` | The `.s2twp` targets of `rules/markdown` |
+| `mmdc` | Mermaid diagrams in the `.docx` targets of `rules/markdown` |
+| [Ollama](https://ollama.com) | `vega_lite_chat`, with the model in its `config.yaml` |
+| Anthropic credentials, for example `ANTHROPIC_API_KEY` | `vega_lite_ai` |
+
 ## Setup
 
-- [Bazelisk](https://github.com/bazelbuild/bazelisk). It reads the Bazel
-  version from `.bazelversion`.
-- Bazel downloads Python 3.14.6 and the packages in `uv.lock` itself. Run
-  `uv sync` only if your editor needs a local `.venv`.
-- `markdownlint` (`brew install markdownlint-cli`). The markdown `.lint`
-  tests run the copy on your `PATH`, not one that Bazel downloads.
-- For the web UI only: Node 24.22.1 (`asdf install` reads `.tool-versions`),
-  then `corepack enable pnpm` and `pnpm install` in `src/main/typescript`.
+```sh
+git clone https://github.com/jack06215/engineercafe-showcase.git
+cd engineercafe-showcase
+tools/setup.sh
+```
+
+`tools/setup.sh` does these steps:
+
+1. It checks the tools above and prints the install command for each missing
+   one. It stops if Bazel or Node is missing.
+2. It installs the web UI's packages with `pnpm install` in
+   `src/main/typescript`.
+3. It runs `bazel build //...`. The first build downloads Python and the
+   packages in `uv.lock`, so it takes some minutes.
+
+Options:
+
+| Option | Does |
+| --- | --- |
+| `--install` | Also installs missing tools: Bazelisk, markdownlint and uv with Homebrew, Node with asdf, and a `pnpm` command with corepack |
+| `--test` | Also runs `bazel test //...` and the web UI's build, tests, type check and lint |
+| `--check` | Only reports the tools and changes nothing |
+| `--no-web` | Skips the web UI |
+
+Without `--install`, the script changes nothing outside the repo and the
+Bazel and pnpm caches.
 
 ## Run
 

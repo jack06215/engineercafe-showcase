@@ -14,7 +14,11 @@ builds and tests it.
 
 ## Setup
 
-1. Node: `asdf install` picks up 24.22.1 from the repo's `.tool-versions`.
+`tools/setup.sh --install` from the repo root does these steps. By hand:
+
+1. Node: `asdf install nodejs 24.22.1`, the version in the repo's
+   `.tool-versions`. A plain `asdf install` would also try to install the
+   Python version there, which Bazel provides by itself.
 2. pnpm: `corepack enable pnpm`. Corepack then runs the version that
    `packageManager` names, 11.22.0. Turborepo needs a `pnpm` command on your
    `PATH` to run the package scripts, so `corepack pnpm` alone is not enough.
