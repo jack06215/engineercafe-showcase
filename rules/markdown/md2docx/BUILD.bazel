@@ -17,9 +17,7 @@ py_library(
         "numbering.py",
         "ooxml.py",
     ],
-    visibility = ["//packages:__pkg__"],
     deps = [
-        "//packages:cli_complete",
         # markdown-it-py's gfm-like preset turns linkify on, which imports it.
         requirement("linkify-it-py"),
         requirement("markdown-it-py"),

@@ -29,34 +29,24 @@ from packages.algo_tutor.runtime import (
 from packages.algo_tutor.store.backups import BackupError
 from packages.algo_tutor.store.migrations import SchemaTooNewError
 from packages.algo_tutor.store.timeutil import now_utc
-from packages.cli_complete import complete
 
 
 def add_location_flags(parser: argparse.ArgumentParser) -> None:
     """`--repo-root`, `--data-dir` and `--config`, shared with `serve.py`."""
-    complete(
-        parser.add_argument(
-            "--repo-root",
-            type=Path,
-            help="the monorepo checkout (default: $BUILD_WORKSPACE_DIRECTORY)",
-        ),
-        "directories",
+    parser.add_argument(
+        "--repo-root",
+        type=Path,
+        help="the monorepo checkout (default: $BUILD_WORKSPACE_DIRECTORY)",
     )
-    complete(
-        parser.add_argument(
-            "--data-dir",
-            type=Path,
-            help="runtime data (default: <repo>/packages/algo_tutor/.data)",
-        ),
-        "directories",
+    parser.add_argument(
+        "--data-dir",
+        type=Path,
+        help="runtime data (default: <repo>/packages/algo_tutor/.data)",
     )
-    complete(
-        parser.add_argument(
-            "--config",
-            type=Path,
-            help="config file, replacing config.yaml and config.local.yaml",
-        ),
-        "files",
+    parser.add_argument(
+        "--config",
+        type=Path,
+        help="config file, replacing config.yaml and config.local.yaml",
     )
 
 
@@ -93,7 +83,7 @@ def build_parser() -> argparse.ArgumentParser:
     pack = add_subcommand(
         "import-pack", "Validate and import a question pack (version 2)"
     )
-    complete(pack.add_argument("file", type=Path, help="the pack's JSON file"), "files")
+    pack.add_argument("file", type=Path, help="the pack's JSON file")
     pack.add_argument(
         "--dry-run",
         action="store_true",

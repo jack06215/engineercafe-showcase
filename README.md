@@ -11,8 +11,8 @@ Projects built at [Engineer Cafe](https://engineercafe.jp/).
 | [`algo_tutor`](packages/algo_tutor) | A local tracker for coding-interview practice, with an optional AI tutor ([spec](packages/algo_tutor/SPEC.md)) | FastAPI, SQLAlchemy, SQLite, LangChain |
 | [`algo-tutor-web`](src/main/typescript/packages/algo-tutor-web) | The web UI of `algo_tutor` | React 19, MUI, TanStack Router and Query, Vite |
 
-`packages/langchain_util`, `packages/common` and `packages/cli_complete.py` are
-shared libraries that `vega_lite_chat` and `algo_tutor` depend on.
+`packages/langchain_util` and `packages/common` are shared libraries that
+`vega_lite_chat` and `algo_tutor` depend on.
 
 The Python packages build with Bazel. `src/main/typescript` is a separate pnpm
 and Turborepo workspace that Bazel ignores; see its

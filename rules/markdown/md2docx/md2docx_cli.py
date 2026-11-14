@@ -9,7 +9,6 @@ from pathlib import Path
 
 import pydantic
 
-from packages.cli_complete import complete
 from rules.markdown.md2docx import converter, diagrams
 from rules.markdown.md2docx.diagrams import DiagramRenderer
 from rules.markdown.md2docx.google_docs import PageSize
@@ -45,13 +44,12 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="SRC",
         help="Markdown files. A relative path keeps its directories under --output_dir.",
     )
-    output_dir = parser.add_argument(
+    parser.add_argument(
         "--output_dir",
         type=Path,
         default=DEFAULT_OUTPUT_DIR,
         help=f"Where to write. Default: ./{DEFAULT_OUTPUT_DIR}.",
     )
-    complete(output_dir, "directories")
     parser.add_argument(
         "--page_size",
         choices=[size.value for size in PageSize],
