@@ -24,8 +24,10 @@ so edit the rules here.
   before every commit.
 - Keep each PR to one semantic change: if its title needs "and", split it.
   Put refactors and behaviour changes in separate PRs.
-- Write commit messages as [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) (`feat:`, `fix:`,
-  `refactor:`) and name branches `<type>/<topic>`, such as `feat/setup-script`.
+- Write commit messages as
+  [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
+  (`feat:`, `fix:`, `refactor:`) and name branches `<type>/<topic>`, such as
+  `feat/setup-script`.
 - Add or update unit tests for every behaviour change. Then run the checks in
   the [Test and lint](README.md#test-and-lint) section of the README and make
   sure they pass.
