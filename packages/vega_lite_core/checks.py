@@ -1,14 +1,14 @@
 """Check a `ChartSpec` against the data's profile: do the columns exist, and does each use suit its column?
 
 The errors are English sentences that say how to fix the chart, because they go back to the model as the
-repair request (DESIGN.md §5). An empty list means the chart can be compiled.
+repair request (packages/vega_lite_chat/DESIGN.md §5). An empty list means the chart can be compiled.
 """
 
 import datetime
 import difflib
 import re
 
-from packages.vega_lite_chat.chart_spec import (
+from packages.vega_lite_core.chart_spec import (
     Channel,
     ChartSpec,
     Encoding,
@@ -17,7 +17,7 @@ from packages.vega_lite_chat.chart_spec import (
     FilterScalar,
     TimeUnit,
 )
-from packages.vega_lite_chat.profile import (
+from packages.vega_lite_core.profile import (
     ColumnProfile,
     DataProfile,
     FieldGuess,
@@ -63,6 +63,21 @@ def check_chart(spec: ChartSpec, profile: DataProfile) -> list[str]:
                 "rank by a numeric column"
             )
     return errors
+
+
+def empty_column_errors(spec: ChartSpec, profile: DataProfile) -> list[str]:
+    """Return an error for each column in *spec* that has no values in *profile*.
+
+    A chart of such a column is blank, and `check_chart` accepts it. `check_chart` does not call this
+    function, so a caller that wants this check calls both. A column that is not in the profile is
+    skipped, because `check_chart` reports it.
+    """
+    names = {encoding.field for _, encoding in spec.encodings() if encoding.field}
+    return [
+        f"column `{name}` has no values, so the chart would be blank"
+        for name in sorted(names)
+        if (column := profile.column(name)) is not None and column.nulls == profile.rows
+    ]
 
 
 def _known(

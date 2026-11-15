@@ -20,22 +20,20 @@ import yaml
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from packages.vega_lite_chat.chart_spec import (
-    AssistantTurn,
-    ChartSpec,
-)
-from packages.vega_lite_chat.checks import check_chart
+from packages.vega_lite_chat.assistant_turn import AssistantTurn
 from packages.vega_lite_chat.config import DataConfig
-from packages.vega_lite_chat.csv_loader import (
+from packages.vega_lite_chat.samples import sample_named
+from packages.vega_lite_core.chart_spec import ChartSpec
+from packages.vega_lite_core.checks import check_chart
+from packages.vega_lite_core.csv_loader import (
     InputError,
     load_csv,
 )
-from packages.vega_lite_chat.profile import (
+from packages.vega_lite_core.profile import (
     DataProfile,
     profile_frame,
     profile_yaml,
 )
-from packages.vega_lite_chat.samples import sample_named
 
 DEFAULT_PROMPTS = Path(__file__).with_name("prompts.yaml")
 

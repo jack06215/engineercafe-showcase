@@ -6,7 +6,7 @@ import numpy
 import pandas
 import yaml
 
-from packages.vega_lite_chat.profile import (
+from packages.vega_lite_core.profile import (
     DataProfile,
     guess_type,
     plain,

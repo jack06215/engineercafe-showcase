@@ -1,13 +1,13 @@
-"""Tests for checks.py: every rule in DESIGN.md §5, passing and failing."""
+"""Tests for checks.py: every rule in packages/vega_lite_chat/DESIGN.md §5, passing and failing."""
 
 import unittest
 from typing import Any
 
 import pandas
 
-from packages.vega_lite_chat.chart_spec import ChartSpec
-from packages.vega_lite_chat.checks import check_chart
-from packages.vega_lite_chat.profile import (
+from packages.vega_lite_core.chart_spec import ChartSpec
+from packages.vega_lite_core.checks import check_chart, empty_column_errors
+from packages.vega_lite_core.profile import (
     DataProfile,
     profile_frame,
 )
@@ -347,6 +347,69 @@ class TopNTest(unittest.TestCase):
         self.assertTrue(
             any("rank by a numeric column" in error for error in errors), errors
         )
+
+
+def _blank_profile() -> DataProfile:
+    df = pandas.DataFrame(
+        {
+            "地域": ["福岡", "東京", "大阪"],
+            "売上": [320, 500, 410],
+            "目標": [float("nan")] * 3,
+            "備考": [None] * 3,
+        }
+    )
+    return profile_frame(df, sample_rows=3, seed=0, max_listed_values=20)
+
+
+BLANK_PROFILE = _blank_profile()
+
+
+def _blank(name: str) -> str:
+    return f"column `{name}` has no values, so the chart would be blank"
+
+
+def _empty_errors(**chart: Any) -> list[str]:
+    return empty_column_errors(ChartSpec.model_validate(chart), BLANK_PROFILE)
+
+
+class EmptyColumnTest(unittest.TestCase):
+    def test_an_empty_column_is_refused(self) -> None:
+        errors = _empty_errors(mark="bar", x=REGION, y={**SALES, "field": "目標"})
+        self.assertEqual(errors, [_blank("目標")])
+
+    def test_columns_with_values_pass(self) -> None:
+        self.assertEqual(_empty_errors(mark="bar", x=REGION, y=SALES), [])
+
+    def test_count_without_a_field_passes(self) -> None:
+        count = {"field": None, "type": "quantitative", "aggregate": "count"}
+        self.assertEqual(_empty_errors(mark="bar", x=REGION, y=count), [])
+
+    def test_unknown_column_is_left_to_check_chart(self) -> None:
+        errors = _empty_errors(mark="bar", x=REGION, y={**SALES, "field": "利益"})
+        self.assertEqual(errors, [])
+
+    def test_one_column_on_two_channels_gives_one_error(self) -> None:
+        target = {"field": "目標", "type": "quantitative"}
+        errors = _empty_errors(
+            mark="point", x={**SALES, "aggregate": None}, y=target, size=target
+        )
+        self.assertEqual(errors, [_blank("目標")])
+
+    def test_errors_are_sorted_by_column_name(self) -> None:
+        errors = _empty_errors(
+            mark="point",
+            x={"field": "目標", "type": "quantitative"},
+            y={**SALES, "aggregate": None},
+            color={"field": "備考", "type": "nominal"},
+        )
+        # x comes first, but 備考 sorts before 目標.
+        self.assertEqual(errors, [_blank("備考"), _blank("目標")])
+
+    def test_check_chart_accepts_a_blank_chart(self) -> None:
+        spec = ChartSpec.model_validate(
+            {"mark": "bar", "x": REGION, "y": {**SALES, "field": "目標"}}
+        )
+        self.assertEqual(check_chart(spec, BLANK_PROFILE), [])
 
 
 if __name__ == "__main__":

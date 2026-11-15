@@ -9,18 +9,16 @@ from dataclasses import dataclass
 
 from langchain_core.messages import AIMessage, BaseMessage
 
-from packages.vega_lite_chat.chart_spec import (
-    AssistantTurn,
-)
-from packages.vega_lite_chat.checks import check_chart
+from packages.vega_lite_chat.assistant_turn import AssistantTurn
 from packages.vega_lite_chat.llm import (
     RawReply,
     StructuredModel,
 )
-from packages.vega_lite_chat.profile import DataProfile
 from packages.vega_lite_chat.prompts import (
     repair_message,
 )
+from packages.vega_lite_core.checks import check_chart
+from packages.vega_lite_core.profile import DataProfile
 
 
 @dataclass(frozen=True)

@@ -10,17 +10,8 @@ import pandas
 import yaml
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
-from packages.vega_lite_chat.chart_spec import (
-    AssistantTurn,
-    ChartSpec,
-    Encoding,
-    Filter,
-)
+from packages.vega_lite_chat.assistant_turn import AssistantTurn
 from packages.vega_lite_chat.config import load_config
-from packages.vega_lite_chat.profile import (
-    DataProfile,
-    profile_frame,
-)
 from packages.vega_lite_chat.prompts import (
     DEFAULT_PROMPTS,
     PromptBook,
@@ -30,6 +21,19 @@ from packages.vega_lite_chat.prompts import (
     chat_system_prompt,
     load_prompts,
     repair_message,
+)
+from packages.vega_lite_chat.samples import sample_named
+from packages.vega_lite_core.chart_spec import (
+    ChartSpec,
+    Encoding,
+    Filter,
+)
+from packages.vega_lite_core.checks import check_chart
+from packages.vega_lite_core.compiler import compile_chart, vega_lite_errors
+from packages.vega_lite_core.csv_loader import load_csv
+from packages.vega_lite_core.profile import (
+    DataProfile,
+    profile_frame,
 )
 
 DATA = load_config().data
@@ -85,6 +89,28 @@ class ShippedPromptsTest(unittest.TestCase):
         samples = {example.sample for example in self.book.examples}
         self.assertEqual(set(self.book.example_profiles), samples)
         self.assertNotIn("fukuoka_weather.csv", samples)
+
+    def test_prompt_examples_compile(self) -> None:
+        for index, example in enumerate(_shipped()["examples"]):
+            df = load_csv(sample_named(example["sample"]).read_bytes())
+            profile = profile_frame(
+                df,
+                sample_rows=DATA.sample_rows,
+                seed=DATA.sample_seed,
+                max_listed_values=DATA.max_listed_values,
+            )
+            charts = {
+                "current": example.get("current"),
+                "reply": example["reply"].get("chart"),
+            }
+            for key, raw in charts.items():
+                if raw is None:
+                    continue
+                with self.subTest(example=index, chart=key):
+                    spec = ChartSpec.model_validate(raw)
+                    self.assertEqual(check_chart(spec, profile), [])
+                    compiled = compile_chart(spec, profile, height=400)
+                    self.assertEqual(vega_lite_errors(compiled), [])
 
 
 class BrokenPromptsTest(unittest.TestCase):

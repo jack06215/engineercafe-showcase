@@ -4,34 +4,13 @@ load("//rules/markdown:defs.bzl", "markdown_docs")
 load("//rules/python/lint:defs.bzl", "py_binary", "py_library")
 load("//rules/python/streamlit:defs.bzl", "streamlit_app")
 
-# The chart format and its checks, with no LLM or UI behind them, so the Claude
-# workshop's chart agent can check charts without LangGraph, Ollama or Streamlit.
-py_library(
-    name = "chart_core",
-    srcs = [
-        "chart_spec.py",
-        "checks.py",
-        "compiler.py",
-        "csv_loader.py",
-        "profile.py",
-    ],
-    visibility = ["//packages/vega_lite_ai:__pkg__"],
-    deps = [
-        # Only for the Vega-Lite JSON schema it ships.
-        requirement("altair"),
-        requirement("jsonschema"),
-        requirement("pandas"),
-        requirement("pydantic"),
-        requirement("pyyaml"),
-    ],
-)
-
 # Everything but main.py and the tests. The YAML files and the sample CSVs are
 # read from next to the code at runtime.
 py_library(
     name = "vega_lite_chat_lib",
     srcs = [
         "agent.py",
+        "assistant_turn.py",
         "config.py",
         "llm.py",
         "prompts.py",
@@ -45,8 +24,8 @@ py_library(
         "prompts.yaml",
     ] + glob(["sample_data/*.csv"]),
     deps = [
-        ":chart_core",
         "//packages/langchain_util",
+        "//packages/vega_lite_core",
         requirement("httpx"),
         requirement("langchain-core"),
         requirement("langchain-ollama"),
@@ -100,12 +79,9 @@ py_library(
 
 _TESTS = [
     "test_agent",
-    "test_checks",
-    "test_compiler",
     "test_config",
-    "test_csv_loader",
-    "test_profile",
     "test_prompts",
+    "test_samples",
     "test_session",
     "test_translator",
 ]

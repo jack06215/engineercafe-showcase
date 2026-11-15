@@ -1,17 +1,13 @@
-"""Tests for csv_loader.py and the bundled samples (samples.py)."""
+"""Tests for csv_loader.py."""
 
 import unittest
 
 import pandas
 
-from packages.vega_lite_chat.csv_loader import (
+from packages.vega_lite_core.csv_loader import (
     NOT_UTF8,
     InputError,
     load_csv,
-)
-from packages.vega_lite_chat.samples import (
-    SAMPLES,
-    sample_named,
 )
 
 
@@ -105,37 +101,6 @@ class DateTest(unittest.TestCase):
         df = _load("日付,和暦\n2025年1月5日,令和7年\n")
         self.assertFalse(_is_dates(df["日付"]))
         self.assertFalse(_is_dates(df["和暦"]))
-
-
-class SamplesTest(unittest.TestCase):
-    def test_every_sample_loads(self) -> None:
-        for sample in SAMPLES:
-            with self.subTest(sample=sample.file_name):
-                df = load_csv(sample.read_bytes())
-                self.assertGreater(len(df), 0)
-
-    def test_sales_by_region(self) -> None:
-        df = load_csv(sample_named("sales_by_region.csv").read_bytes())
-        self.assertEqual(list(df.columns), ["月", "地域", "売上（万円）", "件数"])
-        self.assertEqual(len(df), 120)
-        self.assertTrue(_is_dates(df["月"]))
-        self.assertEqual(
-            df["地域"].unique().tolist(), ["福岡", "東京", "大阪", "名古屋", "札幌"]
-        )
-
-    def test_stores(self) -> None:
-        df = load_csv(sample_named("stores.csv").read_bytes())
-        self.assertEqual(
-            list(df.columns), ["店舗名", "地域", "床面積（m²）", "月商（万円）"]
-        )
-        self.assertEqual(len(df), 30)
-        self.assertEqual(
-            df["地域"].unique().tolist(), ["福岡", "北九州", "久留米", "熊本", "佐賀"]
-        )
-
-    def test_unknown_sample(self) -> None:
-        with self.assertRaises(KeyError):
-            sample_named("nope.csv")
 
 
 if __name__ == "__main__":

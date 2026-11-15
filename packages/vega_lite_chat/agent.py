@@ -31,10 +31,6 @@ from langgraph.prebuilt import ToolNode, ToolRuntime, tools_condition
 from langgraph.runtime import Runtime
 
 from packages.common.logging_util import get_logger
-from packages.vega_lite_chat.compiler import (
-    compile_chart,
-    vega_lite_errors,
-)
 from packages.vega_lite_chat.config import AppConfig
 from packages.vega_lite_chat.llm import (
     Models,
@@ -54,6 +50,10 @@ from packages.vega_lite_chat.session import (
 from packages.vega_lite_chat.translator import (
     Attempt,
     translate,
+)
+from packages.vega_lite_core.compiler import (
+    compile_chart,
+    vega_lite_errors,
 )
 
 LOGGER = get_logger(__name__)

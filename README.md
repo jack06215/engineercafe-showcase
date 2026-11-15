@@ -13,6 +13,9 @@ Projects built at [Engineer Cafe](https://engineercafe.jp/).
 
 `packages/langchain_util` and `packages/common` are shared libraries that
 `vega_lite_chat` and `algo_tutor` depend on.
+[`packages/vega_lite_core`](packages/vega_lite_core) is the shared chart
+library of `vega_lite_chat` and `vega_lite_ai`: the chart format, its checks,
+and the compiler to Vega-Lite.
 
 The Python packages build with Bazel. `src/main/typescript` is a separate pnpm
 and Turborepo workspace that Bazel ignores; see its
@@ -104,7 +107,7 @@ package with `.md` files has `docs.lint` and `docs.fix` (markdownlint, with
 the rules in `.markdownlint.jsonc`):
 
 ```sh
-bazel run //packages/vega_lite_chat:chart_core.fix
+bazel run //packages/vega_lite_core:vega_lite_core.fix
 bazel run //packages/algo_tutor:docs.fix
 bazel run //:buildifier.fix
 ```

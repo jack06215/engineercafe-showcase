@@ -27,14 +27,18 @@ Vega-Lite のグラフ仕様に翻訳し、Streamlit で描くアプリケーシ
 
 ### 2.1 レイヤ
 
+グラフ層と、データ層の `csv_loader.py`・`profile.py` は、`vega_lite_ai` と共有するパッケージ `packages/vega_lite_core` にある
+（表と図では `vega_lite_core/` と書く）。このアプリに残るのは、翻訳のモデルの返答の型 `AssistantTurn`（`assistant_turn.py`）と
+見本（`samples.py`）。
+
 | 層 | モジュール | 知っていること | 知らないこと |
 | --- | --- | --- | --- |
 | UI | `main.py`, `ui.py` | Streamlit、画面の構成、部品の組み立て | — |
 | チャット | `agent.py` | LangGraph のグラフ、`vega_lite_tool`、履歴の組み立て、描画（翻訳→変換） | Streamlit |
 | 会話 | `session.py` | ターンの並び、今のグラフ、直近の依頼 | Streamlit、Ollama |
-| 翻訳 | `translator.py`, `prompts.py`, `llm.py` | プロンプトの組み立て、修正ループ、LangChain・Ollama | Streamlit、Vega-Lite |
-| グラフ | `chart_spec.py`, `checks.py`, `compiler.py` | `ChartSpec` の形と規則、Vega-Lite | LLM、Streamlit |
-| データ | `csv_loader.py`, `profile.py`, `samples.py` | CSV の読み方、pandas、プロフィール | LLM、Vega-Lite、Streamlit |
+| 翻訳 | `translator.py`, `prompts.py`, `llm.py`, `assistant_turn.py` | プロンプトの組み立て、修正ループ、LangChain・Ollama | Streamlit、Vega-Lite |
+| グラフ | `vega_lite_core/chart_spec.py`, `vega_lite_core/checks.py`, `vega_lite_core/compiler.py` | `ChartSpec` の形と規則、Vega-Lite | LLM、Streamlit |
+| データ | `vega_lite_core/csv_loader.py`, `vega_lite_core/profile.py`, `samples.py` | CSV の読み方、pandas、プロフィール | LLM、Vega-Lite、Streamlit |
 | 設定 | `config.py` | `config.yaml` の形 | ほかのすべて |
 
 ```mermaid
@@ -52,14 +56,20 @@ flowchart TD
     subgraph transLayer[翻訳]
         translator --> prompts
         translator --> llm
+        assistant_turn
     end
-    subgraph chartLayer[グラフ]
-        checks --> chart_spec
-        compiler --> chart_spec
+    subgraph core[packages/vega_lite_core]
+        subgraph chartLayer[グラフ]
+            checks --> chart_spec
+            compiler --> chart_spec
+        end
+        subgraph coreDataLayer[データ]
+            csv_loader
+            profile
+        end
     end
-    subgraph dataLayer[データ]
-        samples --> csv_loader
-        profile
+    subgraph dataLayer[データ（見本）]
+        samples
     end
     subgraph configLayer[設定]
         config
@@ -78,6 +88,9 @@ flowchart TD
     agent --> langgraph[langgraph]
     session --> translator
     session --> chart_spec
+    llm --> assistant_turn
+    assistant_turn --> chart_spec
+    samples --> csv_loader
     translator --> checks
     prompts --> checks
     prompts --> samples
@@ -122,15 +135,18 @@ flowchart TD
 
 ### 2.3 モジュール一覧
 
+`vega_lite_core/` で始まる 5 つは `packages/vega_lite_core` のモジュール（説明は `packages/vega_lite_core/README.md`）。
+
 | ファイル | 責務 | 主な公開 API |
 | --- | --- | --- |
 | `config.py` | `config.yaml` の読み込みと検査 | `AppConfig`, `load_config` |
-| `csv_loader.py` | CSV のバイト列 → DataFrame。UTF-8 の判定、日付の変換 | `load_csv`, `InputError` |
-| `profile.py` | DataFrame → プロフィール、プロンプト用の YAML（純粋関数） | `DataProfile`, `ColumnProfile`, `profile_frame`, `profile_yaml` |
+| `vega_lite_core/csv_loader.py` | CSV のバイト列 → DataFrame。UTF-8 の判定、日付の変換 | `load_csv`, `InputError` |
+| `vega_lite_core/profile.py` | DataFrame → プロフィール、プロンプト用の YAML（純粋関数） | `DataProfile`, `ColumnProfile`, `profile_frame`, `profile_yaml` |
 | `samples.py` | 同梱の見本 CSV の一覧 | `Sample`, `SAMPLES` |
-| `chart_spec.py` | LLM の出力の型（構造だけ） | `ChartSpec`, `Encoding`, `Filter`, `TopN`, `AssistantTurn` |
-| `checks.py` | `ChartSpec` をプロフィールと照らす（純粋関数） | `check_chart` |
-| `compiler.py` | `ChartSpec` → Vega-Lite の dict、Vega-Lite のスキーマ検査（純粋関数） | `compile_chart`, `vega_lite_errors`, `with_inline_data` |
+| `vega_lite_core/chart_spec.py` | LLM が書くグラフの型（構造だけ） | `ChartSpec`, `Encoding`, `Filter`, `TopN` |
+| `assistant_turn.py` | 翻訳のモデルの返答の型（グラフとメッセージ） | `AssistantTurn` |
+| `vega_lite_core/checks.py` | `ChartSpec` をプロフィールと照らす（純粋関数） | `check_chart`（`empty_column_errors` は `vega_lite_ai` 用） |
+| `vega_lite_core/compiler.py` | `ChartSpec` → Vega-Lite の dict、Vega-Lite のスキーマ検査（純粋関数） | `compile_chart`, `vega_lite_errors`, `with_inline_data` |
 | `prompts.py` | `prompts.yaml` の読み込みと検査、メッセージの組み立て | `PromptBook`, `load_prompts`, `build_messages`, `chat_system_prompt`, `repair_message` |
 | `llm.py` | Ollama との通信（唯一の外部 I/O）、ウォームアップ | `ollama_models`, `Models`, `ollama_model`, `warm_up`, `reaching_ollama`, `OllamaUnavailable`, `StructuredModel`, `RawReply` |
 | `translator.py` | 修正ループ | `translate`, `Translation`, `Attempt` |
@@ -259,7 +275,8 @@ sample:
 
 ## 4. `ChartSpec`（`chart_spec.py`）
 
-LLM が返すのは `AssistantTurn`。JSON のキーは Vega-Lite と同じ名前（`timeUnit` など）にする。
+LLM が返すのは `AssistantTurn`（`assistant_turn.py`）。`ChartSpec` とその部品は `packages/vega_lite_core/chart_spec.py` にあり、
+`vega_lite_ai` と共有する。JSON のキーは Vega-Lite と同じ名前（`timeUnit` など）にする。
 モデルが知っている名前のほうが間違えにくい。Python 側は snake_case の属性に alias を付け、
 JSON スキーマ・表示・プロンプトは alias で出す（`by_alias=True`）。
 
@@ -317,6 +334,10 @@ class AssistantTurn(BaseModel):
 `check_chart(spec: ChartSpec, profile: DataProfile) -> list[str]`。空なら合格。エラー文は英語で、
 直し方の手がかり（列の候補など）を入れ、そのまま修正の依頼に使える形にする。
 例: ``unknown column `売上額` in y; columns are: 月, 地域, 売上（万円）``
+
+`checks.py` には `empty_column_errors(spec, profile) -> list[str]` もある。値がひとつもない列（null だけの列）を描くと
+グラフは空になるが、`check_chart` はそれを通す。`check_chart` からは呼ばない。`vega_lite_ai` が `check_chart` のあとに呼び、
+このアプリは使わない。
 
 | 規則 | 内容 |
 | --- | --- |
@@ -694,14 +715,17 @@ chart:
 ## 12. テスト
 
 `unittest` で、モジュールごとに 1 ファイル。`live_eval` 以外は Ollama なしで `bazel test` で走る。
+`vega_lite_core/` で始まるテストは `packages/vega_lite_core` にある。見本と `prompts.yaml` を使うテストはこのアプリに残す。
 
 | ファイル | 確かめること |
 | --- | --- |
-| `test_csv_loader.py` | UTF-8 の BOM あり・なし、UTF-8 でない CSV（CP932）を `InputError` にする、日本語の見出し、ISO とスラッシュの日付、1 つでも外れたら文字列のまま、空の CSV、見出しの重複 |
-| `test_profile.py` | 型の推定、`values` を出す列と出さない列、見本の行が固定シードで毎回同じで元の順、YAML に日本語がそのまま出る |
-| `test_checks.py` | 5 章の規則ひとつずつ（通る例と落ちる例）、エラー文に列の候補が入る |
-| `test_compiler.py` | マークごとの変換、`stack: none` → `null`、日付の絞り込み → DateTime、上位 N、`.` を含む列名のエスケープ、ツールチップ、`with_inline_data`。変換したものはすべて `vega_lite_errors` が空。`prompts.yaml` の例も全部変換して検査する |
-| `test_prompts.py` | `prompts.yaml` の例がすべて検査を通る、壊れた例で `load_prompts` が失敗する、メッセージの並び、user メッセージの形、スキーマで `filters` が必須で `mark` のすぐ後、例の返答が空でも `filters` を書く |
+| `vega_lite_core/test_csv_loader.py` | UTF-8 の BOM あり・なし、UTF-8 でない CSV（CP932）を `InputError` にする、日本語の見出し、ISO とスラッシュの日付、1 つでも外れたら文字列のまま、空の CSV、見出しの重複 |
+| `vega_lite_core/test_profile.py` | 型の推定、`values` を出す列と出さない列、見本の行が固定シードで毎回同じで元の順、YAML に日本語がそのまま出る |
+| `vega_lite_core/test_checks.py` | 5 章の規則ひとつずつ（通る例と落ちる例）、エラー文に列の候補が入る、`empty_column_errors` |
+| `vega_lite_core/test_chart_spec.py` | JSON スキーマのキーの順: `filters` が必須で `mark` のすぐ後、チャンネルは `CHANNELS` の順 |
+| `vega_lite_core/test_compiler.py` | マークごとの変換、`stack: none` → `null`、日付の絞り込み → DateTime、上位 N、`.` を含む列名のエスケープ、ツールチップ、`with_inline_data`。変換したものはすべて `vega_lite_errors` が空 |
+| `test_prompts.py` | `prompts.yaml` の例がすべて検査を通る、壊れた例で `load_prompts` が失敗する、メッセージの並び、user メッセージの形、スキーマで `filters` が必須で `mark` のすぐ後、例の返答が空でも `filters` を書く、例をすべて変換して `vega_lite_errors` が空 |
+| `test_samples.py` | 見本がすべて読める、見本ごとの列と行数、知らない名前は `KeyError`、見本を `with_inline_data` で埋め込んでもスキーマに合う |
 | `test_translator.py` | 偽の `StructuredModel` で: 1 回目で合格、2 回失敗して 3 回目で合格、3 回とも失敗、パース失敗、聞き返しは検査しない、修正の依頼に前の返答とエラーが入る、`OllamaUnavailable` は数えない |
 | `test_session.py` | `current` の動き（聞き返し・`Answer` では変わらない、「ここから続ける」）、直近の依頼に自動の依頼と `Answer` が入らない、言い換えた依頼は `tool_request` で数える |
 | `test_agent.py` | 偽の 2 モデルで: 質問は文で答えてトークンを流し、翻訳を呼ばない。描く頼みはツールを呼び、翻訳はツールの `request` を受け取る、`Turn.request` は打った文。修正の `Repairing`、`request` のない呼び出しは失敗のターン、Ollama に届かないのはチャットでもツールでも `OllamaUnavailable`。履歴の形（ツールの呼び出しと結果）、件数の上限、`tool_result` の文 |
@@ -723,7 +747,7 @@ chart:
 
 | ターゲット | ルール | 内容 |
 | --- | --- | --- |
-| `vega_lite_chat_lib` | `py_library`（lint 付き） | `main.py` とテスト以外の全モジュール。`data` に `config.yaml`・`prompts.yaml`・`sample_data/*.csv`。依存は pandas・pydantic・pyyaml・streamlit・langchain-core・langchain-ollama・langgraph・ollama・httpx・jsonschema・altair（スキーマのファイルだけ）・`//packages/langchain_util` |
+| `vega_lite_chat_lib` | `py_library`（lint 付き） | `main.py` とテスト以外の全モジュール。`data` に `config.yaml`・`prompts.yaml`・`sample_data/*.csv`。依存は pandas・pydantic・pyyaml・streamlit・langchain-core・langchain-ollama・langgraph・ollama・httpx・`//packages/langchain_util`・`//packages/vega_lite_core` |
 | `fake_models` | `py_library`（`testonly`） | テスト用の偽の 2 モデル |
 | `vega_lite_chat` | `streamlit_app` | `main.py`。`//rules/python/streamlit` のマクロ |
 | `live_eval` | `py_binary` | 本物の Ollama での評価。`bazel test //...` には入らない |
@@ -769,8 +793,8 @@ bazel run  //packages/vega_lite_chat:live_eval      # デモの前に手で（Ol
 
 | やりたいこと | 触る場所 |
 | --- | --- |
-| `.xlsx` を読む | `csv_loader.py` に足す（openpyxl は lock にある）。複数の領域があるシートは `packages/spreadsheet_llm` |
-| マーク・チャンネル・変換を増やす | `chart_spec.py` の型、`checks.py` の規則、`compiler.py`、`prompts.yaml` の例、それぞれのテスト |
+| `.xlsx` を読む | `packages/vega_lite_core/csv_loader.py` に足す（openpyxl は lock にある）。複数の領域があるシートは `packages/spreadsheet_llm` |
+| マーク・チャンネル・変換を増やす | `packages/vega_lite_core` の `chart_spec.py` の型・`checks.py` の規則・`compiler.py`、このアプリの `prompts.yaml` の例、それぞれのテスト。`vega_lite_ai` にも効く |
 | Vega-Lite をそのまま書かせるモード | `translator.py` に別の経路を足し、`vega_lite_errors` で検査する（列の検査は効かなくなる） |
 | 列名の書き間違いをなくす | 表ごとに JSON スキーマの `field` を列名の列挙にする。7.4 のとおり、黙ったすり替えと引き換え |
 | 別のモデルを使う | `config.yaml` だけ。変えたら `live_eval` を走らせる（翻訳と振り分けの両方） |

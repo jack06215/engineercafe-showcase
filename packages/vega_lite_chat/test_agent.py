@@ -24,13 +24,8 @@ from packages.vega_lite_chat.agent import (
     run_chat,
     tool_result,
 )
-from packages.vega_lite_chat.chart_spec import (
-    AssistantTurn,
-    ChartSpec,
-    Encoding,
-)
+from packages.vega_lite_chat.assistant_turn import AssistantTurn
 from packages.vega_lite_chat.config import load_config
-from packages.vega_lite_chat.csv_loader import load_csv
 from packages.vega_lite_chat.fake_models import (
     GARBLED,
     ScriptedModels,
@@ -40,9 +35,6 @@ from packages.vega_lite_chat.fake_models import (
 from packages.vega_lite_chat.llm import (
     OllamaUnavailable,
 )
-from packages.vega_lite_chat.profile import (
-    profile_frame,
-)
 from packages.vega_lite_chat.prompts import load_prompts
 from packages.vega_lite_chat.samples import sample_named
 from packages.vega_lite_chat.session import (
@@ -51,6 +43,14 @@ from packages.vega_lite_chat.session import (
     Turn,
 )
 from packages.vega_lite_chat.translator import Attempt
+from packages.vega_lite_core.chart_spec import (
+    ChartSpec,
+    Encoding,
+)
+from packages.vega_lite_core.csv_loader import load_csv
+from packages.vega_lite_core.profile import (
+    profile_frame,
+)
 
 CONFIG = load_config()
 PROMPTS = load_prompts(data=CONFIG.data)

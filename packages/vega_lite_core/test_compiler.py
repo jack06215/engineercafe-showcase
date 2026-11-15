@@ -1,15 +1,13 @@
 """Tests for compiler.py. Every compiled spec must pass Vega-Lite's JSON schema."""
 
 import unittest
-from pathlib import Path
 from typing import Any
 
 import pandas
-import yaml
 
-from packages.vega_lite_chat.chart_spec import ChartSpec
-from packages.vega_lite_chat.checks import check_chart
-from packages.vega_lite_chat.compiler import (
+from packages.vega_lite_core.chart_spec import ChartSpec
+from packages.vega_lite_core.checks import check_chart
+from packages.vega_lite_core.compiler import (
     RANK,
     SCHEMA_URL,
     TOTAL,
@@ -18,15 +16,11 @@ from packages.vega_lite_chat.compiler import (
     vega_lite_errors,
     with_inline_data,
 )
-from packages.vega_lite_chat.config import load_config
-from packages.vega_lite_chat.csv_loader import load_csv
-from packages.vega_lite_chat.profile import (
+from packages.vega_lite_core.profile import (
     DataProfile,
     profile_frame,
 )
-from packages.vega_lite_chat.samples import sample_named
 
-PROMPTS = Path(__file__).with_name("prompts.yaml")
 MONTH = {"field": "月", "type": "temporal", "timeUnit": "yearmonth"}
 SALES = {"field": "売上", "type": "quantitative", "aggregate": "sum"}
 REGION = {"field": "地域", "type": "nominal"}
@@ -130,31 +124,6 @@ class SchemaTest(unittest.TestCase):
         errors = vega_lite_errors(broken)
         self.assertEqual(len(errors), 1)
         self.assertTrue(errors[0].startswith("encoding/color"), errors)
-
-    def test_prompt_examples_compile(self) -> None:
-        if not PROMPTS.exists():
-            self.skipTest("prompts.yaml is not there yet")
-        data = load_config().data
-        book = yaml.safe_load(PROMPTS.read_text(encoding="utf-8"))
-        for index, example in enumerate(book["examples"]):
-            df = load_csv(sample_named(example["sample"]).read_bytes())
-            profile = profile_frame(
-                df,
-                sample_rows=data.sample_rows,
-                seed=data.sample_seed,
-                max_listed_values=data.max_listed_values,
-            )
-            charts = {
-                "current": example.get("current"),
-                "reply": example["reply"].get("chart"),
-            }
-            for key, raw in charts.items():
-                if raw is None:
-                    continue
-                with self.subTest(example=index, chart=key):
-                    spec = ChartSpec.model_validate(raw)
-                    self.assertEqual(check_chart(spec, profile), [])
-                    self.assert_valid(compile_chart(spec, profile, height=400))
 
 
 class LayoutTest(unittest.TestCase):
@@ -386,21 +355,6 @@ class InlineDataTest(unittest.TestCase):
         self.assertEqual(values[1]["月"], "2024-02-01T09:30:00Z")
         self.assertIsNone(values[2]["単価.税込[円]"])
         self.assertEqual(inline["encoding"], compiled["encoding"])
-        self.assertEqual(vega_lite_errors(inline), [])
-
-    def test_sample_data_round_trips(self) -> None:
-        df = load_csv(sample_named("sales_by_region.csv").read_bytes())
-        profile = _profile(df)
-        spec = ChartSpec.model_validate(
-            {
-                "mark": "line",
-                "x": MONTH,
-                "y": {**SALES, "field": "売上（万円）"},
-                "color": REGION,
-            }
-        )
-        inline = with_inline_data(compile_chart(spec, profile, height=300), df)
-        self.assertEqual(len(inline["data"]["values"]), 120)
         self.assertEqual(vega_lite_errors(inline), [])
 
 

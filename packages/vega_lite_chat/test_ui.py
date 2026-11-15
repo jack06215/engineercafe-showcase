@@ -6,10 +6,6 @@ from pathlib import Path
 from langchain_core.messages import AIMessage
 from streamlit.testing.v1 import AppTest
 
-from packages.vega_lite_chat.chart_spec import (
-    ChartSpec,
-    Encoding,
-)
 from packages.vega_lite_chat.fake_models import (
     GARBLED,
     ScriptedModels,
@@ -31,6 +27,10 @@ from packages.vega_lite_chat.ui import (
     UPLOAD_KEY,
     continue_key,
     sample_key,
+)
+from packages.vega_lite_core.chart_spec import (
+    ChartSpec,
+    Encoding,
 )
 
 APP = Path(__file__).with_name("main.py")

@@ -11,12 +11,10 @@ from typing import Any
 
 import pandas
 
-from packages.vega_lite_chat.chart_spec import (
-    AssistantTurn,
-    ChartSpec,
-)
-from packages.vega_lite_chat.profile import DataProfile
+from packages.vega_lite_chat.assistant_turn import AssistantTurn
 from packages.vega_lite_chat.translator import Attempt
+from packages.vega_lite_core.chart_spec import ChartSpec
+from packages.vega_lite_core.profile import DataProfile
 
 
 @dataclass(frozen=True)

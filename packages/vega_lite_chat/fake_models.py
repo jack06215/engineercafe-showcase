@@ -14,14 +14,12 @@ from langchain_core.tools import BaseTool
 from pydantic import Field
 
 from packages.vega_lite_chat.agent import TOOL_NAME
-from packages.vega_lite_chat.chart_spec import (
-    AssistantTurn,
-    ChartSpec,
-)
+from packages.vega_lite_chat.assistant_turn import AssistantTurn
 from packages.vega_lite_chat.llm import (
     Models,
     RawReply,
 )
+from packages.vega_lite_core.chart_spec import ChartSpec
 
 
 def chart_reply(chart: ChartSpec | None, message: str) -> RawReply:

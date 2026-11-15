@@ -1,4 +1,4 @@
-"""What the LLM returns: a small, checkable subset of Vega-Lite (`ChartSpec`) inside an `AssistantTurn`.
+"""The chart a model writes: a small, checkable subset of Vega-Lite.
 
 Only the shape lives here. Whether a field exists in the data, or suits its column, is
 `checks.check_chart`'s job, because that needs the profile. JSON keys use Vega-Lite's own names
@@ -118,16 +118,3 @@ class ChartSpec(_Model):
             for channel in CHANNELS
             if (enc := getattr(self, channel)) is not None
         ]
-
-
-class AssistantTurn(_Model):
-    """The translator's reply: an optional chart and a short message."""
-
-    # `chart` comes first: Ollama generates keys in schema order, so the message is written after the
-    # chart and describes what was actually drawn (constrained decoding can swap in a different chart).
-    chart: ChartSpec | None = Field(
-        description="The chart to draw, or null to ask a clarifying question or answer without a chart.",
-    )
-    message: str = Field(
-        description="One or two short sentences describing the chart, or the question. No Markdown.",
-    )

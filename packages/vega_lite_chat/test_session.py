@@ -4,20 +4,20 @@ import unittest
 
 import pandas
 
-from packages.vega_lite_chat.chart_spec import (
-    AssistantTurn,
-    ChartSpec,
-    Encoding,
-)
-from packages.vega_lite_chat.profile import (
-    profile_frame,
-)
+from packages.vega_lite_chat.assistant_turn import AssistantTurn
 from packages.vega_lite_chat.session import (
     Answer,
     ChatSession,
     Turn,
 )
 from packages.vega_lite_chat.translator import Attempt
+from packages.vega_lite_core.chart_spec import (
+    ChartSpec,
+    Encoding,
+)
+from packages.vega_lite_core.profile import (
+    profile_frame,
+)
 
 LINE = ChartSpec(
     mark="line",

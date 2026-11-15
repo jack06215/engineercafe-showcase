@@ -23,25 +23,15 @@ from packages.vega_lite_chat.agent import (
     draw,
     run_chat,
 )
-from packages.vega_lite_chat.compiler import (
-    with_inline_data,
-)
 from packages.vega_lite_chat.config import (
     AppConfig,
     load_config,
-)
-from packages.vega_lite_chat.csv_loader import (
-    InputError,
-    load_csv,
 )
 from packages.vega_lite_chat.llm import (
     Models,
     OllamaUnavailable,
     ollama_models,
     warm_up,
-)
-from packages.vega_lite_chat.profile import (
-    profile_frame,
 )
 from packages.vega_lite_chat.prompts import (
     PromptBook,
@@ -55,6 +45,16 @@ from packages.vega_lite_chat.session import (
     Turn,
 )
 from packages.vega_lite_chat.translator import Attempt
+from packages.vega_lite_core.compiler import (
+    with_inline_data,
+)
+from packages.vega_lite_core.csv_loader import (
+    InputError,
+    load_csv,
+)
+from packages.vega_lite_core.profile import (
+    profile_frame,
+)
 
 TITLE = "CSV グラフチャット"
 

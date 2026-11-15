@@ -13,9 +13,7 @@ from langchain_ollama import ChatOllama
 from pydantic import ValidationError
 
 from packages.langchain_util.api_client import get_langchain_client
-from packages.vega_lite_chat.chart_spec import (
-    AssistantTurn,
-)
+from packages.vega_lite_chat.assistant_turn import AssistantTurn
 from packages.vega_lite_chat.config import OllamaConfig
 
 # The ollama client turns httpx.ConnectError into the builtin ConnectionError,

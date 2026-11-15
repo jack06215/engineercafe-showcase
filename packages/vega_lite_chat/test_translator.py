@@ -6,22 +6,22 @@ from collections.abc import Sequence
 import pandas
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 
-from packages.vega_lite_chat.chart_spec import (
-    AssistantTurn,
-    ChartSpec,
-    Encoding,
-)
+from packages.vega_lite_chat.assistant_turn import AssistantTurn
 from packages.vega_lite_chat.llm import (
     OllamaUnavailable,
     RawReply,
 )
-from packages.vega_lite_chat.profile import (
-    DataProfile,
-    profile_frame,
-)
 from packages.vega_lite_chat.translator import (
     Attempt,
     translate,
+)
+from packages.vega_lite_core.chart_spec import (
+    ChartSpec,
+    Encoding,
+)
+from packages.vega_lite_core.profile import (
+    DataProfile,
+    profile_frame,
 )
 
 GOOD_CHART = ChartSpec(

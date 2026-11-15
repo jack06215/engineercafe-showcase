@@ -25,34 +25,17 @@ from packages.vega_lite_chat.agent import (
     ChatContext,
     chat_reply,
 )
-from packages.vega_lite_chat.chart_spec import (
-    Aggregate,
-    AssistantTurn,
-    Channel,
-    ChartSpec,
-    FieldType,
-    Mark,
-    TimeUnit,
-)
-from packages.vega_lite_chat.compiler import (
-    compile_chart,
-    vega_lite_errors,
-)
+from packages.vega_lite_chat.assistant_turn import AssistantTurn
 from packages.vega_lite_chat.config import (
     AppConfig,
     load_config,
 )
-from packages.vega_lite_chat.csv_loader import load_csv
 from packages.vega_lite_chat.llm import (
     Models,
     OllamaUnavailable,
     StructuredModel,
     ollama_models,
     reaching_ollama,
-)
-from packages.vega_lite_chat.profile import (
-    DataProfile,
-    profile_frame,
 )
 from packages.vega_lite_chat.prompts import (
     PromptBook,
@@ -68,6 +51,23 @@ from packages.vega_lite_chat.session import (
     Turn,
 )
 from packages.vega_lite_chat.translator import translate
+from packages.vega_lite_core.chart_spec import (
+    Aggregate,
+    Channel,
+    ChartSpec,
+    FieldType,
+    Mark,
+    TimeUnit,
+)
+from packages.vega_lite_core.compiler import (
+    compile_chart,
+    vega_lite_errors,
+)
+from packages.vega_lite_core.csv_loader import load_csv
+from packages.vega_lite_core.profile import (
+    DataProfile,
+    profile_frame,
+)
 
 DEFAULT_CASES = Path(__file__).with_name("eval_cases.yaml")
 

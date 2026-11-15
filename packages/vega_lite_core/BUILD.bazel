@@ -1,0 +1,56 @@
+load("@monorepo_pip//:requirements.bzl", "requirement")
+load("@rules_python//python:py_test.bzl", "py_test")
+load("//rules/markdown:defs.bzl", "markdown_docs")
+load("//rules/python/lint:defs.bzl", "py_library")
+
+# The chart format and its checks, with no LLM or UI behind them, so any app
+# can define, check and compile a chart without LangGraph, Ollama, the Claude
+# Agent SDK or Streamlit.
+py_library(
+    name = "vega_lite_core",
+    srcs = [
+        "chart_spec.py",
+        "checks.py",
+        "compiler.py",
+        "csv_loader.py",
+        "profile.py",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        # Only for the Vega-Lite JSON schema it ships.
+        requirement("altair"),
+        requirement("jsonschema"),
+        requirement("pandas"),
+        requirement("pydantic"),
+        requirement("pyyaml"),
+    ],
+)
+
+_TESTS = [
+    "test_chart_spec",
+    "test_checks",
+    "test_compiler",
+    "test_csv_loader",
+    "test_profile",
+]
+
+[
+    py_test(
+        name = name,
+        srcs = [name + ".py"],
+        legacy_create_init = False,
+        main = name + ".py",
+        deps = [":vega_lite_core"],
+    )
+    for name in _TESTS
+]
+
+test_suite(
+    name = "test_all",
+    tests = _TESTS,
+)
+
+markdown_docs(
+    name = "docs",
+    srcs = glob(["*.md"]),
+)

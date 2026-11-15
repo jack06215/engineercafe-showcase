@@ -16,7 +16,7 @@ Load the macros in place of the rules_python macros:
 load("//rules/python/lint:defs.bzl", "py_binary", "py_library")
 
 py_library(
-    name = "chart_core",
+    name = "vega_lite_core",
     srcs = ["chart_spec.py", "checks.py"],
     deps = [requirement("pydantic")],
 )
@@ -30,10 +30,10 @@ A target with no `srcs` gets no `.lint` target and no `.fix` target.
 
 ```sh
 # Check. This command does not change files.
-bazel test //packages/vega_lite_chat:chart_core.lint
+bazel test //packages/vega_lite_core:vega_lite_core.lint
 
 # Fix and format. This command changes the files in the workspace.
-bazel run //packages/vega_lite_chat:chart_core.fix
+bazel run //packages/vega_lite_core:vega_lite_core.fix
 ```
 
 Start a `.fix` target with `bazel run` only. `fix.sh` gets the workspace path

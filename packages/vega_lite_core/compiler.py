@@ -18,15 +18,15 @@ import jsonschema
 import pandas
 from altair.vegalite.v6.schema import SCHEMA_URL
 
-from packages.vega_lite_chat.chart_spec import (
+from packages.vega_lite_core.chart_spec import (
     ChartSpec,
     Encoding,
     Filter,
     FilterScalar,
     TimeUnit,
 )
-from packages.vega_lite_chat.checks import parse_iso
-from packages.vega_lite_chat.profile import (
+from packages.vega_lite_core.checks import parse_iso
+from packages.vega_lite_core.profile import (
     DataProfile,
     plain,
 )

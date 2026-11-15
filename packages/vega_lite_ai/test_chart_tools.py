@@ -25,7 +25,7 @@ from packages.vega_lite_ai.chart_tools import (
     web_denial,
 )
 from packages.vega_lite_ai.runs import CHART, DATA, EXTRACT, RAW
-from packages.vega_lite_chat.chart_spec import ChartSpec
+from packages.vega_lite_core.chart_spec import ChartSpec
 
 CITY = "https://www.city.fukuoka.lg.jp"
 LINE_CHART: dict[str, Any] = {
