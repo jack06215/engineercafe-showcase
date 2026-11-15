@@ -31,14 +31,14 @@ streamlit_app(
 ## Run the app
 
 ```sh
-bazel run //packages/vibe_coding_club/vega_lite_chat:vega_lite_chat
+bazel run //packages/vega_lite_chat:vega_lite_chat
 ```
 
 The launcher gives the arguments after `--` to `streamlit run`. Use them to
 set Streamlit options:
 
 ```sh
-bazel run //packages/vibe_coding_club/vega_lite_chat:vega_lite_chat -- --server.port=8600
+bazel run //packages/vega_lite_chat:vega_lite_chat -- --server.port=8600
 ```
 
 To stop the app, press Ctrl-C. The signal stops the launcher and the Streamlit

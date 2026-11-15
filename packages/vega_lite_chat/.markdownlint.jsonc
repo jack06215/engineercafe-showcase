@@ -1,0 +1,7 @@
+// DESIGN.md is Japanese prose. A line break inside Japanese text can render as
+// a space between two characters, so the 80-column limit is off in this
+// package. Every other rule comes from the root config.
+{
+  "extends": "../../.markdownlint.jsonc",
+  "MD013": false
+}

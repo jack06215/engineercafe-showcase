@@ -13,7 +13,6 @@ from typing import Any
 from urllib.parse import unquote, urljoin, urlsplit
 
 import httpx
-import pandas
 import pydantic
 from claude_agent_sdk import (
     HookContext,
@@ -33,18 +32,18 @@ from packages.vega_lite_ai.runs import (
     RAW,
     append_event,
 )
-from packages.vibe_coding_club.vega_lite_chat.chart_spec import ChartSpec
-from packages.vibe_coding_club.vega_lite_chat.checks import check_chart
-from packages.vibe_coding_club.vega_lite_chat.compiler import (
+from packages.vega_lite_core.chart_spec import ChartSpec
+from packages.vega_lite_core.checks import check_chart, empty_column_errors
+from packages.vega_lite_core.compiler import (
     compile_chart,
     vega_lite_errors,
     with_inline_data,
 )
-from packages.vibe_coding_club.vega_lite_chat.csv_loader import (
+from packages.vega_lite_core.csv_loader import (
     InputError,
     load_csv,
 )
-from packages.vibe_coding_club.vega_lite_chat.profile import profile_frame
+from packages.vega_lite_core.profile import profile_frame
 
 # Subdomains count. The one list decides both what `finder` can read and what can be downloaded.
 ALLOWED_HOSTS = ("bodik.jp", "city.fukuoka.lg.jp")
@@ -212,16 +211,6 @@ def _missing_files(run_dir: Path) -> list[str]:
     return errors
 
 
-def _empty_columns(spec: ChartSpec, df: pandas.DataFrame) -> list[str]:
-    """A column with no values draws nothing, and every other check is happy with that."""
-    names = {encoding.field for _, encoding in spec.encodings() if encoding.field}
-    return [
-        f"column `{name}` has no values, so the chart would be blank"
-        for name in sorted(names)
-        if df[name].notna().sum() == 0
-    ]
-
-
 def submit_chart(state: RunState, arguments: dict[str, Any]) -> list[str]:
     """Check the chart against data.csv and, if it passes, write it and record the hashes.
 
@@ -246,7 +235,7 @@ def submit_chart(state: RunState, arguments: dict[str, Any]) -> list[str]:
     except InputError as error:
         return [f"{DATA}: {error}"]
     profile = profile_frame(df, sample_rows=5, seed=0, max_listed_values=20)
-    errors = check_chart(spec, profile) or _empty_columns(spec, df)
+    errors = check_chart(spec, profile) or empty_column_errors(spec, profile)
     if errors:
         return errors
     compiled = compile_chart(spec, profile, height=CHART_HEIGHT)
