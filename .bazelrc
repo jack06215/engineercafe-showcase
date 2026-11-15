@@ -3,3 +3,9 @@ common --incompatible_default_to_explicit_init_py
 common --repo_env=DO_NOT_TRACK=1
 build --disk_cache=~/.cache/bazel-disk
 build --experimental_disk_cache_gc_max_size=20G
+
+common:ci --announce_rc
+common:ci --color=yes
+common:ci --curses=no
+common:ci --lockfile_mode=error
+test:ci --test_output=errors

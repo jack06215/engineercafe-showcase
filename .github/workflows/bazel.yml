@@ -1,0 +1,38 @@
+name: bazel
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  bazel:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: bazel-contrib/setup-bazel@e1614ab8b64f375e8e1d6885bc7d47f72e8bd0b1 # 0.19.2
+        with:
+          bazelisk-cache: true
+          disk-cache: ${{ github.workflow }}
+          repository-cache: true
+          # A cache that a pull request saves is visible only to that pull
+          # request, and it counts against the 10 GB Actions cache limit of the
+          # repo. Thus only runs on main save the caches.
+          cache-save: ${{ github.event_name != 'pull_request' }}
+      # The docs.lint tests run the markdownlint on PATH, because Bazel does
+      # not supply it (rules/markdown/lint.sh).
+      - run: npm install -g markdownlint-cli@0.50.0
+      - run: bazel run --config=ci //:buildifier.check
+      # Run the tests also when the buildifier check fails, so that one run
+      # shows both results.
+      - if: ${{ !cancelled() }}
+        run: bazel test --config=ci //...
