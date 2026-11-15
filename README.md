@@ -112,6 +112,11 @@ bazel run //packages/algo_tutor:docs.fix
 bazel run //:buildifier.fix
 ```
 
+CI ([`.github/workflows/bazel.yml`](.github/workflows/bazel.yml)) runs
+`bazel run //:buildifier.check` and `bazel test //...` on each pull request
+and each push to `main`. It uses the `ci` config in `.bazelrc`, so add
+`--config=ci` to run the same checks locally.
+
 ## Dependencies
 
 Edit `pyproject.toml`, then run `uv lock`. Bazel reads `uv.lock` directly.
