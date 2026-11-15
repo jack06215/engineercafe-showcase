@@ -30,10 +30,10 @@ A target with no `srcs` gets no `.lint` target and no `.fix` target.
 
 ```sh
 # Check. This command does not change files.
-bazel test //packages/vibe_coding_club/vega_lite_chat:chart_core.lint
+bazel test //packages/vega_lite_chat:chart_core.lint
 
 # Fix and format. This command changes the files in the workspace.
-bazel run //packages/vibe_coding_club/vega_lite_chat:chart_core.fix
+bazel run //packages/vega_lite_chat:chart_core.fix
 ```
 
 Start a `.fix` target with `bazel run` only. `fix.sh` gets the workspace path

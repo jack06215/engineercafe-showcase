@@ -5,9 +5,9 @@ Projects built at [Engineer Cafe](https://engineercafe.jp/).
 | Project | What it is | Stack |
 | --- | --- | --- |
 | [`vega_lite_ai`](packages/vega_lite_ai) | An agent that finds Fukuoka City open data and charts it, with a web page to start runs and watch them | Claude Agent SDK, Streamlit, Vega-Lite |
-| [`vibe_coding_club/vega_lite_chat`](packages/vibe_coding_club/vega_lite_chat) | Upload a CSV and ask for charts in Japanese chat ([design](packages/vibe_coding_club/vega_lite_chat/DESIGN.md)) | Streamlit, LangGraph, Ollama, Vega-Lite |
-| [`vibe_coding_club/fukuoka_tenki_forcast`](packages/vibe_coding_club/fukuoka_tenki_forcast) | Fukuoka City forecast, 7-day outlook and rain radar in the terminal, from JMA data ([design](packages/vibe_coding_club/fukuoka_tenki_forcast/DESIGN.md)) | Textual, Rich, Pillow |
-| [`vibe_coding_club/hello_world_20260912`](packages/vibe_coding_club/hello_world_20260912) | Static Hello World pages | HTML |
+| [`vega_lite_chat`](packages/vega_lite_chat) | Upload a CSV and ask for charts in Japanese chat ([design](packages/vega_lite_chat/DESIGN.md)) | Streamlit, LangGraph, Ollama, Vega-Lite |
+| [`fukuoka_tenki_forcast`](packages/fukuoka_tenki_forcast) | Fukuoka City forecast, 7-day outlook and rain radar in the terminal, from JMA data ([design](packages/fukuoka_tenki_forcast/DESIGN.md)) | Textual, Rich, Pillow |
+| [`hello_world_20260912`](packages/hello_world_20260912) | Static Hello World pages | HTML |
 | [`algo_tutor`](packages/algo_tutor) | A local tracker for coding-interview practice, with an optional AI tutor ([spec](packages/algo_tutor/SPEC.md)) | FastAPI, SQLAlchemy, SQLite, LangChain |
 | [`algo-tutor-web`](src/main/typescript/packages/algo-tutor-web) | The web UI of `algo_tutor` | React 19, MUI, TanStack Router and Query, Vite |
 
@@ -78,10 +78,10 @@ bazel run //packages/vega_lite_ai:chart_app
 bazel run //packages/vega_lite_ai:chart_agent -- 人口の推移
 
 # vega_lite_chat (needs `ollama serve` and the model in its config.yaml)
-bazel run //packages/vibe_coding_club/vega_lite_chat:vega_lite_chat
+bazel run //packages/vega_lite_chat:vega_lite_chat
 
 # Fukuoka weather in the terminal
-bazel run //packages/vibe_coding_club/fukuoka_tenki_forcast:fukuoka_tenki
+bazel run //packages/fukuoka_tenki_forcast:fukuoka_tenki
 
 # algo_tutor: the API on 127.0.0.1:4317, and its command line (see its README)
 bazel run //packages/algo_tutor:serve
@@ -104,7 +104,7 @@ package with `.md` files has `docs.lint` and `docs.fix` (markdownlint, with
 the rules in `.markdownlint.jsonc`):
 
 ```sh
-bazel run //packages/vibe_coding_club/vega_lite_chat:chart_core.fix
+bazel run //packages/vega_lite_chat:chart_core.fix
 bazel run //packages/algo_tutor:docs.fix
 bazel run //:buildifier.fix
 ```

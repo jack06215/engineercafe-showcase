@@ -29,7 +29,7 @@ py_library(
     ],
     deps = _SDK + [
         ":runs",
-        "//packages/vibe_coding_club/vega_lite_chat:chart_core",
+        "//packages/vega_lite_chat:chart_core",
         requirement("httpx"),
         # Nothing here imports openpyxl: it is for the extract.py the agent
         # writes, which runs under this binary's interpreter ($CHART_PYTHON).

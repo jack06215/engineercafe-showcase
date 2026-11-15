@@ -33,18 +33,18 @@ from packages.vega_lite_ai.runs import (
     RAW,
     append_event,
 )
-from packages.vibe_coding_club.vega_lite_chat.chart_spec import ChartSpec
-from packages.vibe_coding_club.vega_lite_chat.checks import check_chart
-from packages.vibe_coding_club.vega_lite_chat.compiler import (
+from packages.vega_lite_chat.chart_spec import ChartSpec
+from packages.vega_lite_chat.checks import check_chart
+from packages.vega_lite_chat.compiler import (
     compile_chart,
     vega_lite_errors,
     with_inline_data,
 )
-from packages.vibe_coding_club.vega_lite_chat.csv_loader import (
+from packages.vega_lite_chat.csv_loader import (
     InputError,
     load_csv,
 )
-from packages.vibe_coding_club.vega_lite_chat.profile import profile_frame
+from packages.vega_lite_chat.profile import profile_frame
 
 # Subdomains count. The one list decides both what `finder` can read and what can be downloaded.
 ALLOWED_HOSTS = ("bodik.jp", "city.fukuoka.lg.jp")
