@@ -7,7 +7,7 @@ every series shows.
 """
 
 import dataclasses
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from typing import Any
 
 import altair
@@ -24,6 +24,10 @@ from packages.monkeytype_analysis_console.results import (
     Result,
     Word,
 )
+from packages.monkeytype_analysis_console.typos import (
+    KEY_POSITIONS,
+    ROWS,
+)
 
 SERIES = ("wpm", "raw", "burst", "errors")
 SERIES_COLOURS = (palette.MAIN, palette.MAIN, palette.SUB, palette.ERROR)
@@ -31,6 +35,11 @@ LEGEND_PARAM = "shown_series"
 HOVER_PARAM = "hovered_second"
 SPEED_HEIGHT = 320
 WORD_HEIGHT = 220
+KEYBOARD_HEIGHT = 200
+# A key's size in key widths; the rest of each key width is the gap.
+KEY_SIZE = 0.9
+# Dark text reads on every key colour: they all have a mid luminance (§6.7).
+KEY_LABEL_COLOUR = "#111111"
 
 _TOOLTIP = [
     altair.Tooltip("t:Q", title="second"),
@@ -191,6 +200,72 @@ def word_speed_chart(
         )
     )
     return altair.LayerChart(layer=[bars, threshold_line], height=WORD_HEIGHT)
+
+
+def keyboard_chart(
+    confusions_by_key: Mapping[str, Mapping[str, int]],
+) -> altair.LayerChart:
+    """The QWERTY keys, coloured by how often each was the wanted key of a wrong key.
+
+    `confusions_by_key` maps a base key to its expected→typed pairs and their
+    counts, as `typos.wrong_keys` returns them. Keys with no typos are grey.
+    """
+    rows = []
+    for key, (x, row) in KEY_POSITIONS.items():
+        confusions = confusions_by_key.get(key, {})
+        ranked = sorted(confusions.items(), key=lambda item: (-item[1], item[0]))
+        rows.append(
+            {
+                "key": key,
+                "x": x,
+                "x2": x + KEY_SIZE,
+                "centre": x + KEY_SIZE / 2,
+                "row": row,
+                "row2": row + KEY_SIZE,
+                "middle": row + KEY_SIZE / 2,
+                "count": sum(confusions.values()),
+                "confusions": ", ".join(f"{pair} ×{n}" for pair, n in ranked),
+            }
+        )
+    data = pandas.DataFrame(rows)
+    most = max(1, int(data["count"].max()))
+    width = max(x + KEY_SIZE for x, _ in KEY_POSITIONS.values())
+    x_scale = altair.Scale(domain=[0, width], nice=False)
+    y_scale = altair.Scale(domain=[0, len(ROWS)], reverse=True, nice=False)
+    tooltip = [
+        altair.Tooltip("key:N"),
+        altair.Tooltip("count:Q", title="wrong-key typos"),
+        altair.Tooltip("confusions:N", title="expected→typed"),
+    ]
+    keys = (
+        altair.Chart(data)
+        .mark_rect(cornerRadius=4)
+        .encode(
+            x=altair.X("x:Q", axis=None, scale=x_scale),
+            x2="x2:Q",
+            y=altair.Y("row:Q", axis=None, scale=y_scale),
+            y2="row2:Q",
+            color=altair.Color(
+                "count:Q",
+                scale=altair.Scale(
+                    domain=[0, most], range=[palette.SUB, palette.ERROR]
+                ),
+                legend=altair.Legend(title="wrong-key typos", tickMinStep=1),
+            ),
+            tooltip=tooltip,
+        )
+    )
+    labels = (
+        altair.Chart(data)
+        .mark_text(color=KEY_LABEL_COLOUR, fontSize=14)
+        .encode(
+            x=altair.X("centre:Q", axis=None, scale=x_scale),
+            y=altair.Y("middle:Q", axis=None, scale=y_scale),
+            text="key:N",
+            tooltip=tooltip,
+        )
+    )
+    return altair.LayerChart(layer=[keys, labels], height=KEYBOARD_HEIGHT)
 
 
 def _shown_when(shown: altair.Parameter, opacity: float) -> Any:

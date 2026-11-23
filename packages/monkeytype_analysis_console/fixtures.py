@@ -9,8 +9,10 @@ The other files are written by hand in `yr`'s layout from it, one case each:
 - `custom.yml`: custom mode, so no `language`.
 - `chart_error.yml`: `chart_error` instead of a chart.
 - `cpm.yml`: speeds in cpm, and a PB.
+- `aborted.yml`: 20 keypresses and Monkeytype's `failed (min accuracy)` flag.
 - `multi.yml`: three results; the first is `real_words10.yml` copied again
-  later, the second has no chart and no input history.
+  later, the second has no chart and no input history, and the third has 20
+  keypresses, so it counts as aborted too.
 - `not_a_result.yml` and `broken.yml`: files the console must refuse.
 """
 
@@ -31,11 +33,12 @@ HEATMAP_OFF = TESTDATA / "heatmap_off.yml"
 CUSTOM = TESTDATA / "custom.yml"
 CHART_ERROR = TESTDATA / "chart_error.yml"
 CPM = TESTDATA / "cpm.yml"
+ABORTED = TESTDATA / "aborted.yml"
 MULTI = TESTDATA / "multi.yml"
 NOT_A_RESULT = TESTDATA / "not_a_result.yml"
 BROKEN = TESTDATA / "broken.yml"
 
-GOOD_FILES = (REAL, TYPOS, HEATMAP_OFF, CUSTOM, CHART_ERROR, CPM, MULTI)
+GOOD_FILES = (REAL, TYPOS, HEATMAP_OFF, CUSTOM, CHART_ERROR, CPM, ABORTED, MULTI)
 
 
 def read(path: Path) -> ParsedFile:

@@ -7,12 +7,19 @@ import altair
 from packages.monkeytype_analysis_console import fixtures, palette
 from packages.monkeytype_analysis_console.charts import (
     HOVER_PARAM,
+    KEY_LABEL_COLOUR,
     LEGEND_PARAM,
+    keyboard_chart,
     speed_chart,
     word_speed_chart,
 )
 from packages.monkeytype_analysis_console.results import (
     Word,
+)
+from packages.monkeytype_analysis_console.typos import (
+    KEY_POSITIONS,
+    classify_words,
+    wrong_keys,
 )
 
 
@@ -197,6 +204,40 @@ class WordSpeedChartTest(unittest.TestCase):
     def test_none_without_measured_words(self) -> None:
         words = [Word(i=0, word="hello", wpm=math.inf, bucket=None)]
         self.assertIsNone(word_speed_chart(words, (), 40, "wpm"))
+
+
+class KeyboardChartTest(unittest.TestCase):
+    def setUp(self) -> None:
+        words = fixtures.result(fixtures.TYPOS).words
+        self.spec = _spec(keyboard_chart(wrong_keys(classify_words(words))))
+        self.keys, self.labels = _units(self.spec)
+        self.rows = {row["key"]: row for row in _rows(self.spec, self.keys)}
+
+    def test_every_key_once(self) -> None:
+        self.assertEqual(set(self.rows), set(KEY_POSITIONS))
+        self.assertEqual(_mark(self.keys)["type"], "rect")
+        self.assertEqual(_mark(self.labels)["type"], "text")
+        self.assertEqual(_mark(self.labels)["color"], KEY_LABEL_COLOUR)
+
+    def test_counts_and_confusions(self) -> None:
+        self.assertEqual(self.rows["e"]["count"], 1)
+        self.assertEqual(self.rows["e"]["confusions"], "e→r ×1")
+        self.assertEqual(self.rows["n"]["count"], 1)
+        self.assertEqual(self.rows["q"]["count"], 0)
+        self.assertEqual(self.rows["q"]["confusions"], "")
+
+    def test_colour_runs_from_grey_to_the_error_colour(self) -> None:
+        scale = self.keys["encoding"]["color"]["scale"]
+        self.assertEqual(scale["range"], [palette.SUB, palette.ERROR])
+        self.assertEqual(scale["domain"], [0, 1])
+
+    def test_top_row_is_drawn_first(self) -> None:
+        self.assertTrue(self.keys["encoding"]["y"]["scale"]["reverse"])
+
+    def test_without_typos_every_key_is_grey(self) -> None:
+        spec = _spec(keyboard_chart({}))
+        keys = _units(spec)[0]
+        self.assertEqual({row["count"] for row in _rows(spec, keys)}, {0})
 
 
 if __name__ == "__main__":

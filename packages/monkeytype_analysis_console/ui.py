@@ -9,7 +9,9 @@ the lint targets check it.
 import math
 import os
 from pathlib import Path
+from typing import Any
 
+import pandas
 import streamlit
 
 from packages.monkeytype_analysis_console import charts
@@ -18,11 +20,21 @@ from packages.monkeytype_analysis_console.history_html import (
     history_html,
 )
 from packages.monkeytype_analysis_console.metrics import (
+    DEFAULT_GOAL,
+    WordGroup,
+    band_groups,
+    chars_left_wrong,
     default_threshold,
     fastest_speed,
-    finite_speed,
+    flags,
     format_number,
+    goal_met,
+    is_aborted,
+    is_mistyped,
+    position_groups,
     slow_words,
+    time_lost,
+    too_fast_count,
 )
 from packages.monkeytype_analysis_console.results import (
     Loaded,
@@ -33,10 +45,17 @@ from packages.monkeytype_analysis_console.results import (
     resolve_folder,
     result_files,
 )
+from packages.monkeytype_analysis_console.typos import (
+    category_counts,
+    classify_words,
+    key_confusions,
+    wrong_keys,
+)
 
 TITLE = "Monkeytype analysis console"
 FOLDER_ENV = "MONKEYTYPE_RESULTS_DIR"
 REPLAY_PAGE = "app_pages/replay.py"
+ANALYSIS_PAGE = "app_pages/analysis.py"
 
 # st.session_state keys. A test types into the folder box through FOLDER_KEY.
 UPLOAD_KEY = "uploaded_files"
@@ -44,6 +63,14 @@ FOLDER_KEY = "results_folder"
 PICK_KEY = "picked_result"
 LOADED_KEY = "loaded_results"
 THRESHOLD_KEY = "slow_threshold"
+GOAL_KEY = "accuracy_goal"
+# A widget on another page is another widget to Streamlit, even with the same
+# key. So the picked result and the goal are also kept under keys of their own:
+# a callback copies each change there, and each run loads it back into the
+# widget before drawing it.
+_PICK_KEPT_KEY = "picked_result_kept"
+_GOAL_KEPT_KEY = "accuracy_goal_kept"
+TOP_CONFUSIONS = 10
 
 NO_RESULTS = (
     "No results loaded. Upload files that `yr` copied, or enter a results "
@@ -54,12 +81,17 @@ NO_HISTORY = (
     "pressing `yr`."
 )
 NO_CHART = "No chart in this result."
+ABORTED = "Nothing else to analyse: fewer than 25 keypresses."
+NO_MISTAKES = "No mistyped words."
 
 
 def render_app() -> None:
     """Draws the sidebar, loads the results, and runs the current page."""
     page = streamlit.navigation(
-        [streamlit.Page(REPLAY_PAGE, title="Result replay", default=True)]
+        [
+            streamlit.Page(REPLAY_PAGE, title="Result replay", default=True),
+            streamlit.Page(ANALYSIS_PAGE, title="Result analysis"),
+        ]
     )
     streamlit.session_state[LOADED_KEY] = _render_sources()
     page.run()
@@ -82,6 +114,26 @@ def render_replay_page() -> None:
         streamlit.info(NO_HISTORY)
         threshold = default_threshold(result)
     _render_word_lists(result, threshold)
+
+
+def render_analysis_page() -> None:
+    """The Result analysis page: the numbers behind one result."""
+    streamlit.header("Result analysis")
+    result = _pick_result(_loaded())
+    goal = _goal_input()
+    if result is None:
+        streamlit.info(NO_RESULTS)
+        return
+    _render_checks(result, goal)
+    if is_aborted(result):
+        streamlit.info(ABORTED)
+        return
+    if not result.words:
+        streamlit.info(NO_HISTORY)
+        return
+    _render_word_speed(result)
+    _render_typos(result)
+    _render_position(result)
 
 
 def result_label(result: Result) -> str:
@@ -190,16 +242,44 @@ def _pick_result(loaded: Loaded) -> Result | None:
     if not loaded.results:
         return None
     by_identity = {result.identity: result for result in reversed(loaded.results)}
-    if streamlit.session_state.get(PICK_KEY) not in by_identity:
+    state = streamlit.session_state
+    if state.get(_PICK_KEPT_KEY) in by_identity:
+        state[PICK_KEY] = state[_PICK_KEPT_KEY]
+    elif state.get(PICK_KEY) not in by_identity:
         # The picked result is no longer loaded: go back to the newest.
-        streamlit.session_state.pop(PICK_KEY, None)
+        state.pop(PICK_KEY, None)
     picked = streamlit.sidebar.selectbox(
         "Result",
         list(by_identity),
         format_func=lambda identity: result_label(by_identity[identity]),
         key=PICK_KEY,
+        on_change=_copy_state,
+        args=(PICK_KEY, _PICK_KEPT_KEY),
     )
+    state[_PICK_KEPT_KEY] = picked
     return by_identity[picked]
+
+
+def _goal_input() -> float:
+    state = streamlit.session_state
+    state[GOAL_KEY] = state.get(_GOAL_KEPT_KEY, DEFAULT_GOAL)
+    goal = streamlit.sidebar.number_input(
+        "Accuracy goal (%)",
+        min_value=0.0,
+        max_value=100.0,
+        step=0.5,
+        format="%.1f",
+        key=GOAL_KEY,
+        on_change=_copy_state,
+        args=(GOAL_KEY, _GOAL_KEPT_KEY),
+        help="A result meets the goal when its accuracy is at least this.",
+    )
+    state[_GOAL_KEPT_KEY] = goal
+    return float(goal)
+
+
+def _copy_state(source: str, target: str) -> None:
+    streamlit.session_state[target] = streamlit.session_state[source]
 
 
 def _render_headline(result: Result) -> None:
@@ -285,16 +365,127 @@ def _render_history(result: Result, threshold: float) -> None:
     chart = charts.word_speed_chart(result.words, result.steps, threshold, result.unit)
     if chart is not None:
         streamlit.altair_chart(chart, width="stretch")
-    too_fast = sum(
-        1
-        for word in result.words
-        if word.wpm is not None and finite_speed(word) is None
-    )
+    _render_too_fast(result, "not in the chart")
+
+
+def _render_too_fast(result: Result, place: str) -> None:
+    too_fast = too_fast_count(result.words)
     if too_fast:
+        verb = "is" if too_fast == 1 else "are"
         streamlit.caption(
-            f"{_plural(too_fast, 'word')} too fast to measure "
-            f"{'is' if too_fast == 1 else 'are'} not in the chart."
+            f"{_plural(too_fast, 'word')} too fast to measure {verb} {place}."
         )
+
+
+def _render_checks(result: Result, goal: float) -> None:
+    streamlit.subheader("Result checks")
+    met = goal_met(result, goal)
+    lost = time_lost(result)
+    left = chars_left_wrong(result)
+    goal_column, lost_column, left_column = streamlit.columns(3)
+    goal_column.metric(
+        "accuracy goal", "–" if met is None else ("met" if met else "missed")
+    )
+    goal_column.caption(f"acc {_percent(result.acc)} vs {format_number(goal)}%")
+    lost_column.metric("time lost to mistakes", _seconds(lost))
+    if lost is not None and result.time:
+        share = format_number(100 * lost / result.time, 0)
+        lost_column.caption(f"{share}% of the test")
+    left_column.metric("characters left wrong", "–" if left is None else str(left))
+    found = flags(result)
+    streamlit.caption("flags: " + (", ".join(found) if found else "none"))
+
+
+def _render_word_speed(result: Result) -> None:
+    streamlit.subheader("Word speed by band")
+    rows = [
+        {
+            "band": group.label,
+            **_group_columns(group, result.unit),
+            "mean length": _rounded(group.mean_length),
+            "mean Shift presses": _rounded(group.mean_shift_presses),
+            "mean symbols": _rounded(group.mean_symbols),
+            "mistyped": group.mistyped,
+        }
+        for group in band_groups(result)
+    ]
+    streamlit.dataframe(pandas.DataFrame(rows), hide_index=True)
+    _render_too_fast(result, "only in the last row")
+
+
+def _render_typos(result: Result) -> None:
+    streamlit.subheader("Typos")
+    mistyped = [word for word in result.words if is_mistyped(word)]
+    if not mistyped:
+        streamlit.info(NO_MISTAKES)
+        return
+    classified = classify_words(result.words)
+    typo_count = sum(len(item.typos) for item in classified)
+    streamlit.markdown(
+        f"{len(mistyped)} of {_plural(len(result.words), 'word')} mistyped, "
+        f"{_plural(typo_count, 'typo')}"
+    )
+    categories = [
+        {"type": category, "count": count, "examples": ", ".join(examples)}
+        for category, count, examples in category_counts(classified)
+    ]
+    if categories:
+        streamlit.dataframe(pandas.DataFrame(categories), hide_index=True)
+    streamlit.caption(
+        "Each key's colour shows how often it was the key wanted when a wrong "
+        "key was pressed."
+    )
+    streamlit.altair_chart(
+        charts.keyboard_chart(wrong_keys(classified)), width="stretch"
+    )
+    confusions = key_confusions(classified).most_common(TOP_CONFUSIONS)
+    if confusions:
+        streamlit.caption("Key confusions (expected→typed)")
+        streamlit.dataframe(
+            pandas.DataFrame(confusions, columns=["confusion", "count"]),
+            hide_index=True,
+        )
+    typos_by_word = {item.word: item.typos for item in classified}
+    rows = []
+    for word in mistyped:
+        typos = typos_by_word.get(word, ())
+        if word.typed is None:
+            found = "no first attempt recorded"
+        else:
+            found = "; ".join(typo.detail for typo in typos)
+        rows.append(
+            {
+                "word": word.word,
+                "first attempt": word.typed or "",
+                "typos": found,
+                result.unit: format_number(word.wpm),
+                "letters fixed": word.fixed,
+                "left wrong": "yes" if word.error else "",
+            }
+        )
+    streamlit.caption("Mistyped words")
+    streamlit.dataframe(pandas.DataFrame(rows), hide_index=True)
+
+
+def _render_position(result: Result) -> None:
+    streamlit.subheader("Position in test")
+    rows = [
+        {
+            "part": group.label,
+            **_group_columns(group, result.unit),
+            "mistyped": group.mistyped,
+        }
+        for group in position_groups(result.words)
+    ]
+    streamlit.dataframe(pandas.DataFrame(rows), hide_index=True)
+
+
+def _group_columns(group: WordGroup, unit: str) -> dict[str, Any]:
+    return {"words": group.words, f"mean {unit}": _rounded(group.mean_speed)}
+
+
+def _rounded(value: float | None) -> float | None:
+    return None if value is None else round(value, 1)
 
 
 def _render_word_lists(result: Result, threshold: float) -> None:

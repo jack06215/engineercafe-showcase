@@ -1,0 +1,39 @@
+---
+datetime: 2026-11-16T22:40:12+09:00
+result:
+  wpm_threshold: 30
+  word_list: |
+    house sure
+  missed_word_list: |
+    house
+  slow_word: ""
+detail:
+  test: words 10
+  language: english 1k
+  other: ["failed (min accuracy)"]
+  unit: wpm
+  wpm: 40.5
+  raw: 52.1
+  acc: 85
+  keys:
+    correct: 17
+    incorrect: 3
+  chars:
+    correct: 9
+    incorrect: 1
+    extra: 0
+    missed: 0
+  consistency: 40.2
+  key_consistency: 12.5
+  time: 2.3
+  afk: 0
+  afk_pct: 0
+  pb: false
+  heatmap:
+    steps: [0, 30, 40, 50, 60]
+  chart:
+    - {t: 1, wpm: 36, raw: 48, burst: 48, errors: 2}
+    - {t: 2, wpm: 40, raw: 52, burst: 56, errors: 1}
+    - {t: 2.3, wpm: 40, raw: 52, burst: 52, errors: 0}
+  words:
+    - {i: 0, word: house, wpm: 44, bucket: 2, typed: hiuse, fixed: 1, marks: ".f..."}
