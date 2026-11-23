@@ -13,6 +13,7 @@ py_library(
         "metrics.py",
         "palette.py",
         "results.py",
+        "typos.py",
         "ui.py",
     ],
     deps = [
@@ -49,6 +50,7 @@ _TESTS = [
     "test_metrics",
     "test_palette",
     "test_results",
+    "test_typos",
 ]
 
 [

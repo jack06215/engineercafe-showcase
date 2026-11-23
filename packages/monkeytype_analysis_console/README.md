@@ -18,14 +18,15 @@ MONKEYTYPE_RESULTS_DIR=~/monkeytype \
 ```
 
 [`SPEC.md`](SPEC.md) is the functional spec: the pages, the definitions
-behind every number, and the plan. The Result replay page is built. Result
-analysis and Progress come next.
+behind every number, and the plan. The Result replay and Result analysis
+pages are built. Progress comes next.
 
 | Module | Job |
 | --- | --- |
 | `results.py` | Reads `yr` files into `Result` objects, reports bad files, skips duplicates |
-| `metrics.py` | The definitions of §5 of the spec, such as slow words and band labels |
-| `charts.py` | The Altair speed chart and the per-word speed chart |
+| `metrics.py` | The definitions of §5 of the spec, such as slow words, aborted results and time lost to mistakes |
+| `typos.py` | The typo classifier and keyboard model, ported from the `monkeytype-review` skill's `analyze.py` |
+| `charts.py` | The Altair speed chart, per-word speed chart and keyboard chart |
 | `history_html.py` | The input history as escaped HTML, coloured by heatmap band |
 | `palette.py` | The fixed colours, readable on light and dark backgrounds |
 | `ui.py` | The sidebar and the pages; `main.py` and `app_pages/` only call it |

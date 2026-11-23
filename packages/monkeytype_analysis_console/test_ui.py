@@ -14,10 +14,14 @@ from packages.monkeytype_analysis_console.results import (
     Result,
 )
 from packages.monkeytype_analysis_console.ui import (
+    ABORTED,
+    ANALYSIS_PAGE,
     FOLDER_ENV,
     FOLDER_KEY,
+    GOAL_KEY,
     NO_CHART,
     NO_HISTORY,
+    NO_MISTAKES,
     NO_RESULTS,
     PICK_KEY,
     REPLAY_PAGE,
@@ -84,11 +88,11 @@ class UiTest(unittest.TestCase):
     def test_folder_box_loads_every_file(self) -> None:
         app = self.open_folder(fixtures.GOOD_FILES)
         self.assertIn(
-            "8 results from 7 files, 1 duplicate skipped",
+            "9 results from 8 files, 1 duplicate skipped",
             [caption.value for caption in app.sidebar.caption],
         )
         picker = app.selectbox(key=PICK_KEY)
-        self.assertEqual(len(picker.options), 8)
+        self.assertEqual(len(picker.options), 9)
         # The newest result comes first and is shown.
         newest = fixtures.result(fixtures.MULTI, 2)
         self.assertEqual(picker.options[0], result_label(newest))
@@ -198,6 +202,84 @@ class UiTest(unittest.TestCase):
         app.switch_page(REPLAY_PAGE).run()
         self.assert_clean(app)
         self.assertEqual([header.value for header in app.header], ["Result replay"])
+
+
+class AnalysisPageTest(UiTest):
+    def analyse(self, paths: Iterable[Path], result: Result | None = None) -> AppTest:
+        app = self.open_folder(paths)
+        if result is not None:
+            self.pick(app, result)
+        app.switch_page(ANALYSIS_PAGE).run()
+        self.assert_clean(app)
+        return app
+
+    def test_without_results(self) -> None:
+        app = _start()
+        app.switch_page(ANALYSIS_PAGE).run()
+        self.assert_clean(app)
+        self.assertEqual([info.value for info in app.info], [NO_RESULTS])
+
+    def test_analysis_of_a_result(self) -> None:
+        app = self.analyse([fixtures.TYPOS])
+        self.assertEqual([h.value for h in app.header], ["Result analysis"])
+        self.assertEqual(self.metric(app, "accuracy goal"), "missed")
+        # 7 wrong keys and their backspaces at 44.1 raw wpm.
+        self.assertEqual(self.metric(app, "time lost to mistakes"), "3.81s")
+        self.assertEqual(self.metric(app, "characters left wrong"), "5")
+        captions = [caption.value for caption in app.main.caption]
+        self.assertIn("acc 88.52% vs 96%", captions)
+        self.assertIn("flags: none", captions)
+        self.assertIn(
+            "5 of 10 words mistyped, 5 typos", [m.value for m in app.main.markdown]
+        )
+        bands, categories, confusions, mistyped, position = (
+            frame.value for frame in app.main.dataframe
+        )
+        self.assertEqual(
+            list(bands["band"]), ["<31", "31-44", "45-59", "60-89", "90+", "all"]
+        )
+        self.assertEqual(len(categories), 5)
+        self.assertEqual(set(confusions["confusion"]), {"n→e", "e→r"})
+        self.assertEqual(
+            list(mistyped["word"]), ["sneeing", "test", "about", "null", "they"]
+        )
+        self.assertEqual(list(position["part"]), ["first", "middle", "last"])
+        self.assertEqual(len(app.main.get("vega_lite_chart")), 1)
+
+    def test_goal_input_changes_the_check(self) -> None:
+        app = self.analyse([fixtures.TYPOS])
+        app.number_input(key=GOAL_KEY).set_value(85.0).run()
+        self.assert_clean(app)
+        self.assertEqual(self.metric(app, "accuracy goal"), "met")
+
+    def test_aborted_result_shows_only_the_checks(self) -> None:
+        app = self.analyse([fixtures.ABORTED])
+        self.assertIn(ABORTED, [info.value for info in app.info])
+        self.assertIn(
+            "flags: failed (min accuracy), aborted",
+            [caption.value for caption in app.main.caption],
+        )
+        self.assertEqual(len(app.main.dataframe), 0)
+
+    def test_result_without_input_history(self) -> None:
+        app = self.analyse([fixtures.MULTI], fixtures.result(fixtures.MULTI, 1))
+        self.assertIn(NO_HISTORY, [info.value for info in app.info])
+
+    def test_result_without_mistakes(self) -> None:
+        app = self.analyse([fixtures.HEATMAP_OFF])
+        self.assertIn(NO_MISTAKES, [info.value for info in app.info])
+
+    def test_picked_result_and_goal_carry_across_pages(self) -> None:
+        app = self.analyse(fixtures.GOOD_FILES, fixtures.result(fixtures.TYPOS))
+        self.assertEqual(self.metric(app, "characters left wrong"), "5")
+        app.number_input(key=GOAL_KEY).set_value(85.0).run()
+        app.switch_page(REPLAY_PAGE).run()
+        self.assert_clean(app)
+        self.assertEqual(self.metric(app, "wpm"), "38.4")
+        app.switch_page(ANALYSIS_PAGE).run()
+        self.assert_clean(app)
+        self.assertEqual(app.number_input(key=GOAL_KEY).value, 85.0)
+        self.assertEqual(self.metric(app, "accuracy goal"), "met")
 
 
 if __name__ == "__main__":

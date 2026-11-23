@@ -181,7 +181,7 @@ class MergeTest(unittest.TestCase):
         loaded = merge(fixtures.read(path) for path in fixtures.GOOD_FILES)
         self.assertEqual(loaded.files, len(fixtures.GOOD_FILES))
         self.assertEqual(loaded.duplicates, 1)
-        self.assertEqual(len(loaded.results), 8)
+        self.assertEqual(len(loaded.results), 9)
         dates = [result.copied_at for result in loaded.results]
         self.assertEqual(dates, sorted(dates))
         # The first copy read wins: real_words10.yml comes before multi.yml.
