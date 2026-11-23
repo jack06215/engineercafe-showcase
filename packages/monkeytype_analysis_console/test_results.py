@@ -1,3 +1,4 @@
+import dataclasses
 import datetime
 import math
 import os
@@ -223,6 +224,51 @@ class FolderTest(unittest.TestCase):
         self.assertEqual(
             resolve_folder("documents", {}), Path(os.getcwd()) / "documents"
         )
+
+
+class DuplicateCopyTest(unittest.TestCase):
+    """multi.yml's first result is real_words10.yml copied again with `yr`."""
+
+    def setUp(self) -> None:
+        self.real = fixtures.result(fixtures.REAL)
+        self.copy = fixtures.result(fixtures.MULTI)
+
+    def test_the_copy_is_the_same_result_copied_later(self) -> None:
+        self.assertEqual(self.copy.identity, self.real.identity)
+        self.assertGreater(self.copy.copied_at, self.real.copied_at)
+
+    def test_the_copy_is_full(self) -> None:
+        # Everything but where and when it was copied matches, chart and
+        # input history included.
+        moved = dataclasses.replace(
+            self.copy, source=self.real.source, copied_at=self.real.copied_at
+        )
+        self.assertEqual(moved, self.real)
+
+    def test_whichever_file_is_read_first_the_kept_result_is_complete(self) -> None:
+        for first, second in (
+            (fixtures.REAL, fixtures.MULTI),
+            (fixtures.MULTI, fixtures.REAL),
+        ):
+            with self.subTest(first=first.name):
+                loaded = merge([fixtures.read(first), fixtures.read(second)])
+                self.assertEqual(loaded.duplicates, 1)
+                kept = [r for r in loaded.results if r.identity == self.real.identity]
+                self.assertEqual(len(kept), 1)
+                self.assertTrue(kept[0].source.startswith(first.name))
+                self.assertEqual(kept[0].chart, self.real.chart)
+                self.assertEqual(kept[0].words, self.real.words)
+
+    def test_a_folder_read_in_name_order_keeps_a_complete_copy(self) -> None:
+        # multi.yml sorts before real_words10.yml, so its copy is the one kept.
+        with tempfile.TemporaryDirectory() as name:
+            folder = Path(name)
+            fixtures.copy_to(folder, [fixtures.REAL, fixtures.MULTI])
+            loaded = merge(fixtures.read(path) for path in result_files(folder))
+        kept = [r for r in loaded.results if r.identity == self.real.identity]
+        self.assertEqual(kept[0].source, "multi.yml, document 1")
+        self.assertEqual(len(kept[0].chart), 14)
+        self.assertEqual(len(kept[0].words), 10)
 
 
 if __name__ == "__main__":
