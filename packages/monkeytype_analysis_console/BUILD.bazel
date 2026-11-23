@@ -12,6 +12,7 @@ py_library(
         "history_html.py",
         "metrics.py",
         "palette.py",
+        "progress.py",
         "results.py",
         "typos.py",
         "ui.py",
@@ -49,6 +50,7 @@ _TESTS = [
     "test_history_html",
     "test_metrics",
     "test_palette",
+    "test_progress",
     "test_results",
     "test_typos",
 ]

@@ -14,6 +14,9 @@ The other files are written by hand in `yr`'s layout from it, one case each:
   later, the second has no chart and no input history, and the third has 20
   keypresses, so it counts as aborted too.
 - `not_a_result.yml` and `broken.yml`: files the console must refuse.
+- `progress.yml`: 9 results over 5 days, for the Progress tests: two word
+  lists and two test types, words that are slow or mistyped more than once,
+  the key confusion e→r twice, a PB, and an aborted result last.
 """
 
 import shutil
@@ -37,6 +40,7 @@ ABORTED = TESTDATA / "aborted.yml"
 MULTI = TESTDATA / "multi.yml"
 NOT_A_RESULT = TESTDATA / "not_a_result.yml"
 BROKEN = TESTDATA / "broken.yml"
+PROGRESS = TESTDATA / "progress.yml"
 
 GOOD_FILES = (REAL, TYPOS, HEATMAP_OFF, CUSTOM, CHART_ERROR, CPM, ABORTED, MULTI)
 

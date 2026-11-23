@@ -10,7 +10,7 @@ Projects built at [Engineer Cafe](https://engineercafe.jp/).
 | [`hello_world_20260912`](packages/hello_world_20260912) | Static Hello World pages | HTML |
 | [`algo_tutor`](packages/algo_tutor) | A local tracker for coding-interview practice, with an optional AI tutor ([spec](packages/algo_tutor/SPEC.md)) | FastAPI, SQLAlchemy, SQLite, LangChain |
 | [`algo-tutor-web`](src/main/typescript/packages/algo-tutor-web) | The web UI of `algo_tutor` | React 19, MUI, TanStack Router and Query, Vite |
-| [`monkeytype_analysis_console`](packages/monkeytype_analysis_console) | Redraws Monkeytype results that the Surfingkeys `yr` mapping copied as YAML ([spec](packages/monkeytype_analysis_console/SPEC.md)) | Streamlit, Altair |
+| [`monkeytype_analysis_console`](packages/monkeytype_analysis_console) | Redraws, analyses and tracks Monkeytype results that the Surfingkeys `yr` mapping copied as YAML ([spec](packages/monkeytype_analysis_console/SPEC.md)) | Streamlit, Altair |
 
 `packages/langchain_util` and `packages/common` are shared libraries that
 `vega_lite_chat` and `algo_tutor` depend on.

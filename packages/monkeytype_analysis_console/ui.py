@@ -36,6 +36,17 @@ from packages.monkeytype_analysis_console.metrics import (
     time_lost,
     too_fast_count,
 )
+from packages.monkeytype_analysis_console.progress import (
+    TREND_FIELDS,
+    Trend,
+    by_word_list,
+    common_tests,
+    counted,
+    latest_results,
+    recurring_problems,
+    repeated_confusions,
+    trend_groups,
+)
 from packages.monkeytype_analysis_console.results import (
     Loaded,
     ParsedFile,
@@ -56,6 +67,7 @@ TITLE = "Monkeytype analysis console"
 FOLDER_ENV = "MONKEYTYPE_RESULTS_DIR"
 REPLAY_PAGE = "app_pages/replay.py"
 ANALYSIS_PAGE = "app_pages/analysis.py"
+PROGRESS_PAGE = "app_pages/progress.py"
 
 # st.session_state keys. A test types into the folder box through FOLDER_KEY.
 UPLOAD_KEY = "uploaded_files"
@@ -64,6 +76,7 @@ PICK_KEY = "picked_result"
 LOADED_KEY = "loaded_results"
 THRESHOLD_KEY = "slow_threshold"
 GOAL_KEY = "accuracy_goal"
+TEST_KEY = "progress_test"
 # A widget on another page is another widget to Streamlit, even with the same
 # key. So the picked result and the goal are also kept under keys of their own:
 # a callback copies each change there, and each run loads it back into the
@@ -83,6 +96,8 @@ NO_HISTORY = (
 NO_CHART = "No chart in this result."
 ABORTED = "Nothing else to analyse: fewer than 25 keypresses."
 NO_MISTAKES = "No mistyped words."
+NEED_TWO = "Progress needs at least 2 results that are not aborted."
+NO_RECURRING = "No word was slow or mistyped in more than one result."
 
 
 def render_app() -> None:
@@ -91,6 +106,7 @@ def render_app() -> None:
         [
             streamlit.Page(REPLAY_PAGE, title="Result replay", default=True),
             streamlit.Page(ANALYSIS_PAGE, title="Result analysis"),
+            streamlit.Page(PROGRESS_PAGE, title="Progress"),
         ]
     )
     streamlit.session_state[LOADED_KEY] = _render_sources()
@@ -134,6 +150,35 @@ def render_analysis_page() -> None:
     _render_word_speed(result)
     _render_typos(result)
     _render_position(result)
+
+
+def render_progress_page() -> None:
+    """The Progress page: results over time, per word list and test type."""
+    streamlit.header("Progress")
+    goal = _goal_input()
+    loaded = _loaded()
+    if not loaded.results:
+        streamlit.info(NO_RESULTS)
+        return
+    results = counted(loaded.results)
+    if len(results) < 2:
+        streamlit.info(NEED_TWO)
+        return
+    tests = common_tests(results)
+    if streamlit.session_state.get(TEST_KEY) not in tests:
+        streamlit.session_state.pop(TEST_KEY, None)
+    test = streamlit.selectbox("Test type", tests, key=TEST_KEY)
+    for word_list, group in by_word_list(
+        [result for result in results if result.test == test]
+    ).items():
+        streamlit.subheader(word_list)
+        wpm_column, acc_column = streamlit.columns(2)
+        wpm_column.altair_chart(charts.progress_chart(group, "wpm"), width="stretch")
+        acc_column.altair_chart(
+            charts.progress_chart(group, "acc", goal), width="stretch"
+        )
+    _render_trends([trend for trend in trend_groups(results) if trend.test == test])
+    _render_recurring(results)
 
 
 def result_label(result: Result) -> str:
@@ -478,6 +523,61 @@ def _render_position(result: Result) -> None:
         for group in position_groups(result.words)
     ]
     streamlit.dataframe(pandas.DataFrame(rows), hide_index=True)
+
+
+def _render_trends(trends: list[Trend]) -> None:
+    streamlit.subheader("Latest vs average")
+    rows = []
+    for trend in trends:
+        latest = trend.latest
+        row: dict[str, Any] = {
+            "word list": trend.word_list,
+            "test": trend.test,
+            "results": len(trend.results),
+            "latest": f"{latest.copied_at:%Y-%m-%d %H:%M}",
+            "wpm": latest.wpm,
+            "acc": latest.acc,
+            "consistency": latest.consistency,
+            "compared with": (
+                f"mean of {_plural(len(trend.earlier), 'earlier result')}"
+                if trend.earlier
+                else "no earlier results"
+            ),
+        }
+        for field in TREND_FIELDS:
+            row[f"change in {field}"] = _signed(trend.change(field))
+        rows.append(row)
+    streamlit.dataframe(pandas.DataFrame(rows), hide_index=True)
+
+
+def _render_recurring(results: list[Result]) -> None:
+    streamlit.subheader("Recurring problems")
+    window = latest_results(results)
+    streamlit.caption(
+        "Words slow or mistyped in at least 2 of the last "
+        f"{_plural(len(window), 'result')}, across every word list and test type."
+    )
+    recurring = recurring_problems(results)
+    if recurring:
+        rows = [
+            {
+                "word": item.word,
+                "results": item.results,
+                "slow in": item.slow,
+                "mistyped in": item.mistyped,
+            }
+            for item in recurring
+        ]
+        streamlit.dataframe(pandas.DataFrame(rows), hide_index=True)
+    else:
+        streamlit.info(NO_RECURRING)
+    confusions = repeated_confusions(results)
+    listed = ", ".join(f"{pair} ×{count}" for pair, count in confusions)
+    streamlit.caption(f"Key confusions seen at least twice: {listed or 'none'}")
+
+
+def _signed(value: float | None) -> str:
+    return "–" if value is None else f"{value:+.2f}"
 
 
 def _group_columns(group: WordGroup, unit: str) -> dict[str, Any]:

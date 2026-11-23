@@ -19,12 +19,16 @@ from packages.monkeytype_analysis_console.ui import (
     FOLDER_ENV,
     FOLDER_KEY,
     GOAL_KEY,
+    NEED_TWO,
     NO_CHART,
     NO_HISTORY,
     NO_MISTAKES,
+    NO_RECURRING,
     NO_RESULTS,
     PICK_KEY,
+    PROGRESS_PAGE,
     REPLAY_PAGE,
+    TEST_KEY,
     result_label,
     threshold_key,
 )
@@ -280,6 +284,73 @@ class AnalysisPageTest(UiTest):
         self.assert_clean(app)
         self.assertEqual(app.number_input(key=GOAL_KEY).value, 85.0)
         self.assertEqual(self.metric(app, "accuracy goal"), "met")
+
+
+class ProgressPageTest(UiTest):
+    def progress(self, paths: Iterable[Path]) -> AppTest:
+        app = self.open_folder(paths)
+        app.switch_page(PROGRESS_PAGE).run()
+        self.assert_clean(app)
+        return app
+
+    def test_without_results(self) -> None:
+        app = _start()
+        app.switch_page(PROGRESS_PAGE).run()
+        self.assert_clean(app)
+        self.assertEqual([info.value for info in app.info], [NO_RESULTS])
+
+    def test_needs_two_counted_results(self) -> None:
+        # One result, plus one that is aborted.
+        app = self.progress([fixtures.REAL, fixtures.ABORTED])
+        self.assertEqual([info.value for info in app.info], [NEED_TWO])
+
+    def test_progress_of_the_most_common_test_type(self) -> None:
+        app = self.progress([fixtures.PROGRESS])
+        self.assertEqual([h.value for h in app.header], ["Progress"])
+        self.assertEqual(app.selectbox(key=TEST_KEY).value, "words 10")
+        self.assertEqual(
+            [s.value for s in app.subheader],
+            ["code python", "english 1k", "Latest vs average", "Recurring problems"],
+        )
+        # wpm and acc for each of the two word lists.
+        self.assertEqual(len(app.main.get("vega_lite_chart")), 4)
+        trends, recurring = (frame.value for frame in app.main.dataframe)
+        self.assertEqual(list(trends["word list"]), ["code python", "english 1k"])
+        self.assertEqual(list(trends["change in wpm"]), ["+2.00", "+4.67"])
+        self.assertEqual(
+            list(trends["compared with"]),
+            ["mean of 1 earlier result", "mean of 3 earlier results"],
+        )
+        self.assertEqual(list(recurring["word"]), ["century", "salt", "self", "they"])
+        captions = [caption.value for caption in app.main.caption]
+        self.assertIn("Key confusions seen at least twice: e→r ×2", captions)
+
+    def test_test_type_filter(self) -> None:
+        app = self.progress([fixtures.PROGRESS])
+        app.selectbox(key=TEST_KEY).select("time 15").run()
+        self.assert_clean(app)
+        self.assertEqual(
+            [s.value for s in app.subheader],
+            ["english 1k", "Latest vs average", "Recurring problems"],
+        )
+        trends = app.main.dataframe[0].value
+        self.assertEqual(list(trends["test"]), ["time 15"])
+
+    def test_nothing_recurring(self) -> None:
+        app = self.progress([fixtures.REAL, fixtures.CHART_ERROR])
+        self.assertIn(NO_RECURRING, [info.value for info in app.info])
+        self.assertIn(
+            "Key confusions seen at least twice: none",
+            [caption.value for caption in app.main.caption],
+        )
+
+    def test_goal_from_the_analysis_page_carries_over(self) -> None:
+        app = self.open_folder([fixtures.PROGRESS])
+        app.switch_page(ANALYSIS_PAGE).run()
+        app.number_input(key=GOAL_KEY).set_value(97.5).run()
+        app.switch_page(PROGRESS_PAGE).run()
+        self.assert_clean(app)
+        self.assertEqual(app.number_input(key=GOAL_KEY).value, 97.5)
 
 
 if __name__ == "__main__":

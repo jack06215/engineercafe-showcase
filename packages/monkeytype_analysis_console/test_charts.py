@@ -10,6 +10,7 @@ from packages.monkeytype_analysis_console.charts import (
     KEY_LABEL_COLOUR,
     LEGEND_PARAM,
     keyboard_chart,
+    progress_chart,
     speed_chart,
     word_speed_chart,
 )
@@ -238,6 +239,50 @@ class KeyboardChartTest(unittest.TestCase):
         spec = _spec(keyboard_chart({}))
         keys = _units(spec)[0]
         self.assertEqual({row["count"] for row in _rows(spec, keys)}, {0})
+
+
+class ProgressChartTest(unittest.TestCase):
+    def setUp(self) -> None:
+        results = fixtures.read(fixtures.PROGRESS).results
+        self.english = [
+            r for r in results if r.test == "words 10" and r.language == "english 1k"
+        ][:4]
+
+    def test_line_and_points_over_time(self) -> None:
+        spec = _spec(progress_chart(self.english, "wpm"))
+        line, points = _units(spec)
+        self.assertEqual(_mark(line)["type"], "line")
+        self.assertEqual(points["encoding"]["x"]["type"], "temporal")
+        self.assertEqual(points["encoding"]["y"]["field"], "wpm")
+        self.assertFalse(points["encoding"]["y"]["scale"]["zero"])
+        rows = _rows(spec, points)
+        self.assertEqual([row["wpm"] for row in rows], [50, 52, 49, 55])
+
+    def test_pbs_get_their_own_shape(self) -> None:
+        spec = _spec(progress_chart(self.english, "wpm"))
+        points = _units(spec)[1]
+        shape = points["encoding"]["shape"]
+        self.assertEqual(shape["scale"]["range"], ["circle", "diamond"])
+        self.assertEqual(
+            [row["kind"] for row in _rows(spec, points)],
+            ["result", "result", "result", "PB"],
+        )
+
+    def test_goal_line_on_accuracy(self) -> None:
+        spec = _spec(progress_chart(self.english, "acc", goal=96))
+        rule = _units(spec)[2]
+        self.assertEqual(_mark(rule)["type"], "rule")
+        self.assertEqual(_rows(spec, rule), [{"goal": 96}])
+        self.assertEqual(len(_units(_spec(progress_chart(self.english, "acc")))), 2)
+
+    def test_tooltip(self) -> None:
+        points = _units(_spec(progress_chart(self.english, "wpm")))[1]
+        fields = [item["field"] for item in points["encoding"]["tooltip"]]
+        self.assertEqual(fields, ["when", "test", "wpm", "acc", "consistency", "file"])
+
+    def test_only_wpm_or_acc(self) -> None:
+        with self.assertRaises(ValueError):
+            progress_chart(self.english, "raw")
 
 
 if __name__ == "__main__":

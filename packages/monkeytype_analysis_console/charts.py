@@ -268,6 +268,72 @@ def keyboard_chart(
     return altair.LayerChart(layer=[keys, labels], height=KEYBOARD_HEIGHT)
 
 
+PROGRESS_HEIGHT = 240
+PROGRESS_MEASURES = ("wpm", "acc")
+
+
+def progress_chart(
+    results: Sequence[Result], measure: str, goal: float | None = None
+) -> altair.LayerChart:
+    """One measure (`wpm` or `acc`) of results over time, PBs marked.
+
+    With a goal, a dashed line shows it. The results should be one trend
+    group, so the speeds are comparable.
+    """
+    if measure not in PROGRESS_MEASURES:
+        raise ValueError(f"measure must be one of {PROGRESS_MEASURES}: {measure!r}")
+    rows = [
+        {
+            "when": result.copied_at.isoformat(),
+            "test": result.test,
+            "wpm": result.wpm,
+            "acc": result.acc,
+            "consistency": result.consistency,
+            "file": result.source,
+            "kind": "PB" if result.pb else "result",
+        }
+        for result in results
+    ]
+    data = pandas.DataFrame(rows)
+    x = altair.X("when:T", title=None)
+    y = altair.Y(f"{measure}:Q", title=measure, scale=altair.Scale(zero=False))
+    line = altair.Chart(data).mark_line(color=palette.MAIN).encode(x=x, y=y)
+    points = (
+        altair.Chart(data)
+        .mark_point(filled=True, size=80, color=palette.MAIN, opacity=1)
+        .encode(
+            x=x,
+            y=y,
+            shape=altair.Shape(
+                "kind:N",
+                scale=altair.Scale(
+                    domain=["result", "PB"], range=["circle", "diamond"]
+                ),
+                legend=altair.Legend(title=None, orient="top"),
+            ),
+            tooltip=[
+                altair.Tooltip("when:T", title="copied", format="%Y-%m-%d %H:%M"),
+                altair.Tooltip("test:N"),
+                altair.Tooltip("wpm:Q"),
+                altair.Tooltip("acc:Q"),
+                altair.Tooltip("consistency:Q"),
+                altair.Tooltip("file:N"),
+            ],
+        )
+    )
+    layers: list[altair.Chart] = [line, points]
+    if goal is not None:
+        layers.append(
+            altair.Chart(pandas.DataFrame({"goal": [goal]}))
+            .mark_rule(strokeDash=[4, 4], color=palette.SUB)
+            .encode(
+                y=altair.Y("goal:Q", title=measure),
+                tooltip=[altair.Tooltip("goal:Q", title="goal")],
+            )
+        )
+    return altair.LayerChart(layer=layers, height=PROGRESS_HEIGHT)
+
+
 def _shown_when(shown: altair.Parameter, opacity: float) -> Any:
     return altair.when(shown).then(altair.value(opacity)).otherwise(altair.value(0))
 
