@@ -11,10 +11,11 @@ import os
 from pathlib import Path
 from typing import Any
 
+import anthropic
 import pandas
 import streamlit
 
-from packages.monkeytype_analysis_console import charts
+from packages.monkeytype_analysis_console import charts, practice
 from packages.monkeytype_analysis_console.history_html import (
     band_legend_html,
     history_html,
@@ -68,6 +69,8 @@ FOLDER_ENV = "MONKEYTYPE_RESULTS_DIR"
 REPLAY_PAGE = "app_pages/replay.py"
 ANALYSIS_PAGE = "app_pages/analysis.py"
 PROGRESS_PAGE = "app_pages/progress.py"
+PRACTICE_PAGE = "app_pages/practice.py"
+KEY_ENV = "ANTHROPIC_API_KEY"
 
 # st.session_state keys. A test types into the folder box through FOLDER_KEY.
 UPLOAD_KEY = "uploaded_files"
@@ -77,13 +80,23 @@ LOADED_KEY = "loaded_results"
 THRESHOLD_KEY = "slow_threshold"
 GOAL_KEY = "accuracy_goal"
 TEST_KEY = "progress_test"
+GROUPS_KEY = "practice_groups"
+TEXT_KEY = "practice_text"
+FOCUS_KEY = "practice_focus"
+LENGTH_KEY = "practice_length"
+GROUP_BUTTON_KEY = "practice_group_button"
+TEXT_BUTTON_KEY = "practice_text_button"
 # A widget on another page is another widget to Streamlit, even with the same
-# key. So the picked result and the goal are also kept under keys of their own:
-# a callback copies each change there, and each run loads it back into the
-# widget before drawing it.
+# key. So the picked result, the goal and the Practice inputs are also kept
+# under keys of their own: a callback copies each change there, and each run
+# loads it back into the widget before drawing it.
 _PICK_KEPT_KEY = "picked_result_kept"
 _GOAL_KEPT_KEY = "accuracy_goal_kept"
+_FOCUS_KEPT_KEY = "practice_focus_kept"
+_LENGTH_KEPT_KEY = "practice_length_kept"
 TOP_CONFUSIONS = 10
+ALL_PROBLEMS = "All problems"
+DEFAULT_LENGTH = 50
 
 NO_RESULTS = (
     "No results loaded. Upload files that `yr` copied, or enter a results "
@@ -98,6 +111,20 @@ ABORTED = "Nothing else to analyse: fewer than 25 keypresses."
 NO_MISTAKES = "No mistyped words."
 NEED_TWO = "Progress needs at least 2 results that are not aborted."
 NO_RECURRING = "No word was slow or mistyped in more than one result."
+PRACTICE_NEEDS_TWO = "Practice needs at least 2 results."
+NOTHING_TO_PRACTISE = (
+    "No word was slow or mistyped in 2 of your last 20 results, so there is "
+    "nothing to practise yet."
+)
+NO_KEY = (
+    f"Set {KEY_ENV} to let Claude group these problems and write a practice text."
+)
+EARLIER_PROBLEMS = (
+    "Made from an earlier set of problems. Press the button again to update it."
+)
+NO_GROUPS = "Claude found no shared causes."
+GROUPS_BY_CLAUDE = "Groups and causes by Claude. The counts above are the console's."
+TEXT_BY_CLAUDE = "Written by Claude. Paste it into Monkeytype's custom mode."
 
 
 def render_app() -> None:
@@ -107,6 +134,7 @@ def render_app() -> None:
             streamlit.Page(REPLAY_PAGE, title="Result replay", default=True),
             streamlit.Page(ANALYSIS_PAGE, title="Result analysis"),
             streamlit.Page(PROGRESS_PAGE, title="Progress"),
+            streamlit.Page(PRACTICE_PAGE, title="Practice"),
         ]
     )
     streamlit.session_state[LOADED_KEY] = _render_sources()
@@ -179,6 +207,37 @@ def render_progress_page() -> None:
         )
     _render_trends([trend for trend in trend_groups(results) if trend.test == test])
     _render_recurring(results)
+
+
+def render_practice_page() -> None:
+    """The Practice page: Claude groups the problems and writes a practice text.
+
+    Nothing is sent to the API until a button is pressed.
+    """
+    streamlit.header("Practice")
+    loaded = _loaded()
+    if not loaded.results:
+        streamlit.info(NO_RESULTS)
+        return
+    results = counted(loaded.results)
+    if len(results) < 2:
+        streamlit.info(PRACTICE_NEEDS_TWO)
+        return
+    found = practice.problems(results)
+    if found.empty:
+        streamlit.info(NOTHING_TO_PRACTISE)
+        return
+    _render_recurring(results)
+    if not os.environ.get(KEY_ENV):
+        streamlit.info(NO_KEY)
+        return
+    _render_cause_groups(found)
+    _render_practice_text(found)
+
+
+def claude_client() -> anthropic.Anthropic:
+    """The client that the Practice page sends its requests through."""
+    return anthropic.Anthropic()
 
 
 def result_label(result: Result) -> str:
@@ -574,6 +633,125 @@ def _render_recurring(results: list[Result]) -> None:
     confusions = repeated_confusions(results)
     listed = ", ".join(f"{pair} ×{count}" for pair, count in confusions)
     streamlit.caption(f"Key confusions seen at least twice: {listed or 'none'}")
+
+
+def _render_cause_groups(found: practice.Problems) -> None:
+    streamlit.subheader("Cause groups")
+    pressed = streamlit.button("Group by cause", key=GROUP_BUTTON_KEY)
+    _render_request(practice.group_content(found))
+    if pressed:
+        with streamlit.spinner("Claude is grouping your problems…"):
+            try:
+                streamlit.session_state[GROUPS_KEY] = practice.group_by_cause(
+                    claude_client(), found
+                )
+            except practice.ClaudeError as e:
+                streamlit.error(str(e))
+    grouping = _grouping()
+    if grouping is None:
+        return
+    _render_earlier(grouping.problems, found)
+    if grouping.groups:
+        rows = [
+            {
+                "group": group.name,
+                "cause": group.cause,
+                "words": ", ".join(group.words),
+                "confusions": ", ".join(group.confusions),
+            }
+            for group in grouping.groups
+        ]
+        streamlit.dataframe(pandas.DataFrame(rows), hide_index=True)
+        left = [*grouping.ungrouped_words, *grouping.ungrouped_confusions]
+        if left:
+            streamlit.caption("Not in a group: " + ", ".join(left))
+        streamlit.caption(GROUPS_BY_CLAUDE)
+    else:
+        streamlit.info(NO_GROUPS)
+    _render_usage(grouping.usage)
+
+
+def _render_practice_text(found: practice.Problems) -> None:
+    streamlit.subheader("Practice text")
+    grouping = _grouping()
+    groups = grouping.groups if grouping is not None else ()
+    names = [ALL_PROBLEMS, *(group.name for group in groups)]
+    state = streamlit.session_state
+    # After the groups are made again, the focused group may be gone.
+    kept = state.get(_FOCUS_KEPT_KEY)
+    state[FOCUS_KEY] = kept if kept in names else ALL_PROBLEMS
+    name = streamlit.selectbox(
+        "Focus",
+        names,
+        key=FOCUS_KEY,
+        on_change=_copy_state,
+        args=(FOCUS_KEY, _FOCUS_KEPT_KEY),
+    )
+    state[_FOCUS_KEPT_KEY] = name
+    state[LENGTH_KEY] = state.get(_LENGTH_KEPT_KEY, DEFAULT_LENGTH)
+    length = streamlit.slider(
+        "Length (words)",
+        min_value=20,
+        max_value=100,
+        step=10,
+        key=LENGTH_KEY,
+        on_change=_copy_state,
+        args=(LENGTH_KEY, _LENGTH_KEPT_KEY),
+    )
+    state[_LENGTH_KEPT_KEY] = length
+    focus = next((group for group in groups if group.name == name), None)
+    pressed = streamlit.button("Write practice text", key=TEXT_BUTTON_KEY)
+    _render_request(practice.text_content(found, length, focus))
+    if pressed:
+        with streamlit.spinner("Claude is writing your practice text…"):
+            try:
+                state[TEXT_KEY] = practice.write_practice_text(
+                    claude_client(), found, length, focus
+                )
+            except practice.ClaudeError as e:
+                streamlit.error(str(e))
+    text = state.get(TEXT_KEY)
+    if not isinstance(text, practice.PracticeText):
+        return
+    _render_earlier(text.problems, found)
+    if text.unusual:
+        streamlit.warning(
+            "The text has characters you can't type on a US keyboard: "
+            + " ".join(text.unusual)
+        )
+    streamlit.code(text.text, language=None, wrap_lines=True)
+    streamlit.caption(TEXT_BY_CLAUDE)
+    streamlit.markdown(_plural(text.word_count, "word"))
+    if text.coverage:
+        streamlit.dataframe(
+            pandas.DataFrame(text.coverage, columns=["word", "times in text"]),
+            hide_index=True,
+        )
+    if text.unused:
+        streamlit.caption("Not used: " + ", ".join(text.unused))
+    _render_usage(text.usage)
+
+
+def _grouping() -> practice.Grouping | None:
+    grouping = streamlit.session_state.get(GROUPS_KEY)
+    return grouping if isinstance(grouping, practice.Grouping) else None
+
+
+def _render_request(content: dict[str, Any]) -> None:
+    with streamlit.expander("What Claude gets"):
+        streamlit.code(practice.request_text(content), language="json")
+
+
+def _render_earlier(made_from: practice.Problems, found: practice.Problems) -> None:
+    if made_from != found:
+        streamlit.caption(EARLIER_PROBLEMS)
+
+
+def _render_usage(usage: practice.Usage) -> None:
+    streamlit.caption(
+        f"Claude used {usage.input_tokens:,} input and "
+        f"{usage.output_tokens:,} output tokens."
+    )
 
 
 def _signed(value: float | None) -> str:

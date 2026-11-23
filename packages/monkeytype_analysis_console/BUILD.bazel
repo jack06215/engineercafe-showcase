@@ -12,6 +12,7 @@ py_library(
         "history_html.py",
         "metrics.py",
         "palette.py",
+        "practice.py",
         "progress.py",
         "results.py",
         "typos.py",
@@ -19,6 +20,7 @@ py_library(
     ],
     deps = [
         requirement("altair"),
+        requirement("anthropic"),
         requirement("pandas"),
         requirement("pyyaml"),
         requirement("streamlit"),
@@ -42,7 +44,11 @@ py_library(
     testonly = True,
     srcs = ["fixtures.py"],
     data = glob(["testdata/*.yml"]),
-    deps = [":monkeytype_analysis_console_lib"],
+    deps = [
+        ":monkeytype_analysis_console_lib",
+        requirement("anthropic"),
+        requirement("httpx2"),
+    ],
 )
 
 _TESTS = [
@@ -50,6 +56,7 @@ _TESTS = [
     "test_history_html",
     "test_metrics",
     "test_palette",
+    "test_practice",
     "test_progress",
     "test_results",
     "test_typos",
@@ -65,6 +72,7 @@ _TESTS = [
             ":fixtures",
             ":monkeytype_analysis_console_lib",
             requirement("altair"),
+            requirement("anthropic"),
         ],
     )
     for name in _TESTS
@@ -81,6 +89,7 @@ py_test(
     deps = [
         ":fixtures",
         ":monkeytype_analysis_console_lib",
+        requirement("anthropic"),
     ],
 )
 

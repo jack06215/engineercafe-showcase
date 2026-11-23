@@ -17,11 +17,20 @@ The other files are written by hand in `yr`'s layout from it, one case each:
 - `progress.yml`: 9 results over 5 days, for the Progress tests: two word
   lists and two test types, words that are slow or mistyped more than once,
   the key confusion e→r twice, a PB, and an aborted result last.
+
+`fake_claude` stands in for the Anthropic client, so no test calls the API.
 """
 
+import json
 import shutil
 from collections.abc import Iterable
 from pathlib import Path
+from typing import Any
+from unittest import mock
+
+import anthropic
+import httpx2
+from anthropic.types.beta import BetaFallbackBlock, BetaMessage, BetaTextBlock
 
 from packages.monkeytype_analysis_console.results import (
     ParsedFile,
@@ -44,6 +53,8 @@ PROGRESS = TESTDATA / "progress.yml"
 
 GOOD_FILES = (REAL, TYPOS, HEATMAP_OFF, CUSTOM, CHART_ERROR, CPM, ABORTED, MULTI)
 
+_API_REQUEST = httpx2.Request("POST", "https://api.anthropic.com/v1/messages")
+
 
 def read(path: Path) -> ParsedFile:
     """Parses one fixture file."""
@@ -62,6 +73,74 @@ def copy_to(folder: Path, paths: Iterable[Path]) -> None:
     """Copies fixture files into `folder`, keeping their names."""
     for path in paths:
         shutil.copyfile(path, folder / path.name)
+
+
+def claude_message(
+    answer: object,
+    stop_reason: str = "end_turn",
+    declined_first: bool = False,
+) -> BetaMessage:
+    """A Messages API response whose text is `answer` as JSON.
+
+    A string `answer` is sent as it is. With `declined_first`, a model writes
+    some text and declines, and a fallback model writes the answer.
+    """
+    text = answer if isinstance(answer, str) else json.dumps(answer)
+    content: list[Any] = [BetaTextBlock(type="text", text=text)]
+    if declined_first:
+        content[:0] = [
+            BetaTextBlock(type="text", text='{"gro'),
+            BetaFallbackBlock.model_validate(
+                {
+                    "type": "fallback",
+                    "from": {"model": "claude-opus-5-5"},
+                    "to": {"model": "claude-opus-4-8"},
+                    "trigger": {"type": "refusal", "category": None},
+                }
+            ),
+        ]
+    return BetaMessage.model_validate(
+        {
+            "id": "msg_test",
+            "type": "message",
+            "role": "assistant",
+            "model": "claude-opus-5-5",
+            "content": [block.model_dump(by_alias=True) for block in content],
+            "stop_reason": stop_reason,
+            "stop_sequence": None,
+            "usage": {"input_tokens": 1234, "output_tokens": 56},
+        }
+    )
+
+
+def fake_claude(*replies: BetaMessage | Exception) -> mock.MagicMock:
+    """A client whose `beta.messages.create` records each request.
+
+    Each call returns, or raises, the next of `replies`.
+    """
+    client = mock.MagicMock(spec_set=["beta"])
+    client.beta.messages.create.side_effect = list(replies)
+    return client
+
+
+def api_error(
+    error: type[anthropic.APIStatusError],
+    status: int,
+    headers: dict[str, str] | None = None,
+) -> anthropic.APIStatusError:
+    """An error the SDK raises for an HTTP `status` answer."""
+    response = httpx2.Response(status, headers=headers, request=_API_REQUEST)
+    return error("error from the test", response=response, body=None)
+
+
+def connection_error() -> anthropic.APIConnectionError:
+    """The error the SDK raises when it can't reach the API."""
+    return anthropic.APIConnectionError(request=_API_REQUEST)
+
+
+def timeout_error() -> anthropic.APITimeoutError:
+    """The error the SDK raises when a request times out."""
+    return anthropic.APITimeoutError(request=_API_REQUEST)
 
 
 def long_result_yaml(seconds: float = 739.6, word_count: int = 100) -> str:

@@ -848,6 +848,7 @@ there is one, stays under the error. The rest of the page keeps working.
 | No connection, or a timeout | "Couldn't reach Claude. Check your connection." |
 | `stop_reason` is `refusal` | "Claude declined this request." |
 | The answer is cut off (`max_tokens`) or doesn't match the schema | "Claude's answer was incomplete. Try again." |
+| Any other API error, such as a request the API rejects | "Claude returned an error: " and the API's message |
 
 ### 13.7 Edge cases
 

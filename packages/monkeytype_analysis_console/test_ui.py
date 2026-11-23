@@ -5,30 +5,48 @@ import tempfile
 import unittest
 from collections.abc import Iterable
 from pathlib import Path
+from typing import Any
 from unittest import mock
 
+import anthropic
 from streamlit.testing.v1 import AppTest
 
-from packages.monkeytype_analysis_console import fixtures
+from packages.monkeytype_analysis_console import fixtures, ui
+from packages.monkeytype_analysis_console.practice import (
+    BUSY,
+)
 from packages.monkeytype_analysis_console.results import (
     Result,
 )
 from packages.monkeytype_analysis_console.ui import (
     ABORTED,
+    ALL_PROBLEMS,
     ANALYSIS_PAGE,
+    EARLIER_PROBLEMS,
+    FOCUS_KEY,
     FOLDER_ENV,
     FOLDER_KEY,
     GOAL_KEY,
+    GROUP_BUTTON_KEY,
+    GROUPS_BY_CLAUDE,
+    KEY_ENV,
+    LENGTH_KEY,
     NEED_TWO,
     NO_CHART,
     NO_HISTORY,
+    NO_KEY,
     NO_MISTAKES,
     NO_RECURRING,
     NO_RESULTS,
+    NOTHING_TO_PRACTISE,
     PICK_KEY,
+    PRACTICE_NEEDS_TWO,
+    PRACTICE_PAGE,
     PROGRESS_PAGE,
     REPLAY_PAGE,
     TEST_KEY,
+    TEXT_BUTTON_KEY,
+    TEXT_BY_CLAUDE,
     result_label,
     threshold_key,
 )
@@ -351,6 +369,152 @@ class ProgressPageTest(UiTest):
         app.switch_page(PROGRESS_PAGE).run()
         self.assert_clean(app)
         self.assertEqual(app.number_input(key=GOAL_KEY).value, 97.5)
+
+
+GROUPS = {
+    "groups": [
+        {
+            "name": "Left index reach",
+            "cause": "The left index finger reaches for r.",
+            "words": ["they", "salt"],
+            "confusions": ["e→r"],
+        }
+    ]
+}
+TEXT = "they sell salt and they tell the century"
+
+
+class PracticePageTest(UiTest):
+    def practice(
+        self,
+        paths: Iterable[Path],
+        *replies: Any,
+        key: str | None = "test-key",
+    ) -> tuple[AppTest, mock.MagicMock]:
+        """Opens the Practice page with a fake client that gives `replies`."""
+        self.enterContext(mock.patch.dict(os.environ))
+        os.environ.pop(KEY_ENV, None)
+        if key is not None:
+            os.environ[KEY_ENV] = key
+        client = fixtures.fake_claude(*replies)
+        self.enterContext(mock.patch.object(ui, "claude_client", return_value=client))
+        app = self.open_folder(paths)
+        app.switch_page(PRACTICE_PAGE).run()
+        self.assert_clean(app)
+        return app, client
+
+    def press(self, app: AppTest, key: str) -> AppTest:
+        app.button(key=key).click().run()
+        self.assert_clean(app)
+        return app
+
+    def captions(self, app: AppTest) -> list[str]:
+        return [caption.value for caption in app.main.caption]
+
+    def test_without_results(self) -> None:
+        app = _start()
+        app.switch_page(PRACTICE_PAGE).run()
+        self.assert_clean(app)
+        self.assertEqual([info.value for info in app.info], [NO_RESULTS])
+
+    def test_needs_two_counted_results(self) -> None:
+        app, _ = self.practice([fixtures.REAL, fixtures.ABORTED])
+        self.assertEqual([info.value for info in app.info], [PRACTICE_NEEDS_TWO])
+
+    def test_nothing_to_practise(self) -> None:
+        app, _ = self.practice([fixtures.REAL, fixtures.CHART_ERROR])
+        self.assertEqual([info.value for info in app.info], [NOTHING_TO_PRACTISE])
+        self.assertEqual(len(app.button), 0)
+
+    def test_without_the_key(self) -> None:
+        app, client = self.practice([fixtures.PROGRESS], key=None)
+        self.assertEqual([h.value for h in app.subheader], ["Recurring problems"])
+        recurring = app.main.dataframe[0].value
+        self.assertEqual(list(recurring["word"]), ["century", "salt", "self", "they"])
+        self.assertEqual([info.value for info in app.info], [NO_KEY])
+        self.assertEqual(len(app.button), 0)
+        client.beta.messages.create.assert_not_called()
+
+    def test_group_then_write_a_text_for_the_group(self) -> None:
+        app, client = self.practice(
+            [fixtures.PROGRESS],
+            fixtures.claude_message(GROUPS),
+            fixtures.claude_message({"text": f"  {TEXT}\n"}),
+        )
+        self.assertEqual(
+            [h.value for h in app.subheader],
+            ["Recurring problems", "Cause groups", "Practice text"],
+        )
+        self.assertEqual(
+            [e.label for e in app.main.expander], ["What Claude gets"] * 2
+        )
+        self.assertEqual(app.selectbox(key=FOCUS_KEY).options, [ALL_PROBLEMS])
+        client.beta.messages.create.assert_not_called()
+
+        self.press(app, GROUP_BUTTON_KEY)
+        groups = app.main.dataframe[1].value
+        self.assertEqual(list(groups["group"]), ["Left index reach"])
+        self.assertEqual(list(groups["words"]), ["they, salt"])
+        self.assertIn("Not in a group: century, self", self.captions(app))
+        self.assertIn(GROUPS_BY_CLAUDE, self.captions(app))
+        self.assertIn(
+            "Claude used 1,234 input and 56 output tokens.", self.captions(app)
+        )
+        self.assertEqual(
+            app.selectbox(key=FOCUS_KEY).options, [ALL_PROBLEMS, "Left index reach"]
+        )
+
+        app.selectbox(key=FOCUS_KEY).select("Left index reach").run()
+        app.slider(key=LENGTH_KEY).set_value(30).run()
+        self.press(app, TEXT_BUTTON_KEY)
+        sent = client.beta.messages.create.call_args.kwargs["messages"][0]
+        self.assertIn('"name": "Left index reach"', sent["content"])
+        self.assertIn('"length_words": 30', sent["content"])
+        self.assertIn(TEXT, [block.value for block in app.main.code])
+        self.assertIn(TEXT_BY_CLAUDE, self.captions(app))
+        self.assertIn("8 words", [m.value for m in app.main.markdown])
+        coverage = app.main.dataframe[2].value
+        self.assertEqual(list(coverage["word"]), ["salt", "they"])
+        self.assertEqual(list(coverage["times in text"]), [1, 2])
+
+    def test_answers_and_inputs_stay_after_a_page_switch(self) -> None:
+        app, _ = self.practice(
+            [fixtures.PROGRESS],
+            fixtures.claude_message(GROUPS),
+            fixtures.claude_message({"text": TEXT}),
+        )
+        self.press(app, GROUP_BUTTON_KEY)
+        app.selectbox(key=FOCUS_KEY).select("Left index reach").run()
+        self.press(app, TEXT_BUTTON_KEY)
+        app.switch_page(PROGRESS_PAGE).run()
+        app.switch_page(PRACTICE_PAGE).run()
+        self.assert_clean(app)
+        self.assertEqual(app.selectbox(key=FOCUS_KEY).value, "Left index reach")
+        self.assertIn(GROUPS_BY_CLAUDE, self.captions(app))
+        self.assertIn(TEXT, [block.value for block in app.main.code])
+        self.assertNotIn(EARLIER_PROBLEMS, self.captions(app))
+
+    def test_a_new_result_marks_the_answer_as_earlier(self) -> None:
+        app, _ = self.practice([fixtures.PROGRESS], fixtures.claude_message(GROUPS))
+        self.press(app, GROUP_BUTTON_KEY)
+        self.assertNotIn(EARLIER_PROBLEMS, self.captions(app))
+        folder = Path(app.text_input(key=FOLDER_KEY).value)
+        fixtures.copy_to(folder, [fixtures.TYPOS])
+        app.run()
+        self.assert_clean(app)
+        self.assertIn(EARLIER_PROBLEMS, self.captions(app))
+        self.assertIn(GROUPS_BY_CLAUDE, self.captions(app))
+
+    def test_an_error_keeps_the_earlier_answer(self) -> None:
+        app, _ = self.practice(
+            [fixtures.PROGRESS],
+            fixtures.claude_message(GROUPS),
+            fixtures.api_error(anthropic.OverloadedError, 529),
+        )
+        self.press(app, GROUP_BUTTON_KEY)
+        self.press(app, GROUP_BUTTON_KEY)
+        self.assertEqual([error.value for error in app.error], [BUSY])
+        self.assertIn(GROUPS_BY_CLAUDE, self.captions(app))
 
 
 if __name__ == "__main__":
