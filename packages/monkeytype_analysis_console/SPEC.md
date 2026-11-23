@@ -10,13 +10,16 @@ The first PR copies the agreed version of this file into
 `packages/monkeytype_analysis_console/SPEC.md` (Q16). From then on, that copy
 is the one to keep up to date.
 
+§13, the Practice page, was agreed later the same day, also with every ⚑
+item as drafted. The edits it made in §1–§11 are marked "(PR 4)".
+
 ---
 
 ## 1. What it is
 
 A local Streamlit app for one person. It reads Monkeytype results that the
-Surfingkeys `yr` mapping copied as YAML, and shows them on three pages
-(Q1, Q6):
+Surfingkeys `yr` mapping copied as YAML, and shows them on four pages. The
+first three come from the interview (Q1, Q6):
 
 - **Result replay** rebuilds Monkeytype's result screen: the stats, the
   per-second chart, and the input history coloured by the burst heatmap.
@@ -25,9 +28,16 @@ Surfingkeys `yr` mapping copied as YAML, and shows them on three pages
   through the test.
 - **Progress** shows many results over time, per word list and test type,
   and the words that keep being slow or mistyped.
+- **Practice** (PR 4) asks Claude to group the words that keep being slow or
+  mistyped by a shared cause, and to write a practice text from them for
+  Monkeytype's custom mode (§13).
 
 The console only reads. It never writes a file (Q10). Coaching, such as
-choosing what to practise, stays in the `monkeytype-review` skill (Q7).
+choosing what to practise, stays in the `monkeytype-review` skill (Q7). The
+Practice page is the one exception: it turns the console's own numbers into
+cause groups and a practice text. It is also the only part of the console
+that sends data off your machine, and only when you press one of its buttons
+(§13.1).
 
 ---
 
@@ -41,6 +51,7 @@ choosing what to practise, stays in the `monkeytype-review` skill (Q7).
 | Result replay | Headline stats, speed chart, other stats, input history, per-word speed chart, `yr`'s word lists | §6.2 | 1 |
 | Result analysis | Result checks, word speed by band, typo classification with a keyboard chart, position in test | §6.3 | 2 |
 | Progress | wpm and acc over time, latest vs average, recurring problems | §6.4 | 3 |
+| Practice | Cause groups and a practice text, written by Claude | §13 | 4 |
 
 ### 2.2 Later
 
@@ -49,8 +60,10 @@ choosing what to practise, stays in the `monkeytype-review` skill (Q7).
 - "Download Vega-Lite spec" buttons and spec checks (Q3, dropped for now by
   the reviewer).
 - The result's own theme colours (Q11).
-- A practice list (Q7 e).
 - Remembering the folder path between sessions (§4.2).
+- Asking Claude questions about your results, with the console's functions as
+  its tools.
+- Reading results from screenshots of Monkeytype's result screen.
 
 ### 2.3 Non-goals
 
@@ -92,11 +105,13 @@ packages/monkeytype_analysis_console/
 ├── app_pages/
 │   ├── replay.py        one line: ui.render_replay_page()
 │   ├── analysis.py      one line: ui.render_analysis_page()
-│   └── progress.py      one line: ui.render_progress_page()
+│   ├── progress.py      one line: ui.render_progress_page()
+│   └── practice.py      one line: ui.render_practice_page() (PR 4)
 ├── results.py           reading files: model, parsing, folder, duplicates
 ├── metrics.py           per-result definitions (§5)
 ├── typos.py             keyboard model and typo classifier (§7)
 ├── progress.py          many-result definitions: trends, recurring problems
+├── practice.py          Claude requests and answer checks (§13, PR 4)
 ├── charts.py            Altair charts (§6.5)
 ├── history_html.py      the input history as HTML (§6.6)
 ├── palette.py           the fixed colours (§6.7)
@@ -117,13 +132,13 @@ entry point turns on Streamlit's older pages-folder mode
 (`streamlit/runtime/pages_manager.py:60-63`). In that mode a rerun runs only
 the page file, so the sidebar, which the entry point draws, disappears.
 
-`results.py`, `metrics.py`, `typos.py` and `progress.py` don't import
-Streamlit, so they can be tested without it.
+`results.py`, `metrics.py`, `typos.py`, `progress.py` and `practice.py` don't
+import Streamlit, so they can be tested without it.
 
 ### 3.3 Dependencies
 
 `streamlit` 1.67.0, `altair` 6.3.0, `pandas` 3.1.1 and `pyyaml` 6.0.3, all
-pinned already. Nothing new.
+pinned already. PR 1 to PR 3 add nothing new. PR 4 adds `anthropic` (§13.9).
 
 ---
 
@@ -256,7 +271,7 @@ wpm.
 The sidebar holds, from the top:
 
 1. The page links (`st.navigation`): Result replay, Result analysis,
-   Progress. Result replay is the default page.
+   Progress and, from PR 4, Practice. Result replay is the default page.
 1. The uploader and the results folder box (§4.2).
 1. The load summary and the error section (§4.3, §4.5).
 1. On the two Result pages: the result picker, a select box with the newest
@@ -554,7 +569,8 @@ One test file per module, as in `fukuoka_tenki_forcast`:
 | `test_charts` | In `chart.to_dict()`: the layers, encodings and dash of each series; independent left and right y scales; the legend selection; the PB line only when §6.5.1 allows it; `inf` words left out; the threshold line |
 | `test_history_html` | Each mark's style; the slow outline; tooltip text; a word such as `<script>` comes out escaped |
 | `test_palette` | Every colour's contrast against both backgrounds is at least 3:1 |
-| `test_ui` | With `AppTest` and `switch_page` on each page file: the no-results message; loading the fixture folder through the folder box; the picker shared by both Result pages; the threshold slider changing the slow list; the goal changing "met" to "missed" |
+| `test_practice` | §13.8 (PR 4) |
+| `test_ui` | With `AppTest` and `switch_page` on each page file: the no-results message; loading the fixture folder through the folder box; the picker shared by both Result pages; the threshold slider changing the slow list; the goal changing "met" to "missed"; the Practice page cases of §13.8 (PR 4) |
 
 No whole-chart snapshots. The checks in the "Test and lint" section of the
 repo's `README.md` pass: `bazel test //...`, the `.lint` targets, `docs.lint`
@@ -567,7 +583,8 @@ and `buildifier.check`.
 `BUILD.bazel` follows `vega_lite_chat` and `fukuoka_tenki_forcast`:
 
 - `py_library` `monkeytype_analysis_console_lib`: every module but `main.py`,
-  the pages and the tests. Deps: `altair`, `pandas`, `pyyaml`, `streamlit`.
+  the pages and the tests. Deps: `altair`, `pandas`, `pyyaml`, `streamlit`
+  and, from PR 4, `anthropic`.
 - `streamlit_app` `monkeytype_analysis_console`: `app = "main.py"`,
   `data = glob(["app_pages/*.py"])`, `args = ["--server.address=localhost"]`.
 - `py_library` `fixtures`, `testonly`, with `testdata/*.yml` as data.
@@ -582,13 +599,14 @@ The repo's `README.md` gets a row in its project table and a line under
 
 ## 11. Delivery
 
-Three PRs, one page each (one semantic change per PR, `AGENTS.md`):
+Four PRs, one page each (one semantic change per PR, `AGENTS.md`):
 
 | PR | Branch | Contents |
 | --- | --- | --- |
 | 1 | `feat/monkeytype-console-replay` | This spec as `SPEC.md`, `README.md`, `BUILD.bazel`, reading files (§4), the palette, the slow-word definition, the Result replay page and its charts |
 | 2 | `feat/monkeytype-console-analysis` | The rest of §5's per-result definitions, the typo port (§7), the keyboard chart, the Result analysis page |
 | 3 | `feat/monkeytype-console-progress` | Trend groups and recurring problems, the Progress charts and page |
+| 4 | `feat/monkeytype-console-practice` | §13 of this spec, the `anthropic` dependency, `practice.py`, the Practice page |
 
 ---
 
@@ -605,3 +623,296 @@ All agreed as drafted on 2026-11-23.
 | No PB line for units other than wpm | §6.5.1 |
 | A dotted outline marks slow words in the history | §6.6 |
 | The exact palette colours | §6.7 |
+
+---
+
+## 13. Practice page (PR 4)
+
+Status: **agreed 2026-11-23**, including every ⚑ item as drafted. §13.10
+lists them.
+
+The Practice page asks Claude, through the Anthropic API, to do two jobs that
+the console's own code can't do well:
+
+- **Cause groups:** group the recurring problems (§5) by a cause they share,
+  such as one finger's reach, a letter pair or a word ending.
+- **Practice text:** write a short text that uses the recurring problems, to
+  paste into Monkeytype's custom mode.
+
+Practice results come back to the console like any other result, under the
+word list "custom" (§5). Progress then shows whether the practice helped.
+
+**⚑ review:** this is a page of its own, not a section of Progress. That
+keeps the API code off the Progress page, and the page can explain what it
+needs when no API key is set.
+
+### 13.1 Rules for Claude requests
+
+- **Only on a button press.** The console sends nothing to the API on its
+  own: not when the page opens, not on a rerun, and not when a new file shows
+  up in the folder. One button press sends one request.
+- **Computed data, not files.** A request holds only the words, counts, typos
+  and key confusions of §13.4 and §13.5, which the console's own code
+  computes (§5, §7). It never holds file names, paths, dates, stats such as
+  wpm, or the YAML.
+- **You see what is sent.** Under each button, a collapsed section "What
+  Claude gets" shows the exact request content before you press the button.
+- **Answers are checked.** The console checks each answer against its request
+  (§13.4, §13.5) and drops what wasn't asked for.
+- **Nothing is written.** Answers live in the browser tab's session, like
+  uploads (§4.2). The console still never writes a file.
+- **Claude's work is labelled.** A caption says which parts Claude wrote. The
+  counts next to them are the console's.
+
+### 13.2 Credentials and request settings
+
+| Setting | Value |
+| --- | --- |
+| Credentials | `ANTHROPIC_API_KEY` from the environment, the way `packages/langchain_util/api_client.py:35` reads its keys. Keep the key in `.env` (`AGENTS.md`). |
+| Client | The official `anthropic` SDK (§13.9) |
+| Model | `claude-opus-5-5` |
+| Effort | `high` for cause groups, `medium` for practice text (**⚑ review**). Claude Opus 5.5 always thinks: effort sets how much. |
+| Answer format | Structured outputs, with the JSON schemas of §13.4 and §13.5 |
+| Refusals | Anthropic's server-side refusal fallback is on (`fallbacks: "default"`, beta). A refusal that still comes back shows as a message (§13.6). |
+| Timeout | 120 seconds per attempt, with the SDK's 2 retries (**⚑ review**) |
+| Usage | Under each answer, a caption with the input and output tokens it used. No price, because prices change. |
+
+Without `ANTHROPIC_API_KEY`, the page still shows the problems (§13.3, item
+1). In place of the buttons it says: "Set ANTHROPIC_API_KEY to let Claude
+group these problems and write a practice text."
+
+**⚑ review:** the SDK can also use a login made with `ant auth login`, but
+the page checks only the environment variable. Without it, the page shows no
+buttons.
+
+### 13.3 The page
+
+The sidebar holds the page links, the uploader, the folder box and the load
+summary (§6.1). It has no result picker and no goal input.
+
+From the top:
+
+1. **Problems:** the recurring problems table of §6.4 and the key confusions
+   seen at least twice, from the same data: the last 20 counted results of
+   every word list and test.
+1. **Cause groups:** a button "Group by cause", the "What Claude gets"
+   section, and the answer (§13.4).
+1. **Practice text:**
+    - a "Focus" select box: "All problems", then each cause group by name,
+      when there are groups;
+    - a "Length" slider, from 20 to 100 words in steps of 10, starting at 50
+      (**⚑ review**);
+    - a button "Write practice text", the "What Claude gets" section, and the
+      answer (§13.5).
+
+While a request runs, a spinner says "Claude is grouping your problems…" or
+"Claude is writing your practice text…".
+
+| Case | Behaviour |
+| --- | --- |
+| No results | The shared message (§6.1) |
+| Fewer than 2 counted results | "Practice needs at least 2 results." |
+| No recurring words and no repeated confusions | "No word was slow or mistyped in 2 of your last 20 results, so there is nothing to practise yet." No buttons. |
+| An answer, then the problems change (for example, a new result arrives) | The answer stays, with a caption: "Made from an earlier set of problems. Press the button again to update it." (**⚑ review**) |
+| The cause groups are made again, and the focused group is gone | The focus goes back to "All problems". |
+
+Answers stay on the page through reruns and page switches.
+
+### 13.4 Cause groups
+
+**Request content**, for example:
+
+```json
+{
+  "keyboard": "US QWERTY, touch typing",
+  "words": [
+    {
+      "word": "which",
+      "results": 4,
+      "slow": 3,
+      "mistyped": 2,
+      "typos": [
+        {"category": "wrong key: neighbour", "detail": "\"h\"→\"j\"", "count": 2}
+      ]
+    }
+  ],
+  "confusions": [
+    {"pair": "e→r", "count": 3, "category": "wrong key: neighbour"}
+  ]
+}
+```
+
+- `words`: the recurring problems (§5), up to 20. Each word carries the
+  typos of its first attempts in the same 20 results (§7), with a count for
+  each category and detail.
+- `confusions`: the key confusions seen at least twice (§5), each with the
+  category it comes from (§7).
+
+**Instructions**, in English, kept in `practice.py`:
+
+- Group the words and confusions by a cause they share, such as a finger or
+  hand, a reach between rows, a letter pair, a word ending, or a habit of
+  typing a similar word.
+- Use only the words and confusions given, spelled exactly as given.
+- Put each item in at most one group. Leave out an item that fits no group.
+- Make 1 to 6 groups, each with at least 2 items (**⚑ review**).
+- Name each group in 2 to 5 words. Give its cause in one sentence.
+
+**Answer schema:**
+
+```json
+{
+  "groups": [
+    {
+      "name": "string",
+      "cause": "string",
+      "words": ["string"],
+      "confusions": ["string"]
+    }
+  ]
+}
+```
+
+**Checks:**
+
+- A word or confusion that isn't in the request is dropped, and so is an
+  item that already appeared in an earlier group.
+- A group left with fewer than 2 items is dropped.
+- The first 6 groups are kept, in Claude's order.
+
+**Display:** a table with one row per group: name, cause, words and
+confusions. Under it, "Not in a group:" lists the items in no group. A
+caption says: "Groups and causes by Claude. The counts above are the
+console's." When no group passes the checks, the page says "Claude found no
+shared causes."
+
+### 13.5 Practice text
+
+**Request content**, for example:
+
+```json
+{
+  "length_words": 50,
+  "words": [{"word": "which", "results": 4}],
+  "confusions": [{"pair": "e→r", "count": 3}],
+  "focus": {"name": "Right index reach", "cause": "..."}
+}
+```
+
+- With the focus "All problems", the request holds every recurring word and
+  repeated confusion, and no `focus`.
+- With a cause group, it holds only that group's words and confusions, and
+  the group's name and cause.
+
+**Instructions:**
+
+- Write about `length_words` words of English for a typing test.
+- Use every given word at least once. Use the words with more `results` more
+  often.
+- Include words that practise each confusion. The letters before the arrow
+  are what the typist meant to press; the letters after it are what they
+  pressed.
+- Use lower case letters and spaces only, unless a given word has capitals
+  or symbols. Use ASCII characters only.
+- Sentences may be odd, but they should read as English (**⚑ review**: not
+  a plain list of words).
+
+**Answer schema:** `{"text": "string"}`.
+
+**Checks:**
+
+- Each run of whitespace becomes one space, and spaces at the ends are
+  removed.
+- A character outside printable ASCII gives a warning that lists it: "The
+  text has characters you can't type on a US keyboard: “ ” —". The text
+  is still shown.
+- The page counts the words in the text: "48 words".
+- **Coverage:** a table of the requested words, with how many times each one
+  appears in the text as a whole word. "Not used:" lists the requested words
+  that don't appear.
+
+**Display:** the text in `st.code`, which has a copy button, with the caption
+"Paste it into Monkeytype's custom mode." Then the word count, the coverage
+table and the token caption.
+
+### 13.6 Errors
+
+An error replaces only the answer of that button. An earlier answer, if
+there is one, stays under the error. The rest of the page keeps working.
+
+| Case | Message |
+| --- | --- |
+| The API rejects the key | "Claude didn't accept the API key. Check ANTHROPIC_API_KEY." |
+| Rate limit | "Too many requests. Try again in N seconds.", with N from `retry-after` |
+| Overloaded, or a server error | "Claude is busy. Try again in a minute." |
+| No connection, or a timeout | "Couldn't reach Claude. Check your connection." |
+| `stop_reason` is `refusal` | "Claude declined this request." |
+| The answer is cut off (`max_tokens`) or doesn't match the schema | "Claude's answer was incomplete. Try again." |
+
+### 13.7 Edge cases
+
+| Case | Behaviour |
+| --- | --- |
+| Results of practice texts (custom mode) | Counted like any other result: a word that is slow or mistyped in a practice text adds to its recurring count. Every practice text falls in one "custom" trend group in Progress (**⚑ review**). |
+| Words but no repeated confusions, or the other way round | The empty list is sent empty; both buttons still work. |
+| Claude names a word or confusion that wasn't sent | Dropped (§13.4) |
+| A unit other than wpm | No speeds are sent. Slow words already use each result's own threshold in its own unit (§5). |
+
+### 13.8 Code and tests
+
+- `practice.py` builds the request content from the results with
+  `progress.py` and `typos.py`. It holds the instructions and the schemas,
+  sends a request through a client that it is given, and checks the answers.
+  It doesn't import Streamlit.
+- `ui.py` draws the page. It gets the client from one function, which the
+  tests replace.
+- `test_practice` uses a fake client that records each request and returns
+  a set answer, with no network. It checks:
+  - the request content: words, counts, typos and confusions, and no file
+    names, dates or stats;
+  - the model and the effort of each request;
+  - unknown and repeated items dropped, small groups dropped, at most 6
+    groups kept;
+  - a focus on a group sends only that group's items;
+  - the whitespace rule, the non-ASCII warning, the word count and the
+    coverage counts;
+  - each case of §13.6 giving its message.
+- `test_ui` checks, with the fake client:
+  - without the key: the problems and the setup message, and no buttons;
+  - with the key: "Group by cause" shows the table and fills the focus box,
+    and "Write practice text" shows the text;
+  - the answers stay after a switch to Progress and back;
+  - a new result in the folder adds the "earlier set of problems" caption.
+- `bazel test` never calls the API.
+
+### 13.9 The `anthropic` dependency
+
+PR 4 pins `anthropic` in `pyproject.toml` and `uv.lock`, and adds it to the
+library's deps (§10). **⚑ review:** `AGENTS.md` asks for your agreement
+before a new third-party dependency.
+
+The repo's LLM code today goes through `packages/langchain_util`, which
+wraps OpenAI and Ollama (`packages/langchain_util/api_client.py:7-8`).
+
+| Option | For | Against |
+| --- | --- | --- |
+| The `anthropic` SDK, used directly (recommended) | Effort, structured outputs, the refusal fallback, typed errors and token usage, with no layer in between | A second style of LLM client in the repo |
+| `langchain-anthropic` through `langchain_util` | One style of LLM client in the repo | Two new packages, and LangChain's layer between the console and the settings of §13.2 |
+
+### 13.10 Items to review
+
+All agreed as drafted on 2026-11-23, including the `anthropic` SDK used
+directly.
+
+| Item | Section |
+| --- | --- |
+| A page of its own, not a section of Progress | §13 |
+| The effort of each request | §13.2 |
+| A 120-second timeout | §13.2 |
+| The buttons need `ANTHROPIC_API_KEY`; `ant auth login` alone doesn't show them | §13.2 |
+| The length slider: 20 to 100 words, starting at 50 | §13.3 |
+| An answer stays, with a caption, after the problems change | §13.3 |
+| 1 to 6 groups, each with at least 2 items | §13.4 |
+| Sentences in English, not a list of words | §13.5 |
+| Results of practice texts count as recurring problems | §13.7 |
+| The `anthropic` dependency | §13.9 |
