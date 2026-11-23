@@ -143,8 +143,7 @@ class FormatNumberTest(unittest.TestCase):
 
 class MistypedTest(unittest.TestCase):
     def test_matches_yr_missed_word_list(self) -> None:
-        # multi.yml's first result has a trimmed word list, so it is left out.
-        for path in [p for p in fixtures.GOOD_FILES if p != fixtures.MULTI]:
+        for path in fixtures.GOOD_FILES:
             result = fixtures.result(path)
             with self.subTest(path.name):
                 mistyped = [word.word for word in result.words if is_mistyped(word)]
