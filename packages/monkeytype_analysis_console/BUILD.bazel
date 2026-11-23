@@ -1,0 +1,95 @@
+load("@monorepo_pip//:requirements.bzl", "requirement")
+load("@rules_python//python:py_test.bzl", "py_test")
+load("//rules/markdown:defs.bzl", "markdown_docs")
+load("//rules/python/lint:defs.bzl", "py_library")
+load("//rules/python/streamlit:defs.bzl", "streamlit_app")
+
+# Everything but main.py, the page files and the tests.
+py_library(
+    name = "monkeytype_analysis_console_lib",
+    srcs = [
+        "charts.py",
+        "history_html.py",
+        "metrics.py",
+        "palette.py",
+        "progress.py",
+        "results.py",
+        "typos.py",
+        "ui.py",
+    ],
+    deps = [
+        requirement("altair"),
+        requirement("pandas"),
+        requirement("pyyaml"),
+        requirement("streamlit"),
+    ],
+)
+
+# streamlit_app hands main.py and the page files over as data, which the lint
+# macro never sees, so they only call ui.py.
+streamlit_app(
+    name = "monkeytype_analysis_console",
+    app = "main.py",
+    # Streamlit otherwise listens on every interface, and the page shows your
+    # typing results.
+    args = ["--server.address=localhost"],
+    data = glob(["app_pages/*.py"]),
+    deps = [":monkeytype_analysis_console_lib"],
+)
+
+py_library(
+    name = "fixtures",
+    testonly = True,
+    srcs = ["fixtures.py"],
+    data = glob(["testdata/*.yml"]),
+    deps = [":monkeytype_analysis_console_lib"],
+)
+
+_TESTS = [
+    "test_charts",
+    "test_history_html",
+    "test_metrics",
+    "test_palette",
+    "test_progress",
+    "test_results",
+    "test_typos",
+]
+
+[
+    py_test(
+        name = name,
+        srcs = [name + ".py"],
+        legacy_create_init = False,
+        main = name + ".py",
+        deps = [
+            ":fixtures",
+            ":monkeytype_analysis_console_lib",
+            requirement("altair"),
+        ],
+    )
+    for name in _TESTS
+]
+
+# Drives the app headlessly through streamlit.testing's AppTest, which runs
+# main.py and the page files from next to the test in the runfiles.
+py_test(
+    name = "test_ui",
+    srcs = ["test_ui.py"],
+    data = ["main.py"] + glob(["app_pages/*.py"]),
+    legacy_create_init = False,
+    main = "test_ui.py",
+    deps = [
+        ":fixtures",
+        ":monkeytype_analysis_console_lib",
+    ],
+)
+
+test_suite(
+    name = "test_all",
+    tests = _TESTS + ["test_ui"],
+)
+
+markdown_docs(
+    name = "docs",
+    srcs = glob(["*.md"]),
+)

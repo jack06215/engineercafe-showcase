@@ -1,0 +1,62 @@
+---
+datetime: 2026-11-22T21:05:42+09:00
+result:
+  wpm_threshold: 40
+  word_list: |
+    on sneeing Vec<T> hello test about null they Python the
+  missed_word_list: |
+    sneeing test about null they
+  slow_word: |
+    sneeing Vec<T> about
+detail:
+  test: words 10
+  language: english 1k
+  options: [punctuation]
+  unit: wpm
+  wpm: 38.4
+  raw: 44.1
+  acc: 88.52
+  keys:
+    correct: 54
+    incorrect: 7
+  chars:
+    correct: 50
+    incorrect: 2
+    extra: 1
+    missed: 2
+  consistency: 61.2
+  key_consistency: 25.4
+  time: 12.5
+  afk: 0
+  afk_pct: 0
+  session_time: 840
+  pb: false
+  heatmap:
+    steps: [0, 31, 45, 60, 90]
+    labels: ["<31", "31-44", "45-59", "60-89", "90+"]
+    colors: ["#f38ba8", "#e0b1ce", "#cdd6f4", "#ccbef6", "#cba6f7"]
+  chart:
+    - {t: 1, wpm: 36, raw: 36, burst: 36, errors: 0}
+    - {t: 2, wpm: 30, raw: 36, burst: 24, errors: 1}
+    - {t: 3, wpm: 32, raw: 38, burst: 36, errors: 0}
+    - {t: 4, wpm: 35, raw: 40, burst: 44, errors: 0}
+    - {t: 5, wpm: 33, raw: 42, burst: 30, errors: 2}
+    - {t: 6, wpm: 36, raw: 43, burst: 48, errors: 0}
+    - {t: 7, wpm: 37, raw: 43, burst: 44, errors: 0}
+    - {t: 8, wpm: 35, raw: 44, burst: 32, errors: 1}
+    - {t: 9, wpm: 36, raw: 44, burst: 44, errors: 0}
+    - {t: 10, wpm: 37, raw: 44, burst: 46, errors: 0}
+    - {t: 11, wpm: 38, raw: 44, burst: 48, errors: 0}
+    - {t: 12, wpm: 38, raw: 44, burst: 44, errors: 0}
+    - {t: 12.5, wpm: 38, raw: 44, burst: 50, errors: 0}
+  words:
+    - {i: 0, word: "on", wpm: 80, bucket: 3}
+    - {i: 1, word: sneeing, wpm: 17, bucket: 0, typed: seeeing, fixed: 1, marks: ".f....."}
+    - {i: 2, word: "Vec<T>", wpm: 33, bucket: 1}
+    - {i: 3, word: hello, wpm: .inf}
+    - {i: 4, word: test, wpm: 40, bucket: 1, typed: tests, error: true, marks: "....+", letters: tests}
+    - {i: 5, word: about, wpm: 30, bucket: 0, typed: abo_, error: true, marks: "...--"}
+    - {i: 6, word: "null", wpm: 58, bucket: 2, typed: nulll, extra_fixed: true}
+    - {i: 7, word: they, wpm: 45, bucket: 2, typed: thry, error: true, marks: "..x."}
+    - {i: 8, word: Python, wpm: 50, bucket: 2}
+    - {i: 9, word: the, wpm: 120, bucket: 4}
