@@ -1,0 +1,22 @@
+---
+datetime: 2026-11-17T09:00:00+09:00
+result:
+  wpm_threshold: 30
+  word_list: ""
+  missed_word_list: ""
+  slow_word: ""
+detail:
+  test: time 15
+  language: english
+  unit: wpm
+  wpm: 55
+  raw: 56
+  acc: 97
+---
+datetime: 2026-11-17T09:05:00+09:00
+detail:
+  test: time 15
+  wpm: 57
+  chart:
+    - {t: 1, wpm: 24, raw: 24
+    - {t: 2, wpm: 30, raw: 30}

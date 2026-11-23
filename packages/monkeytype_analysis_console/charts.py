@@ -1,0 +1,212 @@
+"""Altair charts of one result (SPEC.md §6.5).
+
+The speed chart copies Monkeytype's: wpm, raw and burst share the left axis,
+and errors have their own on the right. Clicking a legend entry adds that
+series to the ones shown, and clicking it again removes it; with none picked,
+every series shows.
+"""
+
+import dataclasses
+from collections.abc import Sequence
+from typing import Any
+
+import altair
+import pandas
+
+from packages.monkeytype_analysis_console import palette
+from packages.monkeytype_analysis_console.metrics import (
+    band_labels,
+    finite_speed,
+    format_number,
+    previous_pb,
+)
+from packages.monkeytype_analysis_console.results import (
+    Result,
+    Word,
+)
+
+SERIES = ("wpm", "raw", "burst", "errors")
+SERIES_COLOURS = (palette.MAIN, palette.MAIN, palette.SUB, palette.ERROR)
+LEGEND_PARAM = "shown_series"
+HOVER_PARAM = "hovered_second"
+SPEED_HEIGHT = 320
+WORD_HEIGHT = 220
+
+_TOOLTIP = [
+    altair.Tooltip("t:Q", title="second"),
+    *(altair.Tooltip(f"{name}:Q") for name in SERIES),
+]
+
+
+def speed_chart(result: Result) -> altair.LayerChart | None:
+    """The per-second chart, or None when the result has no chart rows."""
+    if not result.chart:
+        return None
+    wide = pandas.DataFrame([dataclasses.asdict(row) for row in result.chart])
+    long = wide.melt(
+        id_vars="t", value_vars=list(SERIES), var_name="series", value_name="value"
+    ).dropna(subset=["value"])
+    # Each legend click adds or removes a series. Vega-Lite's default (a click
+    # replaces the selection, a double-click clears it) gave no way back to all
+    # series in Streamlit's chart.
+    shown = altair.selection_point(
+        name=LEGEND_PARAM, fields=["series"], bind="legend", toggle="true"
+    )
+    hovered = altair.selection_point(
+        name=HOVER_PARAM,
+        fields=["t"],
+        nearest=True,
+        on="pointerover",
+        clear="pointerout",
+        empty=False,
+    )
+    x = altair.X("t:Q", title="seconds")
+    colour = altair.Color(
+        "series:N",
+        scale=altair.Scale(domain=list(SERIES), range=list(SERIES_COLOURS)),
+        legend=altair.Legend(title=None, orient="top"),
+    )
+    speed_y = altair.Y("value:Q", title=result.unit)
+    series = altair.Chart(long).encode(x=x, color=colour)
+
+    def one(name: str) -> altair.Chart:
+        return series.transform_filter(altair.datum.series == name)
+
+    # The legend belongs to the first view with a colour, so the legend-bound
+    # param must be defined there: on any other view, clicks do nothing.
+    speed_layers: list[altair.Chart | altair.LayerChart] = [
+        one("burst")
+        .mark_area(line=True, fillOpacity=0.15)
+        .encode(y=speed_y, opacity=_shown_when(shown, 1))
+        .add_params(shown),
+        one("raw")
+        .mark_line(strokeDash=[6, 4], strokeWidth=2)
+        .encode(y=speed_y, opacity=_shown_when(shown, 0.6)),
+        one("wpm")
+        .mark_line(strokeWidth=3)
+        .encode(y=speed_y, opacity=_shown_when(shown, 1)),
+    ]
+    pb = previous_pb(result)
+    if pb is not None:
+        speed_layers.append(_pb_line(pb, result.unit))
+    # Invisible points in a row find the nearest second by x alone, and the
+    # rule shows which second it is. Neither has a y field, so they add no
+    # axis. They sit in the outer layer: Altair gives a param defined inside
+    # the nested speed layer every named view of that layer.
+    hover_points = (
+        altair.Chart(wide)
+        .mark_point()
+        .encode(x=x, y=altair.value(0), opacity=altair.value(0), tooltip=_TOOLTIP)
+        .add_params(hovered)
+    )
+    hover_rule = (
+        altair.Chart(wide)
+        .mark_rule(color=palette.SUB)
+        .encode(
+            x=x,
+            opacity=altair.when(hovered)
+            .then(altair.value(0.5))
+            .otherwise(altair.value(0)),
+            tooltip=_TOOLTIP,
+        )
+    )
+    errors = (
+        one("errors")
+        .transform_filter(altair.datum.value > 0)
+        .mark_point(filled=True, size=60)
+        .encode(
+            y=altair.Y(
+                "value:Q",
+                title="errors",
+                axis=altair.Axis(orient="right", tickMinStep=1),
+                scale=altair.Scale(domainMin=0),
+            ),
+            opacity=_shown_when(shown, 1),
+        )
+    )
+    return altair.LayerChart(
+        layer=[altair.LayerChart(layer=speed_layers), errors, hover_points, hover_rule],
+        height=SPEED_HEIGHT,
+    ).resolve_scale(y="independent")
+
+
+def word_speed_chart(
+    words: Sequence[Word], steps: Sequence[float], threshold: float, unit: str
+) -> altair.LayerChart | None:
+    """One bar per word with a finite speed, and a line at the threshold.
+
+    Returns None when no word has a finite speed.
+    """
+    labels = band_labels(steps)
+    rows = []
+    for word in words:
+        speed = finite_speed(word)
+        if speed is None:
+            continue
+        band = word.bucket
+        colour, label = palette.SUB, ""
+        if band is not None and 0 <= band < len(palette.BANDS):
+            colour = palette.BANDS[band]
+            label = labels[band] if band < len(labels) else ""
+        rows.append(
+            {
+                "i": word.i,
+                "word": word.word,
+                "speed": speed,
+                "band": label,
+                "colour": colour,
+                "typed": word.typed or "",
+                "fixed": word.fixed,
+            }
+        )
+    if not rows:
+        return None
+    y_title = unit
+    bars = (
+        altair.Chart(pandas.DataFrame(rows))
+        .mark_bar()
+        .encode(
+            x=altair.X(
+                "i:O",
+                title="word",
+                axis=altair.Axis(labelAngle=0, labelOverlap="greedy"),
+            ),
+            y=altair.Y("speed:Q", title=y_title),
+            color=altair.Color("colour:N", scale=None),
+            tooltip=[
+                altair.Tooltip("word:N"),
+                altair.Tooltip("speed:Q", title=unit),
+                altair.Tooltip("band:N"),
+                altair.Tooltip("typed:N", title="first attempt"),
+                altair.Tooltip("fixed:Q", title="letters fixed"),
+            ],
+        )
+    )
+    threshold_line = (
+        altair.Chart(pandas.DataFrame({"threshold": [threshold]}))
+        .mark_rule(strokeDash=[4, 4], color=palette.SUB)
+        .encode(
+            y=altair.Y("threshold:Q", title=y_title),
+            tooltip=[altair.Tooltip("threshold:Q", title="slow below")],
+        )
+    )
+    return altair.LayerChart(layer=[bars, threshold_line], height=WORD_HEIGHT)
+
+
+def _shown_when(shown: altair.Parameter, opacity: float) -> Any:
+    return altair.when(shown).then(altair.value(opacity)).otherwise(altair.value(0))
+
+
+def _pb_line(pb: float, unit: str) -> altair.LayerChart:
+    data = pandas.DataFrame({"pb": [pb], "label": [f"previous PB {format_number(pb)}"]})
+    rule = altair.Chart(data).mark_rule(strokeDash=[2, 4], color=palette.SUB)
+    label = altair.Chart(data).mark_text(
+        align="left", baseline="bottom", dx=4, dy=-2, color=palette.SUB
+    )
+    y = altair.Y("pb:Q", title=unit)
+    return altair.LayerChart(
+        layer=[
+            rule.encode(y=y),
+            label.encode(y=y, x=altair.value(0), text="label:N"),
+        ]
+    )

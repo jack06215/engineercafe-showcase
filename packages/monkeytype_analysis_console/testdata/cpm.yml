@@ -1,0 +1,45 @@
+---
+datetime: 2026-11-18T07:55:31+09:00
+result:
+  wpm_threshold: 190
+  word_list: |
+    river stone cloud
+  missed_word_list: ""
+  slow_word: |
+    stone
+detail:
+  test: words 10
+  language: english
+  unit: cpm
+  wpm: 40.2
+  raw: 41
+  acc: 99.1
+  keys:
+    correct: 60
+    incorrect: 1
+  chars:
+    correct: 60
+    incorrect: 0
+    extra: 0
+    missed: 0
+  consistency: 70.8
+  key_consistency: 30
+  time: 17.9
+  afk: 0
+  afk_pct: 0
+  session_time: 18
+  pb: true
+  crown:
+    type: normal
+    text: "+14.5"
+  heatmap:
+    steps: [0, 180, 195, 210, 230]
+    labels: ["<180", "180-194", "195-209", "210-229", "230+"]
+    colors: ["#e2b714", "#d3c06a", "#d1d0c5", "#d9c97a", "#e2b714"]
+  chart:
+    - {t: 1, wpm: 190, raw: 190, burst: 190, errors: 0}
+    - {t: 2, wpm: 200, raw: 205, burst: 210, errors: 1}
+  words:
+    - {i: 0, word: river, wpm: 210, bucket: 3}
+    - {i: 1, word: stone, wpm: 175, bucket: 0}
+    - {i: 2, word: cloud, wpm: 240, bucket: 4}

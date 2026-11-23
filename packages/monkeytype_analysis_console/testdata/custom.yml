@@ -1,0 +1,41 @@
+---
+datetime: 2026-11-20T19:42:10+09:00
+result:
+  wpm_threshold: 25
+  word_list: |
+    fn main println
+  missed_word_list: ""
+  slow_word: |
+    println
+detail:
+  test: custom
+  unit: wpm
+  wpm: 27.3
+  raw: 27.3
+  acc: 100
+  keys:
+    correct: 19
+    incorrect: 0
+  chars:
+    correct: 19
+    incorrect: 0
+    extra: 0
+    missed: 0
+  consistency: 55
+  key_consistency: 20.2
+  time: 8.3
+  afk: 0
+  afk_pct: 0
+  session_time: 9
+  pb: false
+  heatmap:
+    steps: [0, 22, 26, 31, 35]
+    labels: ["<22", "22-25", "26-30", "31-34", "35+"]
+    colors: ["#f38ba8", "#e0b1ce", "#cdd6f4", "#ccbef6", "#cba6f7"]
+  chart:
+    - {t: 1, wpm: 24, raw: 24, burst: 24, errors: 0}
+    - {t: 2, wpm: 26, raw: 26, burst: 28, errors: 0}
+  words:
+    - {i: 0, word: fn, wpm: 36, bucket: 4}
+    - {i: 1, word: main, wpm: 30, bucket: 2}
+    - {i: 2, word: println, wpm: 21, bucket: 0}

@@ -1,0 +1,48 @@
+---
+datetime: 2026-11-21T08:30:00+09:00
+result:
+  wpm_threshold: 60
+  word_list: |
+    century sure term ground root salt house direct measure share
+  missed_word_list: ""
+  slow_word: |
+    century salt
+detail:
+  test: words 10
+  language: english 1k
+  unit: wpm
+  wpm: 50.12
+  raw: 50.12
+  acc: 100
+  keys:
+    correct: 62
+    incorrect: 0
+  chars:
+    correct: 62
+    incorrect: 0
+    extra: 0
+    missed: 0
+  consistency: 68.4
+  key_consistency: 27.1
+  time: 14.6
+  afk: 0
+  afk_pct: 0
+  session_time: 15
+  pb: false
+  heatmap:
+    steps: [0, 37, 70, 92, 127]
+  chart:
+    - {t: 1, wpm: 34, raw: 34, burst: 34, errors: 0}
+    - {t: 2, wpm: 40, raw: 40, burst: 46, errors: 0}
+    - {t: 3, wpm: 44, raw: 44, burst: 52, errors: 0}
+  words:
+    - {i: 0, word: century, wpm: 36, bucket: 0}
+    - {i: 1, word: sure, wpm: 127, bucket: 4}
+    - {i: 2, word: term, wpm: 74, bucket: 2}
+    - {i: 3, word: ground, wpm: 83, bucket: 2}
+    - {i: 4, word: root, wpm: 93, bucket: 3}
+    - {i: 5, word: salt, wpm: 41, bucket: 1}
+    - {i: 6, word: house, wpm: 92, bucket: 3}
+    - {i: 7, word: direct, wpm: 70, bucket: 2}
+    - {i: 8, word: measure, wpm: 70, bucket: 2}
+    - {i: 9, word: share, wpm: 132, bucket: 4}

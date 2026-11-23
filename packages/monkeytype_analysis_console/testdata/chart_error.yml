@@ -1,0 +1,35 @@
+---
+datetime: 2026-11-19T22:10:05+09:00
+result:
+  wpm_threshold: 40
+  word_list: |
+    left right
+  missed_word_list: ""
+  slow_word: ""
+detail:
+  test: words 10
+  language: english
+  unit: wpm
+  wpm: 61.07
+  raw: 62.2
+  acc: 98.1
+  keys:
+    correct: 51
+    incorrect: 1
+  chars:
+    correct: 51
+    incorrect: 0
+    extra: 0
+    missed: 0
+  consistency: 72.3
+  key_consistency: 31.6
+  time: 10.1
+  afk: 0
+  afk_pct: 0
+  pb: false
+  heatmap:
+    steps: [0, 48, 55, 66, 74]
+  chart_error: "Monkeytype's chart was not found on the page"
+  words:
+    - {i: 0, word: left, wpm: 64, bucket: 2}
+    - {i: 1, word: right, wpm: 58, bucket: 2}
