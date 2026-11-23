@@ -82,8 +82,8 @@ def claude_message(
 ) -> BetaMessage:
     """A Messages API response whose text is `answer` as JSON.
 
-    A string `answer` is sent as it is. With `declined_first`, a model writes
-    some text and declines, and a fallback model writes the answer.
+    A string `answer` is sent as it is. With `declined_first`, Claude Opus 5.5
+    writes some text and declines, and Claude Opus 4.8 writes the answer.
     """
     text = answer if isinstance(answer, str) else json.dumps(answer)
     content: list[Any] = [BetaTextBlock(type="text", text=text)]
@@ -104,7 +104,7 @@ def claude_message(
             "id": "msg_test",
             "type": "message",
             "role": "assistant",
-            "model": "claude-opus-5-5",
+            "model": "claude-opus-4-8" if declined_first else "claude-opus-5-5",
             "content": [block.model_dump(by_alias=True) for block in content],
             "stop_reason": stop_reason,
             "stop_sequence": None,

@@ -23,6 +23,7 @@ from packages.monkeytype_analysis_console.practice import (
     Group,
     Problems,
     ProblemWord,
+    Settings,
     TypoCount,
     Usage,
     check_text,
@@ -38,7 +39,7 @@ from packages.monkeytype_analysis_console.results import (
 )
 
 NEIGHBOUR = "wrong key: neighbour"
-USAGE = Usage(1234, 56)
+USAGE = Usage("claude-opus-5-5", 1234, 56)
 
 
 def _problems(*paths: Any) -> Problems:
@@ -135,9 +136,7 @@ class RequestContentTest(unittest.TestCase):
     def test_focus_sends_only_the_group(self) -> None:
         focus = Group("Left index reach", "It reaches.", ("they", "salt"), ("e→r",))
         content = text_content(_problems(fixtures.PROGRESS), 50, focus)
-        self.assertEqual(
-            [word["word"] for word in content["words"]], ["salt", "they"]
-        )
+        self.assertEqual([word["word"] for word in content["words"]], ["salt", "they"])
         self.assertEqual(content["confusions"], [{"pair": "e→r", "count": 2}])
         self.assertEqual(
             content["focus"], {"name": "Left index reach", "cause": "It reaches."}
@@ -168,6 +167,37 @@ class RequestSettingsTest(unittest.TestCase):
         self.assertEqual(sent["output_config"]["effort"], TEXT_EFFORT)
         self.assertEqual(TEXT_EFFORT, "medium")
         self.assertEqual(_content(client), text_content(found, 30))
+
+    def test_defaults_are_the_agreed_settings(self) -> None:
+        self.assertEqual(
+            Settings(),
+            Settings("claude-opus-5-5", "high", "medium", 120.0),
+        )
+
+    def test_changed_settings(self) -> None:
+        settings = Settings("claude-sonnet-5-5", "xhigh", "low", 300.0)
+        client = fixtures.fake_claude(
+            fixtures.claude_message({"groups": []}),
+            fixtures.claude_message({"text": "salt"}),
+        )
+        found = _problems(fixtures.PROGRESS)
+        group_by_cause(client, found, settings)
+        write_practice_text(client, found, 30, settings=settings)
+        for call, effort in ((0, "xhigh"), (1, "low")):
+            sent = _sent(client, call)
+            self.assertEqual(sent["model"], "claude-sonnet-5-5")
+            self.assertEqual(sent["output_config"]["effort"], effort)
+            self.assertEqual(sent["timeout"], 300.0)
+            self.assertEqual(sent["fallbacks"], "default")
+
+    def test_haiku_has_no_fallback(self) -> None:
+        settings = Settings(model="claude-haiku-5-5")
+        self.assertFalse(settings.fallback)
+        client = fixtures.fake_claude(fixtures.claude_message({"groups": []}))
+        group_by_cause(client, _problems(fixtures.PROGRESS), settings)
+        sent = _sent(client)
+        self.assertIs(sent["fallbacks"], anthropic.omit)
+        self.assertIs(sent["betas"], anthropic.omit)
 
 
 class GroupCheckTest(unittest.TestCase):
@@ -248,6 +278,7 @@ class TextCheckTest(unittest.TestCase):
         )
         text = write_practice_text(client, _problems(fixtures.PROGRESS), 20)
         self.assertEqual(text.text, "they sell salt")
+        self.assertEqual(text.usage.model, "claude-opus-4-8")
 
 
 class ErrorTest(unittest.TestCase):

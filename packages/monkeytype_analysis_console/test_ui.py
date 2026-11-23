@@ -14,6 +14,8 @@ from streamlit.testing.v1 import AppTest
 from packages.monkeytype_analysis_console import fixtures, ui
 from packages.monkeytype_analysis_console.practice import (
     BUSY,
+    GROUP_INSTRUCTIONS,
+    TEXT_INSTRUCTIONS,
 )
 from packages.monkeytype_analysis_console.results import (
     Result,
@@ -28,9 +30,11 @@ from packages.monkeytype_analysis_console.ui import (
     FOLDER_KEY,
     GOAL_KEY,
     GROUP_BUTTON_KEY,
+    GROUP_EFFORT_KEY,
     GROUPS_BY_CLAUDE,
     KEY_ENV,
     LENGTH_KEY,
+    MODEL_KEY,
     NEED_TWO,
     NO_CHART,
     NO_HISTORY,
@@ -38,15 +42,21 @@ from packages.monkeytype_analysis_console.ui import (
     NO_MISTAKES,
     NO_RECURRING,
     NO_RESULTS,
+    NO_WORD_LISTS,
     NOTHING_TO_PRACTISE,
     PICK_KEY,
+    PRACTICE_INTRO,
     PRACTICE_NEEDS_TWO,
     PRACTICE_PAGE,
     PROGRESS_PAGE,
     REPLAY_PAGE,
+    RESET_BUTTON_KEY,
     TEST_KEY,
     TEXT_BUTTON_KEY,
     TEXT_BY_CLAUDE,
+    TEXT_EFFORT_KEY,
+    TIMEOUT_KEY,
+    WORD_LISTS_KEY,
     result_label,
     threshold_key,
 )
@@ -426,14 +436,117 @@ class PracticePageTest(UiTest):
         self.assertEqual([info.value for info in app.info], [NOTHING_TO_PRACTISE])
         self.assertEqual(len(app.button), 0)
 
+    def problem_words(self, app: AppTest) -> list[str]:
+        # The first table is the one under "Which results".
+        return list(app.main.dataframe[1].value["word"])
+
     def test_without_the_key(self) -> None:
         app, client = self.practice([fixtures.PROGRESS], key=None)
-        self.assertEqual([h.value for h in app.subheader], ["Recurring problems"])
-        recurring = app.main.dataframe[0].value
-        self.assertEqual(list(recurring["word"]), ["century", "salt", "self", "they"])
+        self.assertIn(PRACTICE_INTRO, [m.value for m in app.main.markdown])
+        self.assertEqual([h.value for h in app.subheader], ["Problems"])
+        self.assertEqual(self.problem_words(app), ["century", "salt", "self", "they"])
+        problems = app.main.dataframe[1].value
+        self.assertEqual(list(problems["typos"])[-1], '"e"→"r" ×2')
+        self.assertIn(
+            "Key confusions seen at least twice: e→r ×2 (wrong key: neighbour)",
+            self.captions(app),
+        )
         self.assertEqual([info.value for info in app.info], [NO_KEY])
         self.assertEqual(len(app.button), 0)
         client.beta.messages.create.assert_not_called()
+
+    def test_what_the_problems_are_based_on(self) -> None:
+        app, _ = self.practice([fixtures.PROGRESS])
+        self.assertIn(
+            "Based on the newest 8 results of 8 in these word lists, from "
+            "2026-11-10 to 2026-11-13, of every test type. Aborted results "
+            "don't count.",
+            self.captions(app),
+        )
+        self.assertEqual(app.main.expander[0].label, "Which results")
+        results = app.main.dataframe[0].value
+        self.assertEqual(len(results), 8)
+        self.assertEqual(list(results["copied"])[0], "2026-11-13 20:30")
+
+    def test_word_list_filter(self) -> None:
+        app, _ = self.practice([fixtures.PROGRESS])
+        word_lists = app.multiselect(key=WORD_LISTS_KEY)
+        self.assertEqual(word_lists.value, ["code python", "english 1k"])
+        word_lists.set_value(["english 1k"]).run()
+        self.assert_clean(app)
+        self.assertEqual(self.problem_words(app), ["century", "salt"])
+        self.assertIn("Key confusions seen at least twice: none", self.captions(app))
+        app.switch_page(PROGRESS_PAGE).run()
+        # The Progress page doesn't filter by word list.
+        recurring = app.main.dataframe[1].value
+        self.assertEqual(list(recurring["word"]), ["century", "salt", "self", "they"])
+        app.switch_page(PRACTICE_PAGE).run()
+        self.assert_clean(app)
+        self.assertEqual(app.multiselect(key=WORD_LISTS_KEY).value, ["english 1k"])
+        self.assertEqual(self.problem_words(app), ["century", "salt"])
+
+    def test_no_word_list_chosen(self) -> None:
+        app, _ = self.practice([fixtures.PROGRESS])
+        app.multiselect(key=WORD_LISTS_KEY).set_value([]).run()
+        self.assert_clean(app)
+        self.assertEqual([info.value for info in app.info], [NO_WORD_LISTS])
+
+    def test_what_claude_gets_shows_settings_instructions_and_data(self) -> None:
+        app, _ = self.practice([fixtures.PROGRESS])
+        self.assertEqual(
+            [e.label for e in app.main.expander],
+            ["Which results", "Claude settings"] + ["What Claude gets"] * 2,
+        )
+        blocks = [block.value for block in app.main.code]
+        self.assertIn(GROUP_INSTRUCTIONS, blocks)
+        self.assertIn(TEXT_INSTRUCTIONS, blocks)
+        self.assertTrue(any('"keyboard": "US QWERTY' in block for block in blocks))
+        self.assertIn(
+            "claude-opus-5-5 · effort high · fallback model if Claude declines: "
+            "on · 120 s per attempt",
+            self.captions(app),
+        )
+
+    def test_claude_settings(self) -> None:
+        app, client = self.practice(
+            [fixtures.PROGRESS],
+            fixtures.claude_message(GROUPS),
+            fixtures.claude_message(GROUPS),
+        )
+        self.assertIn(
+            "Claude Opus 5.5 (claude-opus-5-5) · effort high for cause groups, "
+            "medium for practice text · 120 s per attempt",
+            self.captions(app),
+        )
+        app.selectbox(key=MODEL_KEY).select("claude-haiku-5-5").run()
+        app.select_slider(key=GROUP_EFFORT_KEY).set_value("low").run()
+        app.number_input(key=TIMEOUT_KEY).set_value(300.0).run()
+        self.assert_clean(app)
+        self.assertIn(
+            "claude-haiku-5-5 · effort low · fallback model if Claude declines: "
+            "none for this model · 300 s per attempt",
+            self.captions(app),
+        )
+        self.press(app, GROUP_BUTTON_KEY)
+        sent = client.beta.messages.create.call_args.kwargs
+        self.assertEqual(sent["model"], "claude-haiku-5-5")
+        self.assertEqual(sent["output_config"]["effort"], "low")
+        self.assertEqual(sent["timeout"], 300.0)
+
+        # The settings stay after a page switch, until they are reset.
+        app.switch_page(REPLAY_PAGE).run()
+        app.switch_page(PRACTICE_PAGE).run()
+        self.assert_clean(app)
+        self.assertEqual(app.selectbox(key=MODEL_KEY).value, "claude-haiku-5-5")
+        self.press(app, RESET_BUTTON_KEY)
+        self.assertEqual(app.selectbox(key=MODEL_KEY).value, "claude-opus-5-5")
+        self.assertEqual(app.select_slider(key=GROUP_EFFORT_KEY).value, "high")
+        self.assertEqual(app.select_slider(key=TEXT_EFFORT_KEY).value, "medium")
+        self.assertEqual(app.number_input(key=TIMEOUT_KEY).value, 120.0)
+        self.press(app, GROUP_BUTTON_KEY)
+        self.assertEqual(
+            client.beta.messages.create.call_args.kwargs["model"], "claude-opus-5-5"
+        )
 
     def test_group_then_write_a_text_for_the_group(self) -> None:
         app, client = self.practice(
@@ -443,22 +556,20 @@ class PracticePageTest(UiTest):
         )
         self.assertEqual(
             [h.value for h in app.subheader],
-            ["Recurring problems", "Cause groups", "Practice text"],
-        )
-        self.assertEqual(
-            [e.label for e in app.main.expander], ["What Claude gets"] * 2
+            ["Problems", "Cause groups", "Practice text"],
         )
         self.assertEqual(app.selectbox(key=FOCUS_KEY).options, [ALL_PROBLEMS])
         client.beta.messages.create.assert_not_called()
 
         self.press(app, GROUP_BUTTON_KEY)
-        groups = app.main.dataframe[1].value
+        groups = app.main.dataframe[2].value
         self.assertEqual(list(groups["group"]), ["Left index reach"])
         self.assertEqual(list(groups["words"]), ["they, salt"])
         self.assertIn("Not in a group: century, self", self.captions(app))
         self.assertIn(GROUPS_BY_CLAUDE, self.captions(app))
         self.assertIn(
-            "Claude used 1,234 input and 56 output tokens.", self.captions(app)
+            "claude-opus-5-5 used 1,234 input and 56 output tokens.",
+            self.captions(app),
         )
         self.assertEqual(
             app.selectbox(key=FOCUS_KEY).options, [ALL_PROBLEMS, "Left index reach"]
@@ -473,7 +584,7 @@ class PracticePageTest(UiTest):
         self.assertIn(TEXT, [block.value for block in app.main.code])
         self.assertIn(TEXT_BY_CLAUDE, self.captions(app))
         self.assertIn("8 words", [m.value for m in app.main.markdown])
-        coverage = app.main.dataframe[2].value
+        coverage = app.main.dataframe[3].value
         self.assertEqual(list(coverage["word"]), ["salt", "they"])
         self.assertEqual(list(coverage["times in text"]), [1, 2])
 

@@ -656,7 +656,9 @@ needs when no API key is set.
   computes (§5, §7). It never holds file names, paths, dates, stats such as
   wpm, or the YAML.
 - **You see what is sent.** Under each button, a collapsed section "What
-  Claude gets" shows the exact request content before you press the button.
+  Claude gets" shows everything the request holds before you press the
+  button: the model, the effort, whether a refused request goes to a fallback
+  model, the timeout, the instructions and the data.
 - **Answers are checked.** The console checks each answer against its request
   (§13.4, §13.5) and drops what wasn't asked for.
 - **Nothing is written.** Answers live in the browser tab's session, like
@@ -670,12 +672,12 @@ needs when no API key is set.
 | --- | --- |
 | Credentials | `ANTHROPIC_API_KEY` from the environment, the way `packages/langchain_util/api_client.py:35` reads its keys. Keep the key in `.env` (`AGENTS.md`). |
 | Client | The official `anthropic` SDK (§13.9) |
-| Model | `claude-opus-5-5` |
-| Effort | `high` for cause groups, `medium` for practice text (**⚑ review**). Claude Opus 5.5 always thinks: effort sets how much. |
+| Model | `claude-opus-5-5` by default. The Claude settings section (§13.3) also offers `claude-sonnet-5-5`, `claude-haiku-5-5` and `claude-fable-5-2`. |
+| Effort | `high` for cause groups, `medium` for practice text by default (**⚑ review**). Each can be set from `low` to `max`. These models always think: effort sets how much. |
 | Answer format | Structured outputs, with the JSON schemas of §13.4 and §13.5 |
-| Refusals | Anthropic's server-side refusal fallback is on (`fallbacks: "default"`, beta). A refusal that still comes back shows as a message (§13.6). |
-| Timeout | 120 seconds per attempt, with the SDK's 2 retries (**⚑ review**) |
-| Usage | Under each answer, a caption with the input and output tokens it used. No price, because prices change. |
+| Refusals | Anthropic's server-side refusal fallback is on (`fallbacks: "default"`, beta), except with Claude Haiku 5.5, which has no fallback model. A refusal that still comes back shows as a message (§13.6). |
+| Timeout | 120 seconds per attempt by default, with the SDK's 2 retries (**⚑ review**). It can be set from 30 to 600 seconds. |
+| Usage | Under each answer, a caption with the model that answered (the fallback model, after a refusal) and the input and output tokens it used. No price, because prices change. |
 
 Without `ANTHROPIC_API_KEY`, the page still shows the problems (§13.3, item
 1). In place of the buttons it says: "Set ANTHROPIC_API_KEY to let Claude
@@ -692,9 +694,26 @@ summary (§6.1). It has no result picker and no goal input.
 
 From the top:
 
-1. **Problems:** the recurring problems table of §6.4 and the key confusions
-   seen at least twice, from the same data: the last 20 counted results of
-   every word list and test.
+1. **What the page is for:** a short text that gives the steps: check the
+   problems, group them by cause if you like, write a practice text and type
+   it in custom mode, then copy that result with `yr`. It says that Claude
+   sees only what is under "What Claude gets", and only on a button press.
+1. **Problems:**
+    - a "Word lists" box, which holds every word list of the counted results
+      until you change it; the problems come only from results of the word
+      lists in it (**⚑ review**: Practice only; Progress doesn't filter);
+    - the line "Based on the newest N results of M in these word lists, from
+      D1 to D2, of every test type. Aborted results don't count.", with the
+      dates of the oldest and newest of them;
+    - a collapsed section "Which results" with a table of those results:
+      when each was copied, test, word list, wpm and acc;
+    - the rule of §5 in one line, then a table of the recurring words with
+      their counts and the typos of their first attempts, and the key
+      confusions seen at least twice with their categories.
+1. **Claude settings:** a collapsed section with the model, the effort of
+   each request, the timeout and a button "Reset to defaults" (§13.2). Under
+   it, a caption with the current settings. The settings stay through page
+   switches (**⚑ review**).
 1. **Cause groups:** a button "Group by cause", the "What Claude gets"
    section, and the answer (§13.4).
 1. **Practice text:**
@@ -711,7 +730,8 @@ While a request runs, a spinner says "Claude is grouping your problems…" or
 | Case | Behaviour |
 | --- | --- |
 | No results | The shared message (§6.1) |
-| Fewer than 2 counted results | "Practice needs at least 2 results." |
+| Fewer than 2 counted results, in all or in the chosen word lists | "Practice needs at least 2 results." |
+| No word list chosen | "Choose at least one word list." |
 | No recurring words and no repeated confusions | "No word was slow or mistyped in 2 of your last 20 results, so there is nothing to practise yet." No buttons. |
 | An answer, then the problems change (for example, a new result arrives) | The answer stays, with a caption: "Made from an earlier set of problems. Press the button again to update it." (**⚑ review**) |
 | The cause groups are made again, and the focused group is gone | The focus goes back to "All problems". |
@@ -854,7 +874,7 @@ there is one, stays under the error. The rest of the page keeps working.
 
 | Case | Behaviour |
 | --- | --- |
-| Results of practice texts (custom mode) | Counted like any other result: a word that is slow or mistyped in a practice text adds to its recurring count. Every practice text falls in one "custom" trend group in Progress (**⚑ review**). |
+| Results of practice texts (custom mode) | Counted like any other result: a word that is slow or mistyped in a practice text adds to its recurring count. Every practice text falls in one "custom" trend group in Progress (**⚑ review**). To leave them out of the problems, take "custom" out of the "Word lists" box. |
 | Words but no repeated confusions, or the other way round | The empty list is sent empty; both buttons still work. |
 | Claude names a word or confusion that wasn't sent | Dropped (§13.4) |
 | A unit other than wpm | No speeds are sent. Slow words already use each result's own threshold in its own unit (§5). |
@@ -871,7 +891,8 @@ there is one, stays under the error. The rest of the page keeps working.
   a set answer, with no network. It checks:
   - the request content: words, counts, typos and confusions, and no file
     names, dates or stats;
-  - the model and the effort of each request;
+  - the model, effort and timeout of each request, with the defaults and
+    with other settings, and no fallback with Claude Haiku 5.5;
   - unknown and repeated items dropped, small groups dropped, at most 6
     groups kept;
   - a focus on a group sends only that group's items;
@@ -879,7 +900,14 @@ there is one, stays under the error. The rest of the page keeps working.
     coverage counts;
   - each case of §13.6 giving its message.
 - `test_ui` checks, with the fake client:
-  - without the key: the problems and the setup message, and no buttons;
+  - without the key: the intro, the problems and the setup message, and no
+    buttons;
+  - the "Based on" line and the "Which results" table;
+  - the "Word lists" box changing the problems, on Practice only, and
+    staying through a page switch;
+  - "What Claude gets" showing the settings, the instructions and the data;
+  - changed Claude settings reaching the request, staying through a page
+    switch, and "Reset to defaults";
   - with the key: "Group by cause" shows the table and fills the focus box,
     and "Write practice text" shows the text;
   - the answers stay after a switch to Progress and back;
@@ -903,7 +931,9 @@ wraps OpenAI and Ollama (`packages/langchain_util/api_client.py:7-8`).
 ### 13.10 Items to review
 
 All agreed as drafted on 2026-11-23, including the `anthropic` SDK used
-directly.
+directly. After a first look at the page the same day, it gained the intro,
+the "Word lists" box, the "Based on" line, the instructions under "What Claude
+gets" and the Claude settings; the last four rows are those choices.
 
 | Item | Section |
 | --- | --- |
@@ -917,3 +947,7 @@ directly.
 | Sentences in English, not a list of words | §13.5 |
 | Results of practice texts count as recurring problems | §13.7 |
 | The `anthropic` dependency | §13.9 |
+| The "Word lists" box filters Practice only, and starts with every word list | §13.3 |
+| The models offered: Opus 5.5 (default), Sonnet 5.5, Haiku 5.5 and Fable 5.2 | §13.2 |
+| A timeout from 30 to 600 seconds | §13.2 |
+| The Claude settings stay through page switches, until "Reset to defaults" | §13.3 |

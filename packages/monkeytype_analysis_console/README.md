@@ -24,8 +24,10 @@ The Practice page needs `ANTHROPIC_API_KEY`; without it, the page shows your
 problems but no buttons. It is the only part of the console that sends data
 off your machine, and only when you press one of its buttons: the words,
 counts, typos and key confusions shown under "What Claude gets", never your
-files. Keep the key in `.env`, which git ignores, and load it before you
-start the console:
+files. Its "Claude settings" section changes the model, the effort and the
+timeout; the defaults are Claude Opus 5.5, effort high for cause groups and
+medium for practice text, and 120 seconds. Keep the key in `.env`, which git
+ignores, and load it before you start the console:
 
 ```sh
 set -a && source .env && set +a

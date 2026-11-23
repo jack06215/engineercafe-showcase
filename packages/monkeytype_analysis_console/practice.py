@@ -33,13 +33,32 @@ from packages.monkeytype_analysis_console.typos import (
     classify_words,
 )
 
+Effort = Literal["low", "medium", "high", "xhigh", "max"]
+
+MODELS = (
+    "claude-opus-5-5",
+    "claude-sonnet-5-5",
+    "claude-haiku-5-5",
+    "claude-fable-5-2",
+)
+MODEL_NAMES = {
+    "claude-opus-5-5": "Claude Opus 5.5",
+    "claude-sonnet-5-5": "Claude Sonnet 5.5",
+    "claude-haiku-5-5": "Claude Haiku 5.5",
+    "claude-fable-5-2": "Claude Fable 5.2",
+}
+EFFORTS: tuple[Effort, ...] = ("low", "medium", "high", "xhigh", "max")
 MODEL = "claude-opus-5-5"
-GROUP_EFFORT: Literal["high"] = "high"
-TEXT_EFFORT: Literal["medium"] = "medium"
+GROUP_EFFORT: Effort = "high"
+TEXT_EFFORT: Effort = "medium"
 TIMEOUT = 120.0  # seconds per attempt; the SDK retries twice on its own
+MIN_TIMEOUT = 30.0
+MAX_TIMEOUT = 600.0
 MAX_TOKENS = 16000
 # Lets the API retry a declined request on another model inside the same call.
 FALLBACK_BETA = "server-side-fallback-2026-07-01"
+# Claude Haiku 5.5 has no model to fall back to.
+NO_FALLBACK_MODELS = frozenset({"claude-haiku-5-5"})
 KEYBOARD = "US QWERTY, touch typing"
 MAX_GROUPS = 6
 MIN_GROUP_ITEMS = 2
@@ -123,6 +142,27 @@ class ClaudeError(Exception):
 
 
 @dataclasses.dataclass(frozen=True)
+class Settings:
+    """The request settings that the page lets you change (§13.2).
+
+    Attributes:
+        group_effort: The effort of a cause-group request.
+        text_effort: The effort of a practice-text request.
+        timeout: Seconds per attempt.
+    """
+
+    model: str = MODEL
+    group_effort: Effort = GROUP_EFFORT
+    text_effort: Effort = TEXT_EFFORT
+    timeout: float = TIMEOUT
+
+    @property
+    def fallback(self) -> bool:
+        """Whether a declined request is retried on another model."""
+        return self.model not in NO_FALLBACK_MODELS
+
+
+@dataclasses.dataclass(frozen=True)
 class TypoCount:
     """How often one typo occurred in a word's first attempts."""
 
@@ -173,8 +213,12 @@ class Problems:
 
 @dataclasses.dataclass(frozen=True)
 class Usage:
-    """The tokens one request used."""
+    """The tokens one request used, and the model that answered it.
 
+    After a fallback, `model` is the fallback model.
+    """
+
+    model: str
     input_tokens: int
     output_tokens: int
 
@@ -277,7 +321,11 @@ def group_content(found: Problems) -> dict[str, Any]:
                 "slow": word.slow,
                 "mistyped": word.mistyped,
                 "typos": [
-                    {"category": typo.category, "detail": typo.detail, "count": typo.count}
+                    {
+                        "category": typo.category,
+                        "detail": typo.detail,
+                        "count": typo.count,
+                    }
                     for typo in word.typos
                 ],
             }
@@ -318,14 +366,21 @@ def request_text(content: dict[str, Any]) -> str:
     return json.dumps(content, ensure_ascii=False, indent=2)
 
 
-def group_by_cause(client: anthropic.Anthropic, found: Problems) -> Grouping:
+def group_by_cause(
+    client: anthropic.Anthropic, found: Problems, settings: Settings = Settings()
+) -> Grouping:
     """Asks Claude to group the problems by cause, and checks the answer.
 
     Raises:
         ClaudeError: The request failed or the answer can't be used.
     """
     answer, usage = _ask(
-        client, GROUP_INSTRUCTIONS, group_content(found), GROUP_SCHEMA, GROUP_EFFORT
+        client,
+        settings,
+        settings.group_effort,
+        GROUP_INSTRUCTIONS,
+        group_content(found),
+        GROUP_SCHEMA,
     )
     raw = [
         Group(
@@ -373,6 +428,7 @@ def write_practice_text(
     found: Problems,
     length: int,
     focus: Group | None = None,
+    settings: Settings = Settings(),
 ) -> PracticeText:
     """Asks Claude for a practice text, and checks the answer.
 
@@ -380,7 +436,9 @@ def write_practice_text(
         ClaudeError: The request failed or the answer can't be used.
     """
     content = text_content(found, length, focus)
-    answer, usage = _ask(client, TEXT_INSTRUCTIONS, content, TEXT_SCHEMA, TEXT_EFFORT)
+    answer, usage = _ask(
+        client, settings, settings.text_effort, TEXT_INSTRUCTIONS, content, TEXT_SCHEMA
+    )
     words = [item["word"] for item in content["words"]]
     return check_text(found, words, _string(_field(answer, "text")), usage)
 
@@ -400,14 +458,15 @@ def check_text(
 
 def _ask(
     client: anthropic.Anthropic,
+    settings: Settings,
+    effort: Effort,
     instructions: str,
     content: dict[str, Any],
     schema: dict[str, object],
-    effort: Literal["high", "medium"],
 ) -> tuple[object, Usage]:
     try:
         message = client.beta.messages.create(
-            model=MODEL,
+            model=settings.model,
             max_tokens=MAX_TOKENS,
             system=instructions,
             messages=[{"role": "user", "content": request_text(content)}],
@@ -415,9 +474,9 @@ def _ask(
                 "effort": effort,
                 "format": {"type": "json_schema", "schema": schema},
             },
-            betas=[FALLBACK_BETA],
-            fallbacks="default",
-            timeout=TIMEOUT,
+            betas=[FALLBACK_BETA] if settings.fallback else anthropic.omit,
+            fallbacks="default" if settings.fallback else anthropic.omit,
+            timeout=settings.timeout,
         )
     except (anthropic.AuthenticationError, anthropic.PermissionDeniedError) as e:
         raise ClaudeError(KEY_REJECTED) from e
@@ -439,7 +498,8 @@ def _ask(
         answer = json.loads(_answer_text(message.content))
     except json.JSONDecodeError as e:
         raise ClaudeError(INCOMPLETE) from e
-    return answer, Usage(message.usage.input_tokens, message.usage.output_tokens)
+    usage = message.usage
+    return answer, Usage(message.model, usage.input_tokens, usage.output_tokens)
 
 
 def _answer_text(content: Sequence[BetaContentBlock]) -> str:
